@@ -144,15 +144,15 @@ interface IEntryPoint is IStakeManager, INonceManager {
         bytes signature;
     }
 
-    function zkAAEntryPoint(
-        bytes calldata proof,
-        bytes32 pubInput,
-        PackedUserOperation[] calldata userOps,
-        address[] calldata userOpsAddrs,
-        bytes32 newSmtRoot,
-        ITicketManager.Ticket[] calldata depositTickets,
-        ITicketManager.Ticket[] calldata withdrawTickets
-    ) external;
+    // function zkAAEntryPoint(
+    //     bytes calldata proof,
+    //     bytes32 pubInput,
+    //     PackedUserOperation[] calldata userOps,
+    //     address[] calldata userOpsAddrs,
+    //     bytes32 newSmtRoot,
+    //     ITicketManager.Ticket[] calldata depositTickets,
+    //     ITicketManager.Ticket[] calldata withdrawTickets
+    // ) external;
 
     /**
      * Execute a batch of UserOperations.
@@ -164,6 +164,7 @@ interface IEntryPoint is IStakeManager, INonceManager {
      */
     function handleOps(
         PackedUserOperation[] calldata ops,
+        address[] calldata userOpsAddrs,
         address payable beneficiary
     ) external;
 

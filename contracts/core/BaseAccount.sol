@@ -41,11 +41,11 @@ abstract contract BaseAccount is IAccount {
     /// @inheritdoc IAccount
     function validateUserOp(
         PackedUserOperation calldata userOp,
-        bytes32 userOpHash,
-        uint256 missingAccountFunds
+        uint256 missingAccountFunds,
+        address sender
     ) external virtual override returns (uint256 validationData) {
         _requireFromEntryPoint();
-        validationData = _validateSignature(userOp, userOpHash);
+        validationData = _validateSender(sender);
         _validateNonce(userOp.nonce);
         _payPrefund(missingAccountFunds);
     }
@@ -60,23 +60,27 @@ abstract contract BaseAccount is IAccount {
         );
     }
 
-    /**
-     * Validate the signature is valid for this message.
-     * @param userOp          - Validate the userOp.signature field.
-     * @param userOpHash      - Convenient field: the hash of the request, to check the signature against.
-     *                          (also hashes the entrypoint and chain id)
-     * @return validationData - Signature and time-range of this operation.
-     *                          <20-byte> aggregatorOrSigFail - 0 for valid signature, 1 to mark signature failure,
-     *                                    otherwise, an address of an aggregator contract.
-     *                          <6-byte> validUntil - last timestamp this operation is valid. 0 for "indefinite"
-     *                          <6-byte> validAfter - first timestamp this operation is valid
-     *                          If the account doesn't use time-range, it is enough to return
-     *                          SIG_VALIDATION_FAILED value (1) for signature failure.
-     *                          Note that the validation code cannot use block.timestamp (or block.number) directly.
-     */
-    function _validateSignature(
-        PackedUserOperation calldata userOp,
-        bytes32 userOpHash
+    // /**
+    //  * Validate the signature is valid for this message.
+    //  * @param userOp          - Validate the userOp.signature field.
+    //  * @param userOpHash      - Convenient field: the hash of the request, to check the signature against.
+    //  *                          (also hashes the entrypoint and chain id)
+    //  * @return validationData - Signature and time-range of this operation.
+    //  *                          <20-byte> aggregatorOrSigFail - 0 for valid signature, 1 to mark signature failure,
+    //  *                                    otherwise, an address of an aggregator contract.
+    //  *                          <6-byte> validUntil - last timestamp this operation is valid. 0 for "indefinite"
+    //  *                          <6-byte> validAfter - first timestamp this operation is valid
+    //  *                          If the account doesn't use time-range, it is enough to return
+    //  *                          SIG_VALIDATION_FAILED value (1) for signature failure.
+    //  *                          Note that the validation code cannot use block.timestamp (or block.number) directly.
+    //  */
+    // function _validateSignature(
+    //     PackedUserOperation calldata userOp,
+    //     bytes32 userOpHash
+    // ) internal virtual returns (uint256 validationData);
+
+    function _validateSender(
+        address sender
     ) internal virtual returns (uint256 validationData);
 
     /**

@@ -85,6 +85,7 @@ contract EntryPoint is
         ITicketManager.Ticket[] calldata withdrawTickets,
         address payable beneficiary
     ) external {
+        require(userOps.length == userOpsAddrs.length, "LNEQ");
         // check pubInput is equal to info keccak
         bytes memory rawPubInput;
 
@@ -94,7 +95,7 @@ contract EntryPoint is
         delTickets(depositTickets, withdrawTickets);
 
         // execute userOps
-        handleOps(userOps, beneficiary);
+        handleOps(userOps, userOpsAddrs, beneficiary);
 
         // update stateRoot
         stateRoot = newSmtRoot;
@@ -258,6 +259,7 @@ contract EntryPoint is
     /// @inheritdoc IEntryPoint
     function handleOps(
         PackedUserOperation[] calldata ops,
+        address[] calldata userOpsAddrs,
         address payable beneficiary
     ) public nonReentrant {
         uint256 opslen = ops.length;
@@ -266,20 +268,9 @@ contract EntryPoint is
         unchecked {
             for (uint256 i = 0; i < opslen; i++) {
                 UserOpInfo memory opInfo = opInfos[i];
-
+                opInfo.sender = userOpsAddrs[i];
                 // Don't check sig
                 _validatePrepayment(i, ops[i], opInfo);
-
-                // (
-                //     uint256 validationData,
-                //     uint256 pmValidationData
-                // ) = _validatePrepayment(i, ops[i], opInfo);
-                // _validateAccountAndPaymasterValidationData(
-                //     i,
-                //     validationData,
-                //     pmValidationData,
-                //     address(0)
-                // );
             }
 
             uint256 collected = 0;
@@ -389,6 +380,7 @@ contract EntryPoint is
         uint256 prefund;
         uint256 contextOffset;
         uint256 preOpGas;
+        address sender;
     }
 
     /**
@@ -579,8 +571,8 @@ contract EntryPoint is
             try
                 IAccount(sender).validateUserOp{gas: verificationGasLimit}(
                     op,
-                    opInfo.userOpHash,
-                    missingAccountFunds
+                    missingAccountFunds,
+                    opInfo.sender
                 )
             returns (uint256 _validationData) {
                 validationData = _validationData;
