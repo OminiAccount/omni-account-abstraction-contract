@@ -15,7 +15,7 @@ import "./IAggregator.sol";
 import "./INonceManager.sol";
 import "./ITicketManager.sol";
 
-interface IEntryPoint is IStakeManager, INonceManager {
+interface IEntryPoint is IStakeManager, INonceManager, ITicketManager {
     /***
      * An event emitted after each successful request.
      * @param userOpHash    - Unique identifier for the request (hash its entire content, except signature).
@@ -150,8 +150,8 @@ interface IEntryPoint is IStakeManager, INonceManager {
     //     PackedUserOperation[] calldata userOps,
     //     address[] calldata userOpsAddrs,
     //     bytes32 newSmtRoot,
-    //     ITicketManager.Ticket[] calldata depositTickets,
-    //     ITicketManager.Ticket[] calldata withdrawTickets
+    //     Ticket[] calldata depositTickets,
+    //     Ticket[] calldata withdrawTickets
     // ) external;
 
     /**

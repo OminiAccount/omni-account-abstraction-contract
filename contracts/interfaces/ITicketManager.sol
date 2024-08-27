@@ -33,7 +33,7 @@ interface ITicketManager {
 
     function addWithdrawTicket(address user, uint256 amount) external;
 
-    function delDepositTicket(Ticket calldata ticket) external;
+    // function delDepositTicket(Ticket calldata ticket) external;
 
-    function delWithdrawTicket(Ticket calldata ticket) external;
+    // function delWithdrawTicket(Ticket calldata ticket) external;
 }

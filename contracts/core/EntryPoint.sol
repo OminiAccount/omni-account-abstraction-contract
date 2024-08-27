@@ -7,13 +7,14 @@ import "../interfaces/IAccount.sol";
 import "../interfaces/IAccountExecute.sol";
 import "../interfaces/IPaymaster.sol";
 import "../interfaces/IEntryPoint.sol";
-import "../interfaces/ITicketManager.sol";
 
 import "../utils/Exec.sol";
+import "./SmtManager.sol";
 import "./StakeManager.sol";
 import "./SenderCreator.sol";
 import "./Helpers.sol";
 import "./NonceManager.sol";
+import "./TicketManager.sol";
 import "./UserOperationLib.sol";
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
@@ -27,8 +28,10 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 /// @custom:security-contact https://bounty.ethereum.org
 contract EntryPoint is
     IEntryPoint,
+    SmtManager,
     StakeManager,
     NonceManager,
+    TicketManager,
     ReentrancyGuard,
     ERC165
 {
@@ -67,22 +70,14 @@ contract EntryPoint is
             super.supportsInterface(interfaceId);
     }
 
-    address private ticketManager;
-
-    bytes32 public stateRoot;
-
-    function updateTicketManager(address _ticketManager) external {
-        ticketManager = _ticketManager;
-    }
-
     function zkAAEntryPoint(
         bytes calldata proof,
         bytes32 pubInput,
         bytes32 newSmtRoot,
         PackedUserOperation[] calldata userOps,
         address[] calldata userOpsAddrs,
-        ITicketManager.Ticket[] calldata depositTickets,
-        ITicketManager.Ticket[] calldata withdrawTickets,
+        Ticket[] calldata depositTickets,
+        Ticket[] calldata withdrawTickets,
         address payable beneficiary
     ) external {
         require(userOps.length == userOpsAddrs.length, "LNEQ");
@@ -98,27 +93,31 @@ contract EntryPoint is
         handleOps(userOps, userOpsAddrs, beneficiary);
 
         // update stateRoot
-        stateRoot = newSmtRoot;
+        updateSmtRoot(newSmtRoot);
     }
 
     function delTickets(
-        ITicketManager.Ticket[] calldata depositTickets,
-        ITicketManager.Ticket[] calldata withdrawTickets
+        Ticket[] calldata depositTickets,
+        Ticket[] calldata withdrawTickets
     ) internal {
         uint256 dtslen = depositTickets.length;
         uint256 wtslen = withdrawTickets.length;
 
         unchecked {
             for (uint256 i = 0; i < dtslen; i++) {
-                ITicketManager(ticketManager).delDepositTicket(
-                    depositTickets[i]
-                );
+                Ticket memory ticket = depositTickets[i];
+                delDepositTicket(ticket);
+
+                // execute deposit operation
+                depositTo(ticket.user, ticket.amount);
             }
 
             for (uint256 i = 0; i < wtslen; i++) {
-                ITicketManager(ticketManager).delWithdrawTicket(
-                    withdrawTickets[i]
-                );
+                Ticket memory ticket = withdrawTickets[i];
+                delWithdrawTicket(ticket);
+
+                // execute withdraw operation
+                withdrawTo(payable(ticket.user), ticket.amount);
             }
         }
     }

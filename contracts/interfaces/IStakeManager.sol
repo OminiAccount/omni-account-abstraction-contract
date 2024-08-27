@@ -73,11 +73,11 @@ interface IStakeManager {
      */
     function balanceOf(address account) external view returns (uint256);
 
-    /**
-     * Add to the deposit of the given account.
-     * @param account - The account to add to.
-     */
-    function depositTo(address account) external payable;
+    // /**
+    //  * Add to the deposit of the given account.
+    //  * @param account - The account to add to.
+    //  */
+    // function depositTo(address account) external payable;
 
     /**
      * Add to the account's stake - amount and delay
@@ -99,13 +99,13 @@ interface IStakeManager {
      */
     function withdrawStake(address payable withdrawAddress) external;
 
-    /**
-     * Withdraw from the deposit.
-     * @param withdrawAddress - The address to send withdrawn value.
-     * @param withdrawAmount  - The amount to withdraw.
-     */
-    function withdrawTo(
-        address payable withdrawAddress,
-        uint256 withdrawAmount
-    ) external;
+    // /**
+    //  * Withdraw from the deposit.
+    //  * @param withdrawAddress - The address to send withdrawn value.
+    //  * @param withdrawAmount  - The amount to withdraw.
+    //  */
+    // function withdrawTo(
+    //     address payable withdrawAddress,
+    //     uint256 withdrawAmount
+    // ) external;
 }

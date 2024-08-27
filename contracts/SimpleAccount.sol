@@ -29,11 +29,8 @@ contract SimpleAccount is
 
     IEntryPoint private immutable _entryPoint;
 
-    ITicketManager private immutable _ticketManager;
-
     event SimpleAccountInitialized(
         IEntryPoint indexed entryPoint,
-        ITicketManager indexed ticketManager,
         address indexed owner
     );
 
@@ -47,23 +44,11 @@ contract SimpleAccount is
         return _entryPoint;
     }
 
-    /// @inheritdoc BaseAccount
-    function ticketManager()
-        public
-        view
-        virtual
-        override
-        returns (ITicketManager)
-    {
-        return _ticketManager;
-    }
-
     // solhint-disable-next-line no-empty-blocks
     receive() external payable {}
 
-    constructor(IEntryPoint anEntryPoint, ITicketManager anTicketManager) {
+    constructor(IEntryPoint anEntryPoint) {
         _entryPoint = anEntryPoint;
-        _ticketManager = anTicketManager;
         _disableInitializers();
     }
 
@@ -131,7 +116,7 @@ contract SimpleAccount is
 
     function _initialize(address anOwner) internal virtual {
         owner = anOwner;
-        emit SimpleAccountInitialized(_entryPoint, _ticketManager, owner);
+        emit SimpleAccountInitialized(_entryPoint, owner);
     }
 
     // Require the function call went through EntryPoint or owner
@@ -141,20 +126,6 @@ contract SimpleAccount is
             "account: not Owner or EntryPoint"
         );
     }
-
-    /// implement template method of BaseAccount
-    // function _validateSignature(PackedUserOperation calldata userOp, bytes32 userOpHash)
-    //     internal
-    //     virtual
-    //     override
-    //     returns (uint256 validationData)
-    // {
-    //     bytes32 hash = MessageHashUtils.toEthSignedMessageHash(userOpHash);
-    //     if (owner != ECDSA.recover(hash, userOp.signature)) {
-    //         return SIG_VALIDATION_FAILED;
-    //     }
-    //     return SIG_VALIDATION_SUCCESS;
-    // }
 
     /// implement template method of BaseAccount
     function _validateSender(
@@ -186,7 +157,7 @@ contract SimpleAccount is
      * deposit more funds for this account in the entryPoint
      */
     function addDeposit() public payable {
-        ticketManager().addDepositTicket{value: msg.value}(
+        entryPoint().addDepositTicket{value: msg.value}(
             address(this),
             msg.value
         );
@@ -201,7 +172,7 @@ contract SimpleAccount is
         address payable withdrawAddress,
         uint256 amount
     ) public onlyOwner {
-        ticketManager().addWithdrawTicket(withdrawAddress, amount);
+        entryPoint().addWithdrawTicket(withdrawAddress, amount);
     }
 
     function _authorizeUpgrade(

@@ -39,9 +39,9 @@ abstract contract StakeManager is IStakeManager {
         return deposits[account].deposit;
     }
 
-    receive() external payable {
-        depositTo(msg.sender);
-    }
+    // receive() external payable {
+    //     depositTo(msg.sender);
+    // }
 
     /**
      * Increments an account's deposit.
@@ -49,7 +49,10 @@ abstract contract StakeManager is IStakeManager {
      * @param amount  - The amount to increment by.
      * @return the updated deposit of this account
      */
-    function _incrementDeposit(address account, uint256 amount) internal returns (uint256) {
+    function _incrementDeposit(
+        address account,
+        uint256 amount
+    ) internal returns (uint256) {
         DepositInfo storage info = deposits[account];
         uint256 newAmount = info.deposit + amount;
         info.deposit = newAmount;
@@ -60,8 +63,8 @@ abstract contract StakeManager is IStakeManager {
      * Add to the deposit of the given account.
      * @param account - The account to add to.
      */
-    function depositTo(address account) public virtual payable {
-        uint256 newDeposit = _incrementDeposit(account, msg.value);
+    function depositTo(address account, uint256 amount) internal {
+        uint256 newDeposit = _incrementDeposit(account, amount);
         emit Deposited(account, newDeposit);
     }
 
@@ -122,7 +125,7 @@ abstract contract StakeManager is IStakeManager {
         info.withdrawTime = 0;
         info.stake = 0;
         emit StakeWithdrawn(msg.sender, withdrawAddress, stake);
-        (bool success,) = withdrawAddress.call{value: stake}("");
+        (bool success, ) = withdrawAddress.call{value: stake}("");
         require(success, "failed to withdraw stake");
     }
 
@@ -134,12 +137,12 @@ abstract contract StakeManager is IStakeManager {
     function withdrawTo(
         address payable withdrawAddress,
         uint256 withdrawAmount
-    ) external {
+    ) internal {
         DepositInfo storage info = deposits[msg.sender];
         require(withdrawAmount <= info.deposit, "Withdraw amount too large");
         info.deposit = info.deposit - withdrawAmount;
         emit Withdrawn(msg.sender, withdrawAddress, withdrawAmount);
-        (bool success,) = withdrawAddress.call{value: withdrawAmount}("");
+        (bool success, ) = withdrawAddress.call{value: withdrawAmount}("");
         require(success, "failed to withdraw");
     }
 }

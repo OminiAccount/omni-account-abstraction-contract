@@ -6,7 +6,6 @@ pragma solidity ^0.8.23;
 
 import "../interfaces/IAccount.sol";
 import "../interfaces/IEntryPoint.sol";
-import "../interfaces/ITicketManager.sol";
 import "./UserOperationLib.sol";
 
 /**
@@ -31,12 +30,6 @@ abstract contract BaseAccount is IAccount {
      * Subclass should return the current entryPoint used by this account.
      */
     function entryPoint() public view virtual returns (IEntryPoint);
-
-    /**
-     * Return the ticketManager used by this account.
-     * Subclass should return the current ticketManager used by this account.
-     */
-    function ticketManager() public view virtual returns (ITicketManager);
 
     /// @inheritdoc IAccount
     function validateUserOp(

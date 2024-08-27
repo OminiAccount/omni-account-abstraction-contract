@@ -15,8 +15,8 @@ import "./SimpleAccount.sol";
 contract SimpleAccountFactory {
     SimpleAccount public immutable accountImplementation;
 
-    constructor(IEntryPoint _entryPoint, ITicketManager _ticketManager) {
-        accountImplementation = new SimpleAccount(_entryPoint, _ticketManager);
+    constructor(IEntryPoint _entryPoint) {
+        accountImplementation = new SimpleAccount(_entryPoint);
     }
 
     /**
