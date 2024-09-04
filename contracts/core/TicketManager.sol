@@ -11,19 +11,29 @@ contract TicketManager is ITicketManager {
     mapping(bytes32 => bool) public depositTickets;
     mapping(bytes32 => bool) public withdrawTickets;
 
+    mapping(address owner => address accountAddress) internal accountOwners;
+
     /**
      * Add a user deposit ticket
      */
-    function addDepositTicket(address user, uint256 amount) external payable {
+    function addDepositTicket(
+        address accountAddress,
+        address owner,
+        uint256 amount
+    ) external payable {
         require(msg.value == amount, "VNE");
-        require(user != address(0), "USER0");
+        require(accountAddress != address(0), "USER0");
 
-        Ticket memory ticket = Ticket(user, amount, block.timestamp);
+        uint256 timestamp = block.timestamp;
+        Ticket memory ticket = Ticket(accountAddress, amount, timestamp);
         bytes32 ticketHash = ticket.hash();
 
         depositTickets[ticketHash] = true;
 
-        emit DepositTicketAdded(user, amount, ticketHash);
+        if (accountOwners[owner] == address(0x0)) {
+            accountOwners[owner] = accountAddress;
+        }
+        emit DepositTicketAdded(accountAddress, ticketHash, amount, timestamp);
     }
 
     /**
@@ -32,12 +42,13 @@ contract TicketManager is ITicketManager {
     function addWithdrawTicket(address user, uint256 amount) external {
         require(user != address(0), "USER0");
 
-        Ticket memory ticket = Ticket(user, amount, block.timestamp);
+        uint256 timestamp = block.timestamp;
+        Ticket memory ticket = Ticket(user, amount, timestamp);
         bytes32 ticketHash = ticket.hash();
 
         withdrawTickets[ticketHash] = true;
 
-        emit WithdrawTicketAdded(user, amount, ticketHash);
+        emit WithdrawTicketAdded(user, ticketHash, amount, timestamp);
     }
 
     /**

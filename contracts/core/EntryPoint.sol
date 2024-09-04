@@ -7,6 +7,7 @@ import "../interfaces/IAccount.sol";
 import "../interfaces/IAccountExecute.sol";
 import "../interfaces/IPaymaster.sol";
 import "../interfaces/IEntryPoint.sol";
+import "../interfaces/IVerifyManager.sol";
 
 import "../utils/Exec.sol";
 import "./SmtManager.sol";
@@ -70,35 +71,77 @@ contract EntryPoint is
             super.supportsInterface(interfaceId);
     }
 
-    function zkAAEntryPoint(
+    address public owner;
+    address public verifier;
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "only owner");
+        _;
+    }
+
+    function updateVerifier(address _verifier) external onlyOwner {
+        verifier = _verifier;
+    }
+
+    /**
+     * Verify a batch containing userOps,tickets and newSmtRoot
+     * @param proof The encoded proof.
+     * @param publicValues The encoded public values.
+     */
+    function verifyBatch(
         bytes calldata proof,
-        bytes32 pubInput,
-        bytes32 newSmtRoot,
-        PackedUserOperation[] calldata userOps,
-        address[] calldata userOpsAddrs,
-        Ticket[] calldata depositTickets,
-        Ticket[] calldata withdrawTickets,
+        bytes calldata publicValues,
         address payable beneficiary
     ) external {
-        require(userOps.length == userOpsAddrs.length, "LNEQ");
-        // check pubInput is equal to info keccak
-        bytes memory rawPubInput;
-
         // verify proof
+        IVerifyManager(verifier).verifyProof(publicValues, proof);
 
-        // del tickets
-        delTickets(depositTickets, withdrawTickets);
+        (
+            PackedUserOperation[] memory userOps,
+            address[] memory userOpsAddrs,
+            bytes32 newSmtRoot,
+            Ticket[] memory depositTickets,
+            Ticket[] memory withdrawTickets
+        ) = abi.decode(
+                publicValues,
+                (PackedUserOperation[], address[], bytes32, Ticket[], Ticket[])
+            );
+
+        // process tickets
+        processTickets(depositTickets, withdrawTickets);
 
         // execute userOps
-        handleOps(userOps, userOpsAddrs, beneficiary);
+        this.handleOps(userOps, userOpsAddrs, beneficiary);
 
         // update stateRoot
         updateSmtRoot(newSmtRoot);
     }
 
-    function delTickets(
+    function verifyBatchMock(
+        // bytes calldata proof,
+        // bytes calldata publicValues,
+        // bytes32 newSmtRoot,
+        // PackedUserOperation[] calldata userOps,
+        // address[] calldata userOpsAddrs,
         Ticket[] calldata depositTickets,
-        Ticket[] calldata withdrawTickets
+        Ticket[] calldata withdrawTickets,
+        address payable beneficiary
+    ) external {
+        // verify proof
+        // IVerifyManager(verifier).verifyProof(publicValues, proof);
+
+        processTickets(depositTickets, withdrawTickets);
+
+        // // execute userOps
+        // handleOps(userOps, userOpsAddrs, beneficiary);
+
+        // update stateRoot
+        // updateSmtRoot(newSmtRoot);
+    }
+
+    function processTickets(
+        Ticket[] memory depositTickets,
+        Ticket[] memory withdrawTickets
     ) internal {
         uint256 dtslen = depositTickets.length;
         uint256 wtslen = withdrawTickets.length;
@@ -117,10 +160,18 @@ contract EntryPoint is
                 delWithdrawTicket(ticket);
 
                 // execute withdraw operation
-                withdrawTo(payable(ticket.user), ticket.amount);
+                withdrawTo(
+                    accountOwners[ticket.user],
+                    payable(ticket.user),
+                    ticket.amount
+                );
             }
         }
     }
+
+    // function syncBatch(bytes32 smtRoot) {
+
+    // }
 
     /**
      * Compensate the caller's beneficiary address with the collected fees of all UserOperations.

@@ -159,20 +159,19 @@ contract SimpleAccount is
     function addDeposit() public payable {
         entryPoint().addDepositTicket{value: msg.value}(
             address(this),
+            owner,
             msg.value
         );
     }
 
     /**
      * withdraw value from the account's deposit
-     * @param withdrawAddress target to send to
      * @param amount to withdraw
+     * @notice Currently, only owner's own withdrawal is supported.
+     * After the circuit data is updated later, withdrawTo fields can be added.
      */
-    function withdrawDepositTo(
-        address payable withdrawAddress,
-        uint256 amount
-    ) public onlyOwner {
-        entryPoint().addWithdrawTicket(withdrawAddress, amount);
+    function withdrawDepositTo(uint256 amount) public onlyOwner {
+        entryPoint().addWithdrawTicket(owner, amount);
     }
 
     function _authorizeUpgrade(

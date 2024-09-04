@@ -4,13 +4,15 @@ pragma solidity >=0.7.5;
 interface ITicketManager {
     event DepositTicketAdded(
         address indexed user,
+        bytes32 indexed ticketHash,
         uint256 amount,
-        bytes32 ticketHash
+        uint256 timestamp
     );
     event WithdrawTicketAdded(
         address indexed user,
+        bytes32 indexed ticketHash,
         uint256 amount,
-        bytes32 ticketHash
+        uint256 timestamp
     );
     event DepositTicketDeleted(
         address indexed user,
@@ -29,7 +31,11 @@ interface ITicketManager {
         uint256 timestamp;
     }
 
-    function addDepositTicket(address user, uint256 amount) external payable;
+    function addDepositTicket(
+        address accountAddress,
+        address owner,
+        uint256 amount
+    ) external payable;
 
     function addWithdrawTicket(address user, uint256 amount) external;
 

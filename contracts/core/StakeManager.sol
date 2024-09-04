@@ -131,17 +131,19 @@ abstract contract StakeManager is IStakeManager {
 
     /**
      * Withdraw from the deposit.
+     * @param accountAddress  - The address is AA contract address.
      * @param withdrawAddress - The address to send withdrawn value.
      * @param withdrawAmount  - The amount to withdraw.
      */
     function withdrawTo(
+        address accountAddress,
         address payable withdrawAddress,
         uint256 withdrawAmount
     ) internal {
-        DepositInfo storage info = deposits[msg.sender];
+        DepositInfo storage info = deposits[accountAddress];
         require(withdrawAmount <= info.deposit, "Withdraw amount too large");
         info.deposit = info.deposit - withdrawAmount;
-        emit Withdrawn(msg.sender, withdrawAddress, withdrawAmount);
+        emit Withdrawn(accountAddress, withdrawAddress, withdrawAmount);
         (bool success, ) = withdrawAddress.call{value: withdrawAmount}("");
         require(success, "failed to withdraw");
     }
