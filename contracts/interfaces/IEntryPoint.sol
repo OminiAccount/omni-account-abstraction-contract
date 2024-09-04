@@ -12,16 +12,14 @@ pragma solidity >=0.7.5;
 import "./PackedUserOperation.sol";
 import "./IStakeManager.sol";
 import "./IAggregator.sol";
-import "./INonceManager.sol";
 import "./ITicketManager.sol";
 
-interface IEntryPoint is IStakeManager, INonceManager, ITicketManager {
+interface IEntryPoint is IStakeManager, ITicketManager {
     /***
      * An event emitted after each successful request.
      * @param userOpHash    - Unique identifier for the request (hash its entire content, except signature).
      * @param sender        - The account that generates this request.
      * @param paymaster     - If non-null, the paymaster that pays for this request.
-     * @param nonce         - The nonce value from the request.
      * @param success       - True if the sender transaction succeeded, false if reverted.
      * @param actualGasCost - Actual amount paid (by account or paymaster) for this UserOperation.
      * @param actualGasUsed - Total gas used by this UserOperation (including preVerification, creation,
@@ -31,7 +29,6 @@ interface IEntryPoint is IStakeManager, INonceManager, ITicketManager {
         bytes32 indexed userOpHash,
         address indexed sender,
         address indexed paymaster,
-        uint256 nonce,
         bool success,
         uint256 actualGasCost,
         uint256 actualGasUsed
@@ -55,13 +52,11 @@ interface IEntryPoint is IStakeManager, INonceManager, ITicketManager {
      * An event emitted if the UserOperation "callData" reverted with non-zero length.
      * @param userOpHash   - The request unique identifier.
      * @param sender       - The sender of this request.
-     * @param nonce        - The nonce used in the request.
      * @param revertReason - The return bytes from the (reverted) call to "callData".
      */
     event UserOperationRevertReason(
         bytes32 indexed userOpHash,
         address indexed sender,
-        uint256 nonce,
         bytes revertReason
     );
 
@@ -69,13 +64,11 @@ interface IEntryPoint is IStakeManager, INonceManager, ITicketManager {
      * An event emitted if the UserOperation Paymaster's "postOp" call reverted with non-zero length.
      * @param userOpHash   - The request unique identifier.
      * @param sender       - The sender of this request.
-     * @param nonce        - The nonce used in the request.
      * @param revertReason - The return bytes from the (reverted) call to "callData".
      */
     event PostOpRevertReason(
         bytes32 indexed userOpHash,
         address indexed sender,
-        uint256 nonce,
         bytes revertReason
     );
 
@@ -83,12 +76,10 @@ interface IEntryPoint is IStakeManager, INonceManager, ITicketManager {
      * UserOp consumed more than prefund. The UserOperation is reverted, and no refund is made.
      * @param userOpHash   - The request unique identifier.
      * @param sender       - The sender of this request.
-     * @param nonce        - The nonce used in the request.
      */
     event UserOperationPrefundTooLow(
         bytes32 indexed userOpHash,
-        address indexed sender,
-        uint256 nonce
+        address indexed sender
     );
 
     /**
@@ -164,7 +155,6 @@ interface IEntryPoint is IStakeManager, INonceManager, ITicketManager {
      */
     function handleOps(
         PackedUserOperation[] calldata ops,
-        address[] calldata userOpsAddrs,
         address payable beneficiary
     ) external;
 

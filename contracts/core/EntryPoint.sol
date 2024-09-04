@@ -14,13 +14,13 @@ import "./SmtManager.sol";
 import "./StakeManager.sol";
 import "./SenderCreator.sol";
 import "./Helpers.sol";
-import "./NonceManager.sol";
 import "./TicketManager.sol";
 import "./UserOperationLib.sol";
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
+import "forge-std/console.sol";
 /*
  * Account-Abstraction (EIP-4337) singleton EntryPoint implementation.
  * Only one instance required on each chain.
@@ -31,7 +31,6 @@ contract EntryPoint is
     IEntryPoint,
     SmtManager,
     StakeManager,
-    NonceManager,
     TicketManager,
     ReentrancyGuard,
     ERC165
@@ -62,12 +61,9 @@ contract EntryPoint is
         // note: solidity "type(IEntryPoint).interfaceId" is without inherited methods but we want to check everything
         return
             interfaceId ==
-            (type(IEntryPoint).interfaceId ^
-                type(IStakeManager).interfaceId ^
-                type(INonceManager).interfaceId) ||
+            (type(IEntryPoint).interfaceId ^ type(IStakeManager).interfaceId) ||
             interfaceId == type(IEntryPoint).interfaceId ||
             interfaceId == type(IStakeManager).interfaceId ||
-            interfaceId == type(INonceManager).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
@@ -98,20 +94,19 @@ contract EntryPoint is
 
         (
             PackedUserOperation[] memory userOps,
-            address[] memory userOpsAddrs,
             bytes32 newSmtRoot,
             Ticket[] memory depositTickets,
             Ticket[] memory withdrawTickets
         ) = abi.decode(
                 publicValues,
-                (PackedUserOperation[], address[], bytes32, Ticket[], Ticket[])
+                (PackedUserOperation[], bytes32, Ticket[], Ticket[])
             );
 
         // process tickets
         processTickets(depositTickets, withdrawTickets);
 
         // execute userOps
-        this.handleOps(userOps, userOpsAddrs, beneficiary);
+        this.handleOps(userOps, beneficiary);
 
         // update stateRoot
         updateSmtRoot(newSmtRoot);
@@ -132,8 +127,22 @@ contract EntryPoint is
 
         processTickets(depositTickets, withdrawTickets);
 
-        // // execute userOps
+        // execute userOps
         // handleOps(userOps, userOpsAddrs, beneficiary);
+
+        // update stateRoot
+        // updateSmtRoot(newSmtRoot);
+    }
+
+    function verifyBatchMockUserOp(
+        PackedUserOperation[] calldata userOps,
+        address payable beneficiary
+    ) external {
+        // verify proof
+        // IVerifyManager(verifier).verifyProof(publicValues, proof);
+
+        // execute userOps
+        handleOps(userOps, beneficiary);
 
         // update stateRoot
         // updateSmtRoot(newSmtRoot);
@@ -266,7 +275,6 @@ contract EntryPoint is
                 emit PostOpRevertReason(
                     opInfo.userOpHash,
                     opInfo.mUserOp.sender,
-                    opInfo.mUserOp.nonce,
                     Exec.getReturnData(REVERT_REASON_MAX_LEN)
                 );
 
@@ -291,7 +299,6 @@ contract EntryPoint is
             opInfo.userOpHash,
             opInfo.mUserOp.sender,
             opInfo.mUserOp.paymaster,
-            opInfo.mUserOp.nonce,
             success,
             actualGasCost,
             actualGas
@@ -301,15 +308,13 @@ contract EntryPoint is
     function emitPrefundTooLow(UserOpInfo memory opInfo) internal virtual {
         emit UserOperationPrefundTooLow(
             opInfo.userOpHash,
-            opInfo.mUserOp.sender,
-            opInfo.mUserOp.nonce
+            opInfo.mUserOp.sender
         );
     }
 
     /// @inheritdoc IEntryPoint
     function handleOps(
         PackedUserOperation[] calldata ops,
-        address[] calldata userOpsAddrs,
         address payable beneficiary
     ) public nonReentrant {
         uint256 opslen = ops.length;
@@ -318,7 +323,6 @@ contract EntryPoint is
         unchecked {
             for (uint256 i = 0; i < opslen; i++) {
                 UserOpInfo memory opInfo = opInfos[i];
-                opInfo.sender = userOpsAddrs[i];
                 // Don't check sig
                 _validatePrepayment(i, ops[i], opInfo);
             }
@@ -409,11 +413,10 @@ contract EntryPoint is
 
     /**
      * A memory copy of UserOp static fields only.
-     * Excluding: callData, initCode and signature. Replacing paymasterAndData with paymaster.
+     * Excluding: userAddr, chainId, callData and initCode. Replacing paymasterAndData with paymaster.
      */
     struct MemoryUserOp {
         address sender;
-        uint256 nonce;
         uint256 verificationGasLimit;
         uint256 callGasLimit;
         uint256 paymasterVerificationGasLimit;
@@ -431,6 +434,7 @@ contract EntryPoint is
         uint256 contextOffset;
         uint256 preOpGas;
         address sender;
+        address userAddr;
     }
 
     /**
@@ -475,7 +479,6 @@ contract EntryPoint is
                     emit UserOperationRevertReason(
                         opInfo.userOpHash,
                         mUserOp.sender,
-                        mUserOp.nonce,
                         result
                     );
                 }
@@ -507,7 +510,6 @@ contract EntryPoint is
         MemoryUserOp memory mUserOp
     ) internal pure {
         mUserOp.sender = userOp.sender;
-        mUserOp.nonce = userOp.nonce;
         (mUserOp.verificationGasLimit, mUserOp.callGasLimit) = UserOperationLib
             .unpackUints(userOp.accountGasLimits);
         mUserOp.preVerificationGas = userOp.preVerificationGas;
@@ -620,9 +622,8 @@ contract EntryPoint is
             }
             try
                 IAccount(sender).validateUserOp{gas: verificationGasLimit}(
-                    op,
-                    missingAccountFunds,
-                    opInfo.sender
+                    opInfo.userAddr,
+                    missingAccountFunds
                 )
             returns (uint256 _validationData) {
                 validationData = _validationData;
@@ -793,12 +794,16 @@ contract EntryPoint is
             verificationGasLimit
         );
 
-        if (!_validateAndUpdateNonce(mUserOp.sender, mUserOp.nonce)) {
-            revert FailedOp(opIndex, "AA25 invalid account nonce");
-        }
+        // there is no need to verify the nonce in the contract,
+        // because the verification logic is already implemented in smt.
+        // if (!_validateAndUpdateNonce(mUserOp.sender, 0)) {
+        //     revert FailedOp(opIndex, "AA25 invalid account nonce");
+        // }
 
         unchecked {
             if (preGas - gasleft() > verificationGasLimit) {
+                console.logUint(preGas - gasleft());
+                console.logUint(verificationGasLimit);
                 revert FailedOp(opIndex, "AA26 over verificationGasLimit");
             }
         }

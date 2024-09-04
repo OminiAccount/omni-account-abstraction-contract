@@ -8,6 +8,8 @@ import "../interfaces/IAccount.sol";
 import "../interfaces/IEntryPoint.sol";
 import "./UserOperationLib.sol";
 
+import "forge-std/console.sol";
+
 /**
  * Basic account implementation.
  * This contract provides the basic logic for implementing the IAccount interface - validateUserOp
@@ -17,15 +19,6 @@ abstract contract BaseAccount is IAccount {
     using UserOperationLib for PackedUserOperation;
 
     /**
-     * Return the account nonce.
-     * This method returns the next sequential nonce.
-     * For a nonce of a specific key, use `entrypoint.getNonce(account, key)`
-     */
-    function getNonce() public view virtual returns (uint256) {
-        return entryPoint().getNonce(address(this), 0);
-    }
-
-    /**
      * Return the entryPoint used by this account.
      * Subclass should return the current entryPoint used by this account.
      */
@@ -33,13 +26,11 @@ abstract contract BaseAccount is IAccount {
 
     /// @inheritdoc IAccount
     function validateUserOp(
-        PackedUserOperation calldata userOp,
-        uint256 missingAccountFunds,
-        address sender
+        address _owner,
+        uint256 missingAccountFunds
     ) external virtual override returns (uint256 validationData) {
         _requireFromEntryPoint();
-        validationData = _validateSender(sender);
-        _validateNonce(userOp.nonce);
+        validationData = _validateOwner(_owner);
         _payPrefund(missingAccountFunds);
     }
 
@@ -54,8 +45,8 @@ abstract contract BaseAccount is IAccount {
     }
 
     /**
-     * Validate the sender is valid for IAccount owner.
-     * @param sender          - Validate the sender field.
+     * Validate the _owner is valid for IAccount owner.
+     * @param _owner          - Owner of the account that generated this request.
      * @return validationData - Signature and time-range of this operation.
      *                          <20-byte> aggregatorOrSigFail - 0 for valid signature, 1 to mark signature failure,
      *                                    otherwise, an address of an aggregator contract.
@@ -65,27 +56,9 @@ abstract contract BaseAccount is IAccount {
      *                          SIG_VALIDATION_FAILED value (1) for signature failure.
      *                          Note that the validation code cannot use block.timestamp (or block.number) directly.
      */
-    function _validateSender(
-        address sender
+    function _validateOwner(
+        address _owner
     ) internal virtual returns (uint256 validationData);
-
-    /**
-     * Validate the nonce of the UserOperation.
-     * This method may validate the nonce requirement of this account.
-     * e.g.
-     * To limit the nonce to use sequenced UserOps only (no "out of order" UserOps):
-     *      `require(nonce < type(uint64).max)`
-     * For a hypothetical account that *requires* the nonce to be out-of-order:
-     *      `require(nonce & type(uint64).max == 0)`
-     *
-     * The actual nonce uniqueness is managed by the EntryPoint, and thus no other
-     * action is needed by the account itself.
-     *
-     * @param nonce to validate
-     *
-     * solhint-disable-next-line no-empty-blocks
-     */
-    function _validateNonce(uint256 nonce) internal view virtual {}
 
     /**
      * Sends to the entrypoint (msg.sender) the missing funds for this transaction.
