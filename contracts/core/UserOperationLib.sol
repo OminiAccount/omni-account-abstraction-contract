@@ -179,3 +179,29 @@ library UserOperationLib {
         return keccak256(encode(userOp));
     }
 }
+import "forge-std/console.sol";
+library UserOperationsLib {
+    function filterByChainId(
+        PackedUserOperation[] memory userOps,
+        uint256 chainId
+    ) internal pure returns (PackedUserOperation[] memory) {
+        uint256 validCount = 0;
+        unchecked {
+            for (uint256 i = 0; i < userOps.length; ) {
+                if (userOps[i].chainId == chainId) {
+                    if (i != validCount) {
+                        userOps[validCount] = userOps[i];
+                    }
+                    ++validCount;
+                }
+                ++i;
+            }
+        }
+
+        assembly {
+            mstore(userOps, validCount)
+        }
+
+        return userOps;
+    }
+}

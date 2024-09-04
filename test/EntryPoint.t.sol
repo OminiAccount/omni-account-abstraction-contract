@@ -76,7 +76,7 @@ contract EntryPointTest is Test {
         vm.deal(address(account1), 2 ether);
         bytes memory data = encodeTransferCalldata(account2Owner, 1 ether);
         console.logBytes(data);
-        PackedUserOperation[] memory userOps = new PackedUserOperation[](1);
+        PackedUserOperation[] memory userOps = new PackedUserOperation[](2);
         address sender = address(account1);
         uint256 chainId = block.chainid;
         bytes memory initCode = "";
@@ -95,7 +95,22 @@ contract EntryPointTest is Test {
             paymasterAndData,
             account1Owner
         );
+        PackedUserOperation memory account1OwnerUserOp2 = PackedUserOperation({
+            sender: account1OwnerUserOp.sender,
+            chainId: 1,
+            initCode: account1OwnerUserOp.initCode,
+            callData: account1OwnerUserOp.callData,
+            accountGasLimits: account1OwnerUserOp.accountGasLimits,
+            preVerificationGas: account1OwnerUserOp.preVerificationGas,
+            gasFees: account1OwnerUserOp.gasFees,
+            paymasterAndData: account1OwnerUserOp.paymasterAndData,
+            userAddr: account1OwnerUserOp.userAddr
+        });
         userOps[0] = account1OwnerUserOp;
+        userOps[1] = account1OwnerUserOp2;
+        console.log(userOps[0].chainId);
+        console.log(userOps[1].chainId);
+
         vm.startPrank(deployer);
         ep.verifyBatchMockUserOp(userOps, payable(deployer));
         vm.stopPrank();

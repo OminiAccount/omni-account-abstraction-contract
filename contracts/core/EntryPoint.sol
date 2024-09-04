@@ -36,6 +36,7 @@ contract EntryPoint is
     ERC165
 {
     using UserOperationLib for PackedUserOperation;
+    using UserOperationsLib for PackedUserOperation[];
 
     SenderCreator private immutable _senderCreator = new SenderCreator();
 
@@ -93,7 +94,7 @@ contract EntryPoint is
         IVerifyManager(verifier).verifyProof(publicValues, proof);
 
         (
-            PackedUserOperation[] memory userOps,
+            PackedUserOperation[] memory allUserOps,
             bytes32 newSmtRoot,
             Ticket[] memory depositTickets,
             Ticket[] memory withdrawTickets
@@ -101,6 +102,10 @@ contract EntryPoint is
                 publicValues,
                 (PackedUserOperation[], bytes32, Ticket[], Ticket[])
             );
+
+        PackedUserOperation[] memory userOps = allUserOps.filterByChainId(
+            block.chainid
+        );
 
         // process tickets
         processTickets(depositTickets, withdrawTickets);
@@ -135,14 +140,18 @@ contract EntryPoint is
     }
 
     function verifyBatchMockUserOp(
-        PackedUserOperation[] calldata userOps,
+        PackedUserOperation[] calldata allUserOps,
         address payable beneficiary
     ) external {
         // verify proof
         // IVerifyManager(verifier).verifyProof(publicValues, proof);
 
+        PackedUserOperation[] memory userOps = allUserOps.filterByChainId(
+            block.chainid
+        );
+
         // execute userOps
-        handleOps(userOps, beneficiary);
+        this.handleOps(userOps, beneficiary);
 
         // update stateRoot
         // updateSmtRoot(newSmtRoot);
