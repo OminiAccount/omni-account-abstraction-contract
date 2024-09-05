@@ -13,6 +13,7 @@ import "./SimpleAccount.sol";
  * This way, the entryPoint.getSenderAddress() can be called either before or after the account is created.
  */
 contract SimpleAccountFactory {
+    event AccountCreated(address indexed account, address owner);
     SimpleAccount public immutable accountImplementation;
 
     constructor(IEntryPoint _entryPoint) {
@@ -42,6 +43,8 @@ contract SimpleAccountFactory {
                 )
             )
         );
+
+        emit AccountCreated(addr, owner);
     }
 
     /**
