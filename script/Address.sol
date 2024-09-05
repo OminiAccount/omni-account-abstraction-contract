@@ -13,6 +13,9 @@ contract AddressHelper {
     address arbitrumSepoliaEntryPoint =
         0x5f8AB9b43f0dd3661DD14d9F17787A7d12434d9D;
 
+    address sepoliaFactory = 0xb39F7e2205ae32d1323E912357B4D83A530de347;
+    address arbitrumSepoliaFactory = 0xC1cf05c0d1Bf848B918e59b48bF464776151F3A5;
+
     address verifier;
 
     uint32[] sepoliaDstEids = [arbitrumSepoliaEid];
