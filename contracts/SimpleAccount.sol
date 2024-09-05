@@ -175,6 +175,13 @@ contract SimpleAccount is
         entryPoint().addWithdrawTicket(owner, amount);
     }
 
+    function withdrawFromContract(uint256 amount) external onlyOwner {
+        if (amount > address(this).balance) {
+            revert();
+        }
+        payable(msg.sender).call{value: amount}("");
+    }
+
     function _authorizeUpgrade(
         address newImplementation
     ) internal view override {

@@ -37,6 +37,15 @@ contract EntryPointTest is Utils {
         account1OwnerDeposit();
         console.log();
         account1OwnerWithdraw();
+
+        vm.deal(address(account1), 2 ether);
+        console.log("account1 balance", address(account1).balance);
+        console.log("owner balance", account1Owner.balance);
+        vm.startPrank(account1Owner);
+        account1.withdrawFromContract(1 ether);
+        vm.stopPrank();
+        console.log("account1 balance", address(account1).balance);
+        console.log("owner balance", account1Owner.balance);
     }
 
     function test_account_execute() public {
