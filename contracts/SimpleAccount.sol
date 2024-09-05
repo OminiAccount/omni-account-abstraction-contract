@@ -25,6 +25,8 @@ contract SimpleAccount is
     UUPSUpgradeable,
     Initializable
 {
+    error InsufficientBalance();
+
     address public owner;
 
     IEntryPoint private immutable _entryPoint;
@@ -177,9 +179,9 @@ contract SimpleAccount is
 
     function withdrawFromContract(uint256 amount) external onlyOwner {
         if (amount > address(this).balance) {
-            revert();
+            revert InsufficientBalance();
         }
-        payable(msg.sender).call{value: amount}("");
+        _call(msg.sender, amount, "");
     }
 
     function _authorizeUpgrade(

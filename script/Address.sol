@@ -13,8 +13,8 @@ contract AddressHelper {
     address arbitrumSepoliaEntryPoint =
         0x5f8AB9b43f0dd3661DD14d9F17787A7d12434d9D;
 
-    address sepoliaFactory = 0xb39F7e2205ae32d1323E912357B4D83A530de347;
-    address arbitrumSepoliaFactory = 0xC1cf05c0d1Bf848B918e59b48bF464776151F3A5;
+    address sepoliaFactory = 0xB8a4CE913F8F4Ed99B89F52BC565d0048C62aEA1;
+    address arbitrumSepoliaFactory = 0xea460aB5cFEE898D75Bc914734343ecB907125a4;
 
     address verifier = 0x21C81909C1C8F2D1EDC67730B1967A2079b0D164;
 
