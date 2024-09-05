@@ -39,9 +39,10 @@ contract SyncRouterTest is Utils {
 
         router1 = new SyncRouter(
             address(0x6EDCE65403992e310A62460808c4b910D972f10f),
-            address(ep),
             deployer
         );
+
+        router1.updateEntryPoint(address(ep));
 
         ep.updateSyncRouter(address(router1));
         uint32[] memory dstEids = new uint32[](1);

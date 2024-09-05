@@ -14,7 +14,7 @@ contract DeploySyncRouter is Script, Utils, AddressHelper {
         vm.createSelectFork(sepoliaRpc);
         vm.startBroadcast(deployerPrivateKey);
         VerifyManager verify = new VerifyManager(sp1Verifier, aaProgramVKey);
-        conosle.log("verify address: ", address(verify));
+        console.log("verify address: ", address(verify));
         vm.stopBroadcast();
     }
 }
