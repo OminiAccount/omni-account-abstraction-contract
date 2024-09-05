@@ -1,10 +1,10 @@
 {
-  "dependencies": {
-    "@layerzerolabs/test-devtools-evm-foundry": "^0.2.12",
-    "@layerzerolabs/toolbox-foundry": "^0.1.9",
-    "@layerzerolabs/lz-evm-messagelib-v2": "^2.3.39",
-    "@layerzerolabs/lz-evm-protocol-v2": "^2.3.39",
-    "@layerzerolabs/lz-evm-v1-0.7": "^2.3.39",
-    "solidity-bytes-utils": "^0.8.2"
-  }
+    "dependencies": {
+        "@layerzerolabs/lz-evm-messagelib-v2": "^2.3.39",
+        "@layerzerolabs/lz-evm-protocol-v2": "^2.3.39",
+        "@layerzerolabs/lz-evm-v1-0.7": "^2.3.39",
+        "@layerzerolabs/test-devtools-evm-foundry": "^0.2.12",
+        "@layerzerolabs/toolbox-foundry": "^0.1.9",
+        "solidity-bytes-utils": "^0.8.2"
+    }
 }

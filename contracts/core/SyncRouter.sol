@@ -43,11 +43,8 @@ contract SyncRouter is OApp, OAppOptionsType3 {
      */
     constructor(
         address _endpoint,
-        address _entryPoint,
         address _owner
-    ) OApp(_endpoint, _owner) Ownable(msg.sender) {
-        entryPoint = _entryPoint;
-    }
+    ) OApp(_endpoint, _owner) Ownable(msg.sender) {}
 
     function updateEntryPoint(address _entryPoint) external onlyOwner {
         entryPoint = _entryPoint;

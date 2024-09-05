@@ -157,7 +157,6 @@ contract EntryPoint is
         address payable beneficiary
     ) external payable {
         // verify proof
-        // IVerifyManager(verifier).verifyProof(publicValues, proof);
         uint256 startGas = gasleft();
         PackedUserOperation[] memory userOps = allUserOps.filterByChainId(
             block.chainid
@@ -174,7 +173,7 @@ contract EntryPoint is
 
         bytes memory _extraSendOptions = OptionsBuilder
             .newOptions()
-            .addExecutorLzReceiveOption(50000, 0);
+            .addExecutorLzReceiveOption(uint128(gasUsed * 2), 0);
         ISyncRouter(syncRouter).send{value: msg.value}(
             dstEids,
             message,
