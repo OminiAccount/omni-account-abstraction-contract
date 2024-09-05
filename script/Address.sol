@@ -16,12 +16,13 @@ contract AddressHelper {
     address sepoliaFactory = 0xb39F7e2205ae32d1323E912357B4D83A530de347;
     address arbitrumSepoliaFactory = 0xC1cf05c0d1Bf848B918e59b48bF464776151F3A5;
 
-    address verifier;
+    address verifier = 0x21C81909C1C8F2D1EDC67730B1967A2079b0D164;
 
     uint32[] sepoliaDstEids = [arbitrumSepoliaEid];
 
     address public sp1Verifier = 0x3B6041173B80E77f038f3F2C0f9744f04837185e;
-    bytes32 public aaProgramVKey;
+    bytes32 public aaProgramVKey =
+        0x00562de31787f72cba4fffa5794e5500c92f40c0ac88e0cbb3b732460b096908;
 
     address endPoint = 0x6EDCE65403992e310A62460808c4b910D972f10f;
     address owner = 0xBC989fDe9e54cAd2aB4392Af6dF60f04873A033A;
