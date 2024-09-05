@@ -22,18 +22,6 @@ abstract contract StakeManager is IStakeManager {
         return deposits[account];
     }
 
-    /**
-     * Internal method to return just the stake info.
-     * @param addr - The account to query.
-     */
-    function _getStakeInfo(
-        address addr
-    ) internal view returns (StakeInfo memory info) {
-        DepositInfo storage depositInfo = deposits[addr];
-        info.stake = depositInfo.stake;
-        info.unstakeDelaySec = depositInfo.unstakeDelaySec;
-    }
-
     /// @inheritdoc IStakeManager
     function balanceOf(address account) public view returns (uint256) {
         return deposits[account].deposit;
@@ -66,67 +54,6 @@ abstract contract StakeManager is IStakeManager {
     function depositTo(address account, uint256 amount) internal {
         uint256 newDeposit = _incrementDeposit(account, amount);
         emit Deposited(account, newDeposit);
-    }
-
-    /**
-     * Add to the account's stake - amount and delay
-     * any pending unstake is first cancelled.
-     * @param unstakeDelaySec The new lock duration before the deposit can be withdrawn.
-     */
-    function addStake(uint32 unstakeDelaySec) public payable {
-        DepositInfo storage info = deposits[msg.sender];
-        require(unstakeDelaySec > 0, "must specify unstake delay");
-        require(
-            unstakeDelaySec >= info.unstakeDelaySec,
-            "cannot decrease unstake time"
-        );
-        uint256 stake = info.stake + msg.value;
-        require(stake > 0, "no stake specified");
-        require(stake <= type(uint112).max, "stake overflow");
-        deposits[msg.sender] = DepositInfo(
-            info.deposit,
-            true,
-            uint112(stake),
-            unstakeDelaySec,
-            0
-        );
-        emit StakeLocked(msg.sender, stake, unstakeDelaySec);
-    }
-
-    /**
-     * Attempt to unlock the stake.
-     * The value can be withdrawn (using withdrawStake) after the unstake delay.
-     */
-    function unlockStake() external {
-        DepositInfo storage info = deposits[msg.sender];
-        require(info.unstakeDelaySec != 0, "not staked");
-        require(info.staked, "already unstaking");
-        uint48 withdrawTime = uint48(block.timestamp) + info.unstakeDelaySec;
-        info.withdrawTime = withdrawTime;
-        info.staked = false;
-        emit StakeUnlocked(msg.sender, withdrawTime);
-    }
-
-    /**
-     * Withdraw from the (unlocked) stake.
-     * Must first call unlockStake and wait for the unstakeDelay to pass.
-     * @param withdrawAddress - The address to send withdrawn value.
-     */
-    function withdrawStake(address payable withdrawAddress) external {
-        DepositInfo storage info = deposits[msg.sender];
-        uint256 stake = info.stake;
-        require(stake > 0, "No stake to withdraw");
-        require(info.withdrawTime > 0, "must call unlockStake() first");
-        require(
-            info.withdrawTime <= block.timestamp,
-            "Stake withdrawal is not due"
-        );
-        info.unstakeDelaySec = 0;
-        info.withdrawTime = 0;
-        info.stake = 0;
-        emit StakeWithdrawn(msg.sender, withdrawAddress, stake);
-        (bool success, ) = withdrawAddress.call{value: stake}("");
-        require(success, "failed to withdraw stake");
     }
 
     /**

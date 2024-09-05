@@ -11,7 +11,7 @@ contract TicketManager is ITicketManager {
     mapping(bytes32 => bool) public depositTickets;
     mapping(bytes32 => bool) public withdrawTickets;
 
-    mapping(address owner => address accountAddress) internal accountOwners;
+    mapping(address owner => address accountAddress) public accountOwners;
 
     /**
      * Add a user deposit ticket

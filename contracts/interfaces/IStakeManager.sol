@@ -15,22 +15,6 @@ interface IStakeManager {
         uint256 amount
     );
 
-    // Emitted when stake or unstake delay are modified.
-    event StakeLocked(
-        address indexed account,
-        uint256 totalStaked,
-        uint256 unstakeDelaySec
-    );
-
-    // Emitted once a stake is scheduled for withdrawal.
-    event StakeUnlocked(address indexed account, uint256 withdrawTime);
-
-    event StakeWithdrawn(
-        address indexed account,
-        address withdrawAddress,
-        uint256 amount
-    );
-
     /**
      * @param deposit         - The entity's deposit.
      * @param staked          - True if this entity is staked.
@@ -49,12 +33,6 @@ interface IStakeManager {
         uint112 stake;
         uint32 unstakeDelaySec;
         uint48 withdrawTime;
-    }
-
-    // API struct used by getStakeInfo and simulateValidation.
-    struct StakeInfo {
-        uint256 stake;
-        uint256 unstakeDelaySec;
     }
 
     /**
@@ -78,26 +56,6 @@ interface IStakeManager {
     //  * @param account - The account to add to.
     //  */
     // function depositTo(address account) external payable;
-
-    /**
-     * Add to the account's stake - amount and delay
-     * any pending unstake is first cancelled.
-     * @param _unstakeDelaySec - The new lock duration before the deposit can be withdrawn.
-     */
-    function addStake(uint32 _unstakeDelaySec) external payable;
-
-    /**
-     * Attempt to unlock the stake.
-     * The value can be withdrawn (using withdrawStake) after the unstake delay.
-     */
-    function unlockStake() external;
-
-    /**
-     * Withdraw from the (unlocked) stake.
-     * Must first call unlockStake and wait for the unstakeDelay to pass.
-     * @param withdrawAddress - The address to send withdrawn value.
-     */
-    function withdrawStake(address payable withdrawAddress) external;
 
     // /**
     //  * Withdraw from the deposit.

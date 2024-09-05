@@ -145,6 +145,8 @@ interface IEntryPoint is IStakeManager, ITicketManager {
     //     Ticket[] calldata withdrawTickets
     // ) external;
 
+    function syncBatch(bytes calldata syncInfo) external;
+
     /**
      * Execute a batch of UserOperations.
      * No signature aggregator is used.
@@ -155,16 +157,6 @@ interface IEntryPoint is IStakeManager, ITicketManager {
      */
     function handleOps(
         PackedUserOperation[] calldata ops,
-        address payable beneficiary
-    ) external;
-
-    /**
-     * Execute a batch of UserOperation with Aggregators
-     * @param opsPerAggregator - The operations to execute, grouped by aggregator (or address(0) for no-aggregator accounts).
-     * @param beneficiary      - The address to receive the fees.
-     */
-    function handleAggregatedOps(
-        UserOpsPerAggregator[] calldata opsPerAggregator,
         address payable beneficiary
     ) external;
 
@@ -192,15 +184,6 @@ interface IEntryPoint is IStakeManager, ITicketManager {
         uint256 accountValidationData;
         uint256 paymasterValidationData;
         bytes paymasterContext;
-    }
-
-    /**
-     * Returned aggregated signature info:
-     * The aggregator returned by the account, and its current stake.
-     */
-    struct AggregatorStakeInfo {
-        address aggregator;
-        StakeInfo stakeInfo;
     }
 
     /**

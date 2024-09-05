@@ -8,8 +8,6 @@ import "../interfaces/IAccount.sol";
 import "../interfaces/IEntryPoint.sol";
 import "./UserOperationLib.sol";
 
-import "forge-std/console.sol";
-
 /**
  * Basic account implementation.
  * This contract provides the basic logic for implementing the IAccount interface - validateUserOp

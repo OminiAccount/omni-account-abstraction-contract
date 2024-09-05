@@ -8,6 +8,7 @@ import "../interfaces/IAccountExecute.sol";
 import "../interfaces/IPaymaster.sol";
 import "../interfaces/IEntryPoint.sol";
 import "../interfaces/IVerifyManager.sol";
+import "../interfaces/ISyncRouter.sol";
 
 import "../utils/Exec.sol";
 import "./SmtManager.sol";
@@ -15,10 +16,14 @@ import "./StakeManager.sol";
 import "./SenderCreator.sol";
 import "./Helpers.sol";
 import "./TicketManager.sol";
+import "./ConfigManager.sol";
 import "./UserOperationLib.sol";
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
+import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 
 import "forge-std/console.sol";
 /*
@@ -32,11 +37,18 @@ contract EntryPoint is
     SmtManager,
     StakeManager,
     TicketManager,
+    ConfigManager,
     ReentrancyGuard,
+    Ownable,
     ERC165
 {
+    using OptionsBuilder for bytes;
     using UserOperationLib for PackedUserOperation;
     using UserOperationsLib for PackedUserOperation[];
+
+    constructor() Ownable(msg.sender) {}
+
+    function _isOwner() internal virtual override onlyOwner {}
 
     SenderCreator private immutable _senderCreator = new SenderCreator();
 
@@ -68,18 +80,6 @@ contract EntryPoint is
             super.supportsInterface(interfaceId);
     }
 
-    address public owner;
-    address public verifier;
-
-    modifier onlyOwner() {
-        require(msg.sender == owner, "only owner");
-        _;
-    }
-
-    function updateVerifier(address _verifier) external onlyOwner {
-        verifier = _verifier;
-    }
-
     /**
      * Verify a batch containing userOps,tickets and newSmtRoot
      * @param proof The encoded proof.
@@ -89,7 +89,7 @@ contract EntryPoint is
         bytes calldata proof,
         bytes calldata publicValues,
         address payable beneficiary
-    ) external {
+    ) external payable {
         // verify proof
         IVerifyManager(verifier).verifyProof(publicValues, proof);
 
@@ -115,6 +115,19 @@ contract EntryPoint is
 
         // update stateRoot
         updateSmtRoot(newSmtRoot);
+
+        bytes memory message = abi.encode(publicValues, beneficiary);
+
+        // sync other chains
+        bytes memory _extraSendOptions = OptionsBuilder
+            .newOptions()
+            .addExecutorLzReceiveOption(50000, 0);
+        ISyncRouter(syncRouter).send(
+            dstEids,
+            message,
+            _extraSendOptions,
+            beneficiary
+        );
     }
 
     function verifyBatchMock(
@@ -142,10 +155,10 @@ contract EntryPoint is
     function verifyBatchMockUserOp(
         PackedUserOperation[] calldata allUserOps,
         address payable beneficiary
-    ) external {
+    ) external payable {
         // verify proof
         // IVerifyManager(verifier).verifyProof(publicValues, proof);
-
+        uint256 startGas = gasleft();
         PackedUserOperation[] memory userOps = allUserOps.filterByChainId(
             block.chainid
         );
@@ -153,8 +166,68 @@ contract EntryPoint is
         // execute userOps
         this.handleOps(userOps, beneficiary);
 
+        uint256 gasUsed = startGas - gasleft();
+
+        console.log("gasUsed", gasUsed);
+
+        bytes memory message = abi.encode(allUserOps, beneficiary);
+
+        bytes memory _extraSendOptions = OptionsBuilder
+            .newOptions()
+            .addExecutorLzReceiveOption(50000, 0);
+        ISyncRouter(syncRouter).send{value: msg.value}(
+            dstEids,
+            message,
+            _extraSendOptions,
+            beneficiary
+        );
+    }
+
+    function syncBatch(bytes calldata syncInfo) external isSyncRouter {
+        (bytes memory publicValues, address payable beneficiary) = abi.decode(
+            syncInfo,
+            (bytes, address)
+        );
+        (
+            PackedUserOperation[] memory allUserOps,
+            bytes32 newSmtRoot,
+            Ticket[] memory depositTickets,
+            Ticket[] memory withdrawTickets
+        ) = abi.decode(
+                publicValues,
+                (PackedUserOperation[], bytes32, Ticket[], Ticket[])
+            );
+
+        PackedUserOperation[] memory userOps = allUserOps.filterByChainId(
+            block.chainid
+        );
+
+        // process tickets
+        processTickets(depositTickets, withdrawTickets);
+
+        // execute userOps
+        this.handleOps(userOps, beneficiary);
+
         // update stateRoot
-        // updateSmtRoot(newSmtRoot);
+        updateSmtRoot(newSmtRoot);
+    }
+
+    function syncBatchMock(bytes calldata syncInfo) external isSyncRouter {
+        (bytes memory publicValues, address payable beneficiary) = abi.decode(
+            syncInfo,
+            (bytes, address)
+        );
+        PackedUserOperation[] memory allUserOps = abi.decode(
+            publicValues,
+            (PackedUserOperation[])
+        );
+
+        PackedUserOperation[] memory userOps = allUserOps.filterByChainId(
+            block.chainid
+        );
+
+        // execute userOps
+        this.handleOps(userOps, beneficiary);
     }
 
     function processTickets(
@@ -186,10 +259,6 @@ contract EntryPoint is
             }
         }
     }
-
-    // function syncBatch(bytes32 smtRoot) {
-
-    // }
 
     /**
      * Compensate the caller's beneficiary address with the collected fees of all UserOperations.
@@ -345,79 +414,6 @@ contract EntryPoint is
 
             _compensate(beneficiary, collected);
         }
-    }
-
-    /// @inheritdoc IEntryPoint
-    function handleAggregatedOps(
-        UserOpsPerAggregator[] calldata opsPerAggregator,
-        address payable beneficiary
-    ) public nonReentrant {
-        uint256 opasLen = opsPerAggregator.length;
-        uint256 totalOps = 0;
-        for (uint256 i = 0; i < opasLen; i++) {
-            UserOpsPerAggregator calldata opa = opsPerAggregator[i];
-            PackedUserOperation[] calldata ops = opa.userOps;
-            IAggregator aggregator = opa.aggregator;
-
-            //address(1) is special marker of "signature error"
-            require(
-                address(aggregator) != address(1),
-                "AA96 invalid aggregator"
-            );
-
-            if (address(aggregator) != address(0)) {
-                // solhint-disable-next-line no-empty-blocks
-                try aggregator.validateSignatures(ops, opa.signature) {} catch {
-                    revert SignatureValidationFailed(address(aggregator));
-                }
-            }
-
-            totalOps += ops.length;
-        }
-
-        UserOpInfo[] memory opInfos = new UserOpInfo[](totalOps);
-
-        uint256 opIndex = 0;
-        for (uint256 a = 0; a < opasLen; a++) {
-            UserOpsPerAggregator calldata opa = opsPerAggregator[a];
-            PackedUserOperation[] calldata ops = opa.userOps;
-            IAggregator aggregator = opa.aggregator;
-
-            uint256 opslen = ops.length;
-            for (uint256 i = 0; i < opslen; i++) {
-                UserOpInfo memory opInfo = opInfos[opIndex];
-                (
-                    uint256 validationData,
-                    uint256 paymasterValidationData
-                ) = _validatePrepayment(opIndex, ops[i], opInfo);
-                _validateAccountAndPaymasterValidationData(
-                    i,
-                    validationData,
-                    paymasterValidationData,
-                    address(aggregator)
-                );
-                opIndex++;
-            }
-        }
-
-        emit BeforeExecution();
-
-        uint256 collected = 0;
-        opIndex = 0;
-        for (uint256 a = 0; a < opasLen; a++) {
-            UserOpsPerAggregator calldata opa = opsPerAggregator[a];
-            emit SignatureAggregatorChanged(address(opa.aggregator));
-            PackedUserOperation[] calldata ops = opa.userOps;
-            uint256 opslen = ops.length;
-
-            for (uint256 i = 0; i < opslen; i++) {
-                collected += _executeUserOp(opIndex, ops[i], opInfos[opIndex]);
-                opIndex++;
-            }
-        }
-        emit SignatureAggregatorChanged(address(0));
-
-        _compensate(beneficiary, collected);
     }
 
     /**
