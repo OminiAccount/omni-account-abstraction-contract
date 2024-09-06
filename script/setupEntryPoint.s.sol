@@ -8,6 +8,7 @@ import "./Address.sol";
 contract SetupEntryPoint is Script, AddressHelper {
     function run() external {
         string memory sepoliaRpc = vm.envString("CHAIN1_RPC_URL");
+        string memory arbitrumSepoliaRpc = vm.envString("CHAIN2_RPC_URL");
 
         uint256 deployerPrivateKey = vm.envUint("DEPLOY");
 
@@ -18,7 +19,13 @@ contract SetupEntryPoint is Script, AddressHelper {
         EntryPoint(sepoliaEntryPoint).updateVerifier(verifier);
         EntryPoint(sepoliaEntryPoint).updateSyncRouter(sepoliaSyncRouter);
         EntryPoint(sepoliaEntryPoint).updateDstEids(sepoliaDstEids);
+        vm.stopBroadcast();
 
+        vm.createSelectFork(arbitrumSepoliaRpc);
+        vm.startBroadcast(deployerPrivateKey);
+        EntryPoint(sepoliaEntryPoint).updateSyncRouter(
+            arbitrumSepoliaSyncRouter
+        );
         vm.stopBroadcast();
     }
 }

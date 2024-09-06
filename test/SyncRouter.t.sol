@@ -63,10 +63,11 @@ contract SyncRouterTest is Utils {
         bytes memory data = encodeTransferCalldata(account2Owner, 1 ether);
 
         PackedUserOperation[] memory userOps = new PackedUserOperation[](2);
-        address sender = address(account1);
+        address sender = address(0xCB726A5C2AB61fe8a901E8AB8372d9e90790DF65);
         uint256 chainId = block.chainid;
-        bytes memory initCode = "";
-        bytes32 accountGasLimits = packUints(60000, 55000);
+        bytes
+            memory initCode = hex"19b8495e7d3c0ff16592f67745a0c887d3d60a4d5fbfb9cf00000000000000000000000069299a9dfcc793e9780a0115bf3b45b4deca24630000000000000000000000000000000000000000000000000000000000000000";
+        bytes32 accountGasLimits = packUints(260000, 55000);
         uint256 preVerificationGas = 16997;
         bytes32 gasFees = packUints(2500000000, 30000000000);
         bytes memory paymasterAndData = "";

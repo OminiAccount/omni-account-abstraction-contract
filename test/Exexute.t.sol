@@ -9,23 +9,35 @@ import "contracts/SimpleAccount.sol";
 import "contracts/SimpleAccountFactory.sol";
 import "contracts/core/SyncRouter.sol";
 import "./Utils.sol";
+import "script/Address.sol";
 
-contract SyncRouterTest is Utils {
-    function setUp() public {}
+contract SyncRouterTest is Utils, AddressHelper {
+    uint256 sepoliaFork;
+    EntryPoint ep;
+
+    function setUp() public {
+        string memory SEPOLIA_RPC_URL = vm.envString("SEPOLIA_RPC_URL");
+        sepoliaFork = vm.createFork(SEPOLIA_RPC_URL);
+        vm.selectFork(sepoliaFork);
+        ep = EntryPoint(sepoliaEntryPoint);
+    }
 
     function test_userop() public {
-        PackedUserOperation[] memory userOps = new PackedUserOperation[](2);
-        // [["0x0000000000000000000000000000000000000001",11155111,"0x5fbfb9cf00000000000000000000000069299a9dfcc793e9780a0115bf3b45b4deca24630000000000000000000000000000000000000000000000000000000000000000","0x","0x00000000000000000000000000006978000000000000000000000000000088b8",17000,"0x0000000000000000000000009502f900000000000000000000000006fc23ac00","0x","0x0000000000000000000000000000000000000001"]]
-        address sender = address(0x01);
-        console.logAddress(sender);
-        uint256 chainId = 11155111;
+        address account = address(0xCB726A5C2AB61fe8a901E8AB8372d9e90790DF65);
+        address account2Owner = address(
+            0xe25A045cBC0407DB4743c9c5B8dcbdDE2021e3Aa
+        );
+        vm.deal(address(account), 2 ether);
+        bytes memory data = encodeTransferCalldata(account2Owner, 1 ether);
+        PackedUserOperation[] memory userOps = new PackedUserOperation[](1);
+        address sender = account;
+        uint256 chainId = block.chainid;
+        console.log("chainId", chainId);
         bytes
-            memory initCode = "0x5fbfb9cf00000000000000000000000069299a9dfcc793e9780a0115bf3b45b4deca24630000000000000000000000000000000000000000000000000000000000000000";
-        bytes32 accountGasLimits = packUints(27000, 35000);
-        console.logBytes32(accountGasLimits);
+            memory initCode = hex"19b8495e7d3c0ff16592f67745a0c887d3d60a4d5fbfb9cf00000000000000000000000069299a9dfcc793e9780a0115bf3b45b4deca24630000000000000000000000000000000000000000000000000000000000000000";
+        bytes32 accountGasLimits = packUints(260000, 55000);
         uint256 preVerificationGas = 17000;
         bytes32 gasFees = packUints(2500000000, 30000000000);
-        console.logBytes32(gasFees);
         bytes memory paymasterAndData = "";
         PackedUserOperation memory account1OwnerUserOp = PackedUserOperation(
             sender,
@@ -38,5 +50,12 @@ contract SyncRouterTest is Utils {
             paymasterAndData,
             sender
         );
+        userOps[0] = account1OwnerUserOp;
+        vm.startPrank(owner);
+        ep.verifyBatchMockUserOp{value: 514197274447005}(
+            userOps,
+            payable(owner)
+        );
+        vm.stopPrank();
     }
 }

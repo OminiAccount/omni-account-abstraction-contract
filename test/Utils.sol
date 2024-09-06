@@ -2,6 +2,7 @@
 pragma solidity ^0.8.23;
 import "forge-std/Test.sol";
 import "contracts/SimpleAccount.sol";
+import "contracts/SimpleAccountFactory.sol";
 
 contract Utils is Test {
     function encodeTransferCalldata(
@@ -30,5 +31,21 @@ contract Utils is Test {
 
     function addressToBytes32(address _addr) public pure returns (bytes32) {
         return bytes32(uint256(uint160(_addr)));
+    }
+
+    function getAccountInitCode(
+        address owner,
+        address factory,
+        uint256 salt
+    ) public pure returns (bytes memory) {
+        bytes4 selector = SimpleAccountFactory.createAccount.selector;
+
+        bytes memory encodedData = abi.encodeWithSelector(
+            selector,
+            owner,
+            salt
+        );
+
+        return abi.encodePacked(factory, encodedData);
     }
 }
