@@ -21,6 +21,7 @@ contract SetupEntryPoint is Script, AddressHelper {
         EntryPoint(sepoliaEntryPoint).updateDstEids(sepoliaDstEids);
         vm.stopBroadcast();
 
+        // config SyncRouter, dstEids
         vm.createSelectFork(arbitrumSepoliaRpc);
         vm.startBroadcast(deployerPrivateKey);
         EntryPoint(sepoliaEntryPoint).updateSyncRouter(
