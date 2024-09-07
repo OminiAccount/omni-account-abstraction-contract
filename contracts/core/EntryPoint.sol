@@ -90,38 +90,18 @@ contract EntryPoint is
         bytes calldata publicValues,
         address payable beneficiary
     ) external payable {
-        // verify proof
         IVerifyManager(verifier).verifyProof(publicValues, proof);
 
-        (
-            PackedUserOperation[] memory allUserOps,
-            bytes32 newSmtRoot,
-            Ticket[] memory depositTickets,
-            Ticket[] memory withdrawTickets
-        ) = abi.decode(
-                publicValues,
-                (PackedUserOperation[], bytes32, Ticket[], Ticket[])
-            );
-
-        PackedUserOperation[] memory userOps = allUserOps.filterByChainId(
-            block.chainid
-        );
-
-        // process tickets
-        processTickets(depositTickets, withdrawTickets);
-
-        // execute userOps
-        this.handleOps(userOps, beneficiary);
-
-        // update stateRoot
-        updateSmtRoot(newSmtRoot);
+        uint256 startGas = gasleft();
+        processBatch(publicValues, beneficiary);
+        uint256 gasUsed = startGas - gasleft();
 
         bytes memory message = abi.encode(publicValues, beneficiary);
 
         // sync other chains
         bytes memory _extraSendOptions = OptionsBuilder
             .newOptions()
-            .addExecutorLzReceiveOption(50000, 0);
+            .addExecutorLzReceiveOption(uint128(gasUsed * 2), 0);
         ISyncRouter(syncRouter).send(
             dstEids,
             message,
@@ -187,28 +167,8 @@ contract EntryPoint is
             syncInfo,
             (bytes, address)
         );
-        (
-            PackedUserOperation[] memory allUserOps,
-            bytes32 newSmtRoot,
-            Ticket[] memory depositTickets,
-            Ticket[] memory withdrawTickets
-        ) = abi.decode(
-                publicValues,
-                (PackedUserOperation[], bytes32, Ticket[], Ticket[])
-            );
 
-        PackedUserOperation[] memory userOps = allUserOps.filterByChainId(
-            block.chainid
-        );
-
-        // process tickets
-        processTickets(depositTickets, withdrawTickets);
-
-        // execute userOps
-        this.handleOps(userOps, beneficiary);
-
-        // update stateRoot
-        updateSmtRoot(newSmtRoot);
+        processBatch(publicValues, beneficiary);
     }
 
     function syncBatchMock(bytes calldata syncInfo) external isSyncRouter {
@@ -227,6 +187,29 @@ contract EntryPoint is
 
         // execute userOps
         this.handleOps(userOps, beneficiary);
+    }
+
+    function processBatch(
+        bytes memory publicValues,
+        address payable beneficiary
+    ) internal {
+        ProofOutPut memory proofOutPut = abi.decode(
+            publicValues,
+            (ProofOutPut)
+        );
+
+        PackedUserOperation[] memory userOps = proofOutPut
+            .allUserOps
+            .filterByChainId(block.chainid);
+
+        // process tickets
+        processTickets(proofOutPut.depositTickets, proofOutPut.withdrawTickets);
+
+        // execute userOps
+        this.handleOps(userOps, beneficiary);
+
+        // update stateRoot
+        updateSmtRoot(proofOutPut.oldSmtRoot, proofOutPut.newSmtRoot);
     }
 
     function processTickets(

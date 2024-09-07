@@ -126,24 +126,13 @@ interface IEntryPoint is IStakeManager, ITicketManager {
     // Return value of getSenderAddress.
     error SenderAddressResult(address sender);
 
-    // UserOps handled, per aggregator.
-    struct UserOpsPerAggregator {
-        PackedUserOperation[] userOps;
-        // Aggregator address
-        IAggregator aggregator;
-        // Aggregated signature
-        bytes signature;
+    struct ProofOutPut {
+        PackedUserOperation[] allUserOps;
+        bytes32 oldSmtRoot;
+        bytes32 newSmtRoot;
+        ITicketManager.Ticket[] depositTickets;
+        ITicketManager.Ticket[] withdrawTickets;
     }
-
-    // function zkAAEntryPoint(
-    //     bytes calldata proof,
-    //     bytes32 pubInput,
-    //     PackedUserOperation[] calldata userOps,
-    //     address[] calldata userOpsAddrs,
-    //     bytes32 newSmtRoot,
-    //     Ticket[] calldata depositTickets,
-    //     Ticket[] calldata withdrawTickets
-    // ) external;
 
     function syncBatch(bytes calldata syncInfo) external;
 

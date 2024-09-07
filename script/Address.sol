@@ -9,20 +9,20 @@ contract AddressHelper {
     address arbitrumSepoliaSyncRouter =
         0x453C825cA5B8EdD85D531c3A3A01EE488670c2a7;
 
-    address sepoliaEntryPoint = 0x5F2464f924b7D9166a870cCe9201AFBC2a2f151D;
+    address sepoliaEntryPoint = 0x17665Bd0F7f48E5b6056C8bC792FD2Aa83C87e7F;
     address arbitrumSepoliaEntryPoint =
-        0x5F2464f924b7D9166a870cCe9201AFBC2a2f151D;
+        0xBbB9712a01d70EE87C4b366d8b0D1EEd0C427b35;
 
-    address sepoliaFactory = 0xC65d497690b7747dE9C2Ceb844Ee877DaEDAe425;
-    address arbitrumSepoliaFactory = 0xC65d497690b7747dE9C2Ceb844Ee877DaEDAe425;
+    address sepoliaFactory = 0xDB2D90cf05867cdF998aC29015c9Ac3e14A16c3C;
+    address arbitrumSepoliaFactory = 0x18618001af9aFB8Ab9955aD6161F5786e0242FfB;
 
-    address verifier = 0x6C70Cf2d1deFe71aBa6eD5da4e7360943157a6FE;
+    address verifier = 0xd5b83E42E902DcB759db3Cd22A6e62CEAb74e6c4;
 
     uint32[] sepoliaDstEids = [arbitrumSepoliaEid];
 
     address public sp1Verifier = 0x3B6041173B80E77f038f3F2C0f9744f04837185e;
     bytes32 public aaProgramVKey =
-        0x0080002da3d759722129c5fabd878c0f90fbbfc8156d3007d3b546da4e5658d9;
+        0x00154ebb5f415f85b771d59138e4f62d774c3cbc3226773825e185ff870b3419;
 
     address endPoint = 0x6EDCE65403992e310A62460808c4b910D972f10f;
     address owner = 0xeac2F980834c3a27CFDD52a3073468A8aA07c12C;
