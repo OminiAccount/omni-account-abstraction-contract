@@ -5,16 +5,16 @@ contract AddressHelper {
     uint32 sepoliaEid = 40161;
     uint32 arbitrumSepoliaEid = 40231;
 
-    address sepoliaSyncRouter = 0x453C825cA5B8EdD85D531c3A3A01EE488670c2a7;
+    address sepoliaSyncRouter = 0x3096b1217756C37AAF08A73E8120FA47Fb1C5CCE;
     address arbitrumSepoliaSyncRouter =
-        0x453C825cA5B8EdD85D531c3A3A01EE488670c2a7;
+        0x3096b1217756C37AAF08A73E8120FA47Fb1C5CCE;
 
-    address sepoliaEntryPoint = 0x15dC63777584b1E04B3D0047FDd258C2C09B5a32;
+    address sepoliaEntryPoint = 0x38Aa7af83153706BD84D2D6FA66Bb4c7fA79EcE9;
     address arbitrumSepoliaEntryPoint =
-        0x41EBE20Befde0f94B889D1633576e68605CEBC70;
+        0x38Aa7af83153706BD84D2D6FA66Bb4c7fA79EcE9;
 
-    address sepoliaFactory = 0x1dC47415973e48cb4B8A01486BF684831f25EaF4;
-    address arbitrumSepoliaFactory = 0x4Cee2b30384FA5e6eddB72247b80038D22AFccdb;
+    address sepoliaFactory = 0x54eE76aD43e3A1dDbBBBA8c92F01cEcf09Ca3CfD;
+    address arbitrumSepoliaFactory = 0x54eE76aD43e3A1dDbBBBA8c92F01cEcf09Ca3CfD;
 
     address verifier = 0xd5b83E42E902DcB759db3Cd22A6e62CEAb74e6c4;
 

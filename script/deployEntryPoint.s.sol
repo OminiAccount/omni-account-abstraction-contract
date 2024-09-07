@@ -11,12 +11,12 @@ contract DeployEntryPoint is Script {
 
         uint256 deployerPrivateKey = vm.envUint("DEPLOY");
 
-        // vm.createSelectFork(sepoliaRpc);
-        // vm.startBroadcast(deployerPrivateKey);
-        // EntryPoint sepoliaEntryPoint = new EntryPoint();
-        // console.log("sepoliaEntryPoint: ", address(sepoliaEntryPoint));
+        vm.createSelectFork(sepoliaRpc);
+        vm.startBroadcast(deployerPrivateKey);
+        EntryPoint sepoliaEntryPoint = new EntryPoint();
+        console.log("sepoliaEntryPoint: ", address(sepoliaEntryPoint));
 
-        // vm.stopBroadcast();
+        vm.stopBroadcast();
 
         vm.createSelectFork(arbitrumSepoliaRpc);
         vm.startBroadcast(deployerPrivateKey);

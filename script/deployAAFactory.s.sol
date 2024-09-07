@@ -13,13 +13,13 @@ contract DeployAAFactory is Script, Utils, AddressHelper {
         string memory arbitrumSepoliaRpc = vm.envString("CHAIN2_RPC_URL");
         uint256 deployerPrivateKey = vm.envUint("DEPLOY");
 
-        // vm.createSelectFork(sepoliaRpc);
-        // vm.startBroadcast(deployerPrivateKey);
-        // SimpleAccountFactory sepoliaFactory = new SimpleAccountFactory(
-        //     EntryPoint(sepoliaEntryPoint)
-        // );
-        // console.log("sepoliaFactory address: ", address(sepoliaFactory));
-        // vm.stopBroadcast();
+        vm.createSelectFork(sepoliaRpc);
+        vm.startBroadcast(deployerPrivateKey);
+        SimpleAccountFactory sepoliaFactory = new SimpleAccountFactory(
+            EntryPoint(sepoliaEntryPoint)
+        );
+        console.log("sepoliaFactory address: ", address(sepoliaFactory));
+        vm.stopBroadcast();
 
         vm.createSelectFork(arbitrumSepoliaRpc);
         vm.startBroadcast(deployerPrivateKey);
