@@ -31,13 +31,9 @@ interface ITicketManager {
         uint256 timestamp;
     }
 
-    function addDepositTicket(
-        address accountAddress,
-        address owner,
-        uint256 amount
-    ) external payable;
+    function addDepositTicket(uint256 amount) external payable;
 
-    function addWithdrawTicket(address user, uint256 amount) external;
+    function addWithdrawTicket(uint256 amount) external;
 
     // function delDepositTicket(Ticket calldata ticket) external;
 

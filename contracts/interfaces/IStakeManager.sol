@@ -9,11 +9,7 @@ pragma solidity >=0.7.5;
 interface IStakeManager {
     event Deposited(address indexed account, uint256 totalDeposit);
 
-    event Withdrawn(
-        address indexed account,
-        address withdrawAddress,
-        uint256 amount
-    );
+    event Withdrawn(address indexed account, uint256 amount);
 
     /**
      * @param deposit         - The entity's deposit.

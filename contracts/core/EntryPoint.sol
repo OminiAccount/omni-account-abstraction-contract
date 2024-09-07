@@ -233,11 +233,7 @@ contract EntryPoint is
                 delWithdrawTicket(ticket);
 
                 // execute withdraw operation
-                withdrawTo(
-                    accountOwners[ticket.user],
-                    payable(ticket.user),
-                    ticket.amount
-                );
+                withdrawTo(payable(ticket.user), ticket.amount);
             }
         }
     }

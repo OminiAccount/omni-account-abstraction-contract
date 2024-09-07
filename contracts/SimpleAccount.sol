@@ -160,11 +160,7 @@ contract SimpleAccount is
      * deposit more funds for this account in the entryPoint
      */
     function addDeposit() public payable {
-        entryPoint().addDepositTicket{value: msg.value}(
-            address(this),
-            owner,
-            msg.value
-        );
+        entryPoint().addDepositTicket{value: msg.value}(msg.value);
     }
 
     /**
@@ -174,7 +170,7 @@ contract SimpleAccount is
      * After the circuit data is updated later, withdrawTo fields can be added.
      */
     function withdrawDepositTo(uint256 amount) public onlyOwner {
-        entryPoint().addWithdrawTicket(owner, amount);
+        entryPoint().addWithdrawTicket(amount);
     }
 
     function withdrawFromContract(uint256 amount) external onlyOwner {

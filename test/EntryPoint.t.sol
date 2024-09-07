@@ -214,7 +214,7 @@ contract EntryPointTest is Utils {
             ITicketManager.Ticket[]
                 memory withdrawTickets = new ITicketManager.Ticket[](1);
             ITicketManager.Ticket memory account1OwnerTicket = ITicketManager
-                .Ticket(account1Owner, 10 ether, 1); // timestamp is 1.
+                .Ticket(address(account1), 10 ether, 1); // timestamp is 1.
             withdrawTickets[0] = account1OwnerTicket;
             vm.startPrank(deployer);
             ep.verifyBatchMock(
@@ -230,7 +230,7 @@ contract EntryPointTest is Utils {
             );
             console.log(
                 "account1 real withdraw balance after",
-                account1Owner.balance
+                address(account1).balance
             );
         }
     }
