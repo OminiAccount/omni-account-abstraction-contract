@@ -93,7 +93,7 @@ contract EntryPoint is
         IVerifyManager(verifier).verifyProof(publicValues, proof);
 
         uint256 startGas = gasleft();
-        processBatch(publicValues, beneficiary);
+        processBatch(publicValues, beneficiary, false);
         uint256 gasUsed = startGas - gasleft();
 
         bytes memory message = abi.encode(publicValues, beneficiary);
@@ -168,30 +168,13 @@ contract EntryPoint is
             (bytes, address)
         );
 
-        processBatch(publicValues, beneficiary);
-    }
-
-    function syncBatchMock(bytes calldata syncInfo) external isSyncRouter {
-        (bytes memory publicValues, address payable beneficiary) = abi.decode(
-            syncInfo,
-            (bytes, address)
-        );
-        PackedUserOperation[] memory allUserOps = abi.decode(
-            publicValues,
-            (PackedUserOperation[])
-        );
-
-        PackedUserOperation[] memory userOps = allUserOps.filterByChainId(
-            block.chainid
-        );
-
-        // execute userOps
-        this.handleOps(userOps, beneficiary);
+        processBatch(publicValues, beneficiary, true);
     }
 
     function processBatch(
         bytes memory publicValues,
-        address payable beneficiary
+        address payable beneficiary,
+        bool isSync
     ) internal {
         ProofOutPut memory proofOutPut = abi.decode(
             publicValues,
@@ -203,7 +186,12 @@ contract EntryPoint is
             .filterByChainId(block.chainid);
 
         // process tickets
-        processTickets(proofOutPut.depositTickets, proofOutPut.withdrawTickets);
+        if (!isSync) {
+            processTickets(
+                proofOutPut.depositTickets,
+                proofOutPut.withdrawTickets
+            );
+        }
 
         // execute userOps
         this.handleOps(userOps, beneficiary);

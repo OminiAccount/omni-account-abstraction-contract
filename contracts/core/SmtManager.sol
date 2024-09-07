@@ -3,7 +3,7 @@ pragma solidity ^0.8.23;
 
 contract SmtManager {
     bytes32 public smtRoot =
-        0xb178c245c947ea7e21ecede07728941a6ab1b706143c06873baff8ebd6de6308;
+        0xd3b634a894b9aab4dd62ddea9416760d31b1eb7987bfa555e093389169306533;
 
     function updateSmtRoot(bytes32 oldSmtRoot, bytes32 newSmtRoot) internal {
         require(oldSmtRoot == smtRoot, "NEQSR");

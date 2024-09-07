@@ -151,7 +151,7 @@ contract SyncRouterTest is Utils {
         bytes memory userOpsMessage = abi.encode(userOps);
         bytes memory message = abi.encode(userOpsMessage, deployer);
         vm.startPrank(address(router1));
-        ep.syncBatchMock(message);
+        ep.syncBatch(message);
         vm.stopPrank();
         console.log(
             "account1 execute balance after should be 1 ether: ",

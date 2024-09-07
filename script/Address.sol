@@ -11,10 +11,10 @@ contract AddressHelper {
 
     address sepoliaEntryPoint = 0x15dC63777584b1E04B3D0047FDd258C2C09B5a32;
     address arbitrumSepoliaEntryPoint =
-        0x05AB3d543E7cA0105E661614C29c2728E346E092;
+        0x41EBE20Befde0f94B889D1633576e68605CEBC70;
 
     address sepoliaFactory = 0x1dC47415973e48cb4B8A01486BF684831f25EaF4;
-    address arbitrumSepoliaFactory = 0x6f27880498160fA7725ED722D5527Ab9F907213f;
+    address arbitrumSepoliaFactory = 0x4Cee2b30384FA5e6eddB72247b80038D22AFccdb;
 
     address verifier = 0xd5b83E42E902DcB759db3Cd22A6e62CEAb74e6c4;
 
