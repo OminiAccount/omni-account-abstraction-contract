@@ -102,7 +102,7 @@ contract EntryPoint is
         bytes memory _extraSendOptions = OptionsBuilder
             .newOptions()
             .addExecutorLzReceiveOption(uint128(gasUsed * 2), 0);
-        ISyncRouter(syncRouter).send(
+        ISyncRouter(syncRouter).send{value: msg.value}(
             dstEids,
             message,
             _extraSendOptions,
