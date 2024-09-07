@@ -48,7 +48,7 @@ contract TicketManager is ITicketManager {
 
         withdrawTickets[ticketHash] = true;
 
-        emit WithdrawTicketAdded(user, ticketHash, amount, timestamp);
+        emit WithdrawTicketAdded(msg.sender, ticketHash, amount, timestamp);
     }
 
     /**
