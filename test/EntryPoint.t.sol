@@ -138,21 +138,26 @@ contract EntryPointTest is Utils {
     function account1OwnerDeposit() public {
         console.log("=== account1Owner will deposit to ep ===");
         vm.startPrank(account1Owner);
-        console.log(
-            "account1 deposit balance before should be 20 ether",
-            account1Owner.balance
-        );
-        console.log("ep balance before 0 ether", address(ep).balance);
+
+        console.log("account1 deposit balance before should be 20 ether");
+        assert(account1Owner.balance == 20 ether);
+
+        console.log("ep balance before 0 ether");
+        assert(address(ep).balance == 0 ether);
+
         account1.addDeposit{value: 10 ether}();
+
+        console.log("account1 deposit balance after 10 ether");
+        assert(account1Owner.balance == 10 ether);
+
+        console.log("ep balance after 10 ether");
+        assert(address(ep).balance == 10 ether);
+
         console.log(
-            "account1 deposit balance after 10 ether",
-            account1Owner.balance
+            "account1 real deposit amount in ep shoule be 0 ether, because has not prove."
         );
-        console.log("ep balance after 10 ether", address(ep).balance);
-        console.log(
-            "account1 real deposit amount in ep shoule be 0 ether, because has not prove.",
-            account1.getDeposit()
-        );
+        assert(account1.getDeposit() == 0 ether);
+
         vm.stopPrank();
 
         console.log("=== will execute prove to ep ===");
@@ -177,10 +182,6 @@ contract EntryPointTest is Utils {
                 "account1 real deposit amount in ep shoule be 10 ether, because has prove."
             );
             assert(account1.getDeposit() == 10 ether);
-            console.log(
-                "account1 deposit balance after shoule be 10 ether",
-                account1Owner.balance
-            );
         }
     }
 
@@ -188,21 +189,29 @@ contract EntryPointTest is Utils {
         console.log("=== account1Owner will withdraw to ep ===");
         {
             vm.startPrank(account1Owner);
-            console.log(
-                "account1 withdraw balance before",
-                account1Owner.balance
-            );
-            console.log("ep balance before", address(ep).balance);
+
+            console.log("account1 withdraw before balance should be 10 ether.");
+            assert(account1Owner.balance == 10 ether);
+
+            console.log("ep balance before");
+            assert(address(ep).balance == 10 ether);
+
             account1.withdrawDepositTo(10 ether);
+
             console.log(
-                "account1 withdraw balance after",
-                account1Owner.balance
+                "account1 withdraw after balance shoule be 10 ether, because has not prove."
             );
-            console.log("ep balance after", address(ep).balance);
+            assert(account1Owner.balance == 10 ether);
+
             console.log(
-                "account1 real deposit amount in ep shoule be 10, because has not prove.",
-                account1.getDeposit()
+                "ep balance shoule be 10 ether, because has not prove."
             );
+            assert(address(ep).balance == 10 ether);
+
+            console.log(
+                "account1 real deposit amount in ep shoule be 10, because has not prove."
+            );
+            assert(account1.getDeposit() == 10 ether);
             vm.stopPrank();
         }
 
@@ -225,13 +234,12 @@ contract EntryPointTest is Utils {
             vm.stopPrank();
 
             console.log(
-                "account1 real deposit amount in ep shoule be 0 ether, because has prove.",
-                account1.getDeposit()
+                "account1 real deposit amount in ep shoule be 0 ether, because has prove."
             );
-            console.log(
-                "account1 real withdraw balance after",
-                address(account1).balance
-            );
+            assert(account1.getDeposit() == 0 ether);
+
+            console.log("now account1 balance should be 10 ether");
+            assert(address(account1).balance == 10 ether);
         }
     }
 

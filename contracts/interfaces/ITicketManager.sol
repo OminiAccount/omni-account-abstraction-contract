@@ -31,10 +31,6 @@ interface ITicketManager {
         bytes32 ticketHash
     );
 
-    // event Deposited(address indexed account, uint256 totalDeposit);
-
-    // event Withdrawn(address indexed account, uint256 amount);
-
     struct Ticket {
         address user;
         uint256 amount;
@@ -43,22 +39,10 @@ interface ITicketManager {
 
     /**
      * @param deposit         - The entity's deposit.
-     * @param staked          - True if this entity is staked.
-     * @param stake           - Actual amount of ether staked for this entity.
-     * @param unstakeDelaySec - Minimum delay to withdraw the stake.
-     * @param withdrawTime    - First block timestamp where 'withdrawStake' will be callable, or zero if already locked.
-     * @dev Sizes were chosen so that deposit fits into one cell (used during handleOp)
-     *      and the rest fit into a 2nd cell (used during stake/unstake)
-     *      - 112 bit allows for 10^15 eth
-     *      - 48 bit for full timestamp
-     *      - 32 bit allows 150 years for unstake delay
      */
     struct DepositInfo {
         uint256 deposit;
-        bool staked;
-        uint112 stake;
-        uint32 unstakeDelaySec;
-        uint48 withdrawTime;
+        // uint256 notConfirmedDeposit;
     }
 
     function addDepositTicket(uint256 amount) external payable;

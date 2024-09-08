@@ -13,7 +13,7 @@ contract TicketManager is ITicketManager {
     error ValueNotEqual();
     error CallFailed();
 
-    /// maps paymaster to their deposits and stakes
+    /// maps paymaster to their deposits
     mapping(address => DepositInfo) public deposits;
 
     mapping(bytes32 => bool) public depositTickets;
@@ -39,11 +39,6 @@ contract TicketManager is ITicketManager {
      * Add a user withdraw ticket
      */
     function addWithdrawTicket(uint256 amount) external {
-        DepositInfo memory info = deposits[msg.sender];
-        if (amount > info.deposit) {
-            revert InsufficientBalance();
-        }
-
         uint256 timestamp = block.timestamp;
         Ticket memory ticket = Ticket(msg.sender, amount, timestamp);
         bytes32 ticketHash = ticket.hash();
