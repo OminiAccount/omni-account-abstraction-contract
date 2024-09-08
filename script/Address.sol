@@ -8,18 +8,18 @@ contract AddressHelper {
     uint256 dstCoeffGas = 50;
     uint256 dstConGas = 200000;
 
-    address sepoliaSyncRouter = 0x4CF7d09b53EEe418bd0b7fc1568d1Dd923038005;
+    address sepoliaSyncRouter = 0xd69063398e6aF0bd4C248837828Fa871C6cF94c1;
     address arbitrumSepoliaSyncRouter =
-        0x4CF7d09b53EEe418bd0b7fc1568d1Dd923038005;
+        0xd69063398e6aF0bd4C248837828Fa871C6cF94c1;
 
-    address sepoliaEntryPoint = 0xe50DF7D2AB3a32F8BC228aD9a7681d7cf5039dFD;
+    address sepoliaEntryPoint = 0xe141262039fd65FbcdB8Fe9266de94e3e3a7e192;
     address arbitrumSepoliaEntryPoint =
-        0xe50DF7D2AB3a32F8BC228aD9a7681d7cf5039dFD;
+        0xe141262039fd65FbcdB8Fe9266de94e3e3a7e192;
 
-    address sepoliaFactory = 0x94C672Ab282511Cf20D0D44d5A1968401A1CC880;
-    address arbitrumSepoliaFactory = 0x94C672Ab282511Cf20D0D44d5A1968401A1CC880;
+    address sepoliaFactory = 0x741e62226F2a96EfA566E409Bda68Dea474a8B23;
+    address arbitrumSepoliaFactory = 0x741e62226F2a96EfA566E409Bda68Dea474a8B23;
 
-    address verifier = 0x2de15470a3351ce35Edc2F0cB3B479840844bcAC;
+    address verifier = 0x0917B6b9b20A8Ee9fD27bd5e85D88BEb6Af2e039;
 
     uint32[] sepoliaDstEids = [arbitrumSepoliaEid];
 
