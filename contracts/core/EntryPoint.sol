@@ -12,7 +12,6 @@ import "../interfaces/ISyncRouter.sol";
 
 import "../utils/Exec.sol";
 import "./SmtManager.sol";
-import "./StakeManager.sol";
 import "./SenderCreator.sol";
 import "./Helpers.sol";
 import "./TicketManager.sol";
@@ -35,7 +34,6 @@ import "forge-std/console.sol";
 contract EntryPoint is
     IEntryPoint,
     SmtManager,
-    StakeManager,
     TicketManager,
     ConfigManager,
     ReentrancyGuard,
@@ -74,9 +72,10 @@ contract EntryPoint is
         // note: solidity "type(IEntryPoint).interfaceId" is without inherited methods but we want to check everything
         return
             interfaceId ==
-            (type(IEntryPoint).interfaceId ^ type(IStakeManager).interfaceId) ||
+            (type(IEntryPoint).interfaceId ^
+                type(ITicketManager).interfaceId) ||
             interfaceId == type(IEntryPoint).interfaceId ||
-            interfaceId == type(IStakeManager).interfaceId ||
+            interfaceId == type(ITicketManager).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
@@ -214,17 +213,11 @@ contract EntryPoint is
             for (uint256 i = 0; i < dtslen; i++) {
                 Ticket memory ticket = depositTickets[i];
                 delDepositTicket(ticket);
-
-                // execute deposit operation
-                depositTo(ticket.user, ticket.amount);
             }
 
             for (uint256 i = 0; i < wtslen; i++) {
                 Ticket memory ticket = withdrawTickets[i];
                 delWithdrawTicket(ticket);
-
-                // execute withdraw operation
-                withdrawTo(payable(ticket.user), ticket.amount);
             }
         }
     }

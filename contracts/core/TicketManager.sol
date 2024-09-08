@@ -8,6 +8,14 @@ import "./TicketLib.sol";
 contract TicketManager is ITicketManager {
     using TicketLib for Ticket;
 
+    error InsufficientBalance();
+    error TicketNotExist();
+    error ValueNotEqual();
+    error CallFailed();
+
+    /// maps paymaster to their deposits and stakes
+    mapping(address => DepositInfo) public deposits;
+
     mapping(bytes32 => bool) public depositTickets;
     mapping(bytes32 => bool) public withdrawTickets;
 
@@ -15,7 +23,9 @@ contract TicketManager is ITicketManager {
      * Add a user deposit ticket
      */
     function addDepositTicket(uint256 amount) external payable {
-        require(msg.value == amount, "VNE");
+        if (msg.value != amount) {
+            revert ValueNotEqual();
+        }
 
         uint256 timestamp = block.timestamp;
         Ticket memory ticket = Ticket(msg.sender, amount, timestamp);
@@ -29,6 +39,11 @@ contract TicketManager is ITicketManager {
      * Add a user withdraw ticket
      */
     function addWithdrawTicket(uint256 amount) external {
+        DepositInfo memory info = deposits[msg.sender];
+        if (amount > info.deposit) {
+            revert InsufficientBalance();
+        }
+
         uint256 timestamp = block.timestamp;
         Ticket memory ticket = Ticket(msg.sender, amount, timestamp);
         bytes32 ticketHash = ticket.hash();
@@ -39,26 +54,85 @@ contract TicketManager is ITicketManager {
     }
 
     /**
-     * Delete a user deposit ticket
+     * Delete a user deposit ticket, add to the deposit of the given account.
      */
     function delDepositTicket(Ticket memory ticket) internal {
         bytes32 ticketHash = ticket.hash();
-        require(depositTickets[ticketHash], "THNE1");
+        if (!depositTickets[ticketHash]) {
+            revert TicketNotExist();
+        }
 
         depositTickets[ticketHash] = false;
 
-        emit DepositTicketDeleted(ticket.user, ticket.amount, ticketHash);
+        uint256 newDeposit = _incrementDeposit(ticket.user, ticket.amount);
+
+        emit DepositTicketDeleted(
+            ticket.user,
+            ticket.amount,
+            newDeposit,
+            ticketHash
+        );
     }
 
     /**
-     * Delete a user withdraw ticket
+     * Delete a user withdraw ticket, reduce the deposit of the given account.
      */
     function delWithdrawTicket(Ticket memory ticket) internal {
         bytes32 ticketHash = ticket.hash();
-        require(withdrawTickets[ticketHash], "THNE2");
+        if (!withdrawTickets[ticketHash]) {
+            revert TicketNotExist();
+        }
 
         withdrawTickets[ticketHash] = false;
 
-        emit WithdrawTicketDeleted(ticket.user, ticket.amount, ticketHash);
+        uint256 newDeposit = _reduceDeposit(
+            payable(ticket.user),
+            ticket.amount
+        );
+
+        emit WithdrawTicketDeleted(
+            ticket.user,
+            ticket.amount,
+            newDeposit,
+            ticketHash
+        );
+    }
+
+    /// @inheritdoc ITicketManager
+    function getDepositInfo(
+        address account
+    ) public view returns (DepositInfo memory info) {
+        return deposits[account];
+    }
+
+    /// @inheritdoc ITicketManager
+    function balanceOf(address account) public view returns (uint256) {
+        return deposits[account].deposit;
+    }
+
+    function _incrementDeposit(
+        address account,
+        uint256 amount
+    ) internal returns (uint256) {
+        DepositInfo storage info = deposits[account];
+        uint256 newAmount = info.deposit + amount;
+        info.deposit = newAmount;
+        return newAmount;
+    }
+
+    function _reduceDeposit(
+        address payable account,
+        uint256 amount
+    ) internal returns (uint256) {
+        DepositInfo storage info = deposits[account];
+        if (amount > info.deposit) {
+            revert InsufficientBalance();
+        }
+        info.deposit = info.deposit - amount;
+        (bool success, ) = account.call{value: amount}("");
+        if (!success) {
+            revert CallFailed();
+        }
+        return info.deposit;
     }
 }

@@ -174,9 +174,9 @@ contract EntryPointTest is Utils {
             vm.stopPrank();
 
             console.log(
-                "account1 real deposit amount in ep shoule be 10 ether, because has prove.",
-                account1.getDeposit()
+                "account1 real deposit amount in ep shoule be 10 ether, because has prove."
             );
+            assert(account1.getDeposit() == 10 ether);
             console.log(
                 "account1 deposit balance after shoule be 10 ether",
                 account1Owner.balance

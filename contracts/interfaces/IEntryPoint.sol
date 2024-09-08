@@ -10,11 +10,10 @@ pragma solidity >=0.7.5;
 /* solhint-disable reason-string */
 
 import "./PackedUserOperation.sol";
-import "./IStakeManager.sol";
 import "./IAggregator.sol";
 import "./ITicketManager.sol";
 
-interface IEntryPoint is IStakeManager, ITicketManager {
+interface IEntryPoint is ITicketManager {
     /***
      * An event emitted after each successful request.
      * @param userOpHash    - Unique identifier for the request (hash its entire content, except signature).
