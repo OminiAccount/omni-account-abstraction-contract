@@ -12,13 +12,15 @@ contract SetupEntryPoint is Script, AddressHelper {
 
         uint256 deployerPrivateKey = vm.envUint("DEPLOY");
 
-        // config verifier, SyncRouter, dstEids
+        // config verifier, SyncRouter, dstEids, dstCoeffGas, dstConGas
 
         vm.createSelectFork(sepoliaRpc);
         vm.startBroadcast(deployerPrivateKey);
         EntryPoint(sepoliaEntryPoint).updateVerifier(verifier);
         EntryPoint(sepoliaEntryPoint).updateSyncRouter(sepoliaSyncRouter);
         EntryPoint(sepoliaEntryPoint).updateDstEids(sepoliaDstEids);
+        EntryPoint(sepoliaEntryPoint).updateDstCoeffGas(dstCoeffGas);
+        EntryPoint(sepoliaEntryPoint).updateDstConGas(dstConGas);
         vm.stopBroadcast();
 
         // config SyncRouter

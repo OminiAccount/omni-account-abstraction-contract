@@ -7,13 +7,16 @@ contract ConfigManager {
 
     uint32[] public dstEids;
 
+    uint256 internal dstCoeffGas;
+    uint256 internal dstConGas;
+
     modifier isOwner() {
         _isOwner();
         _;
     }
 
     modifier isSyncRouter() {
-        require(msg.sender == syncRouter, "NEQSR");
+        require(msg.sender == syncRouter, "NEQSRR");
         _;
     }
 
@@ -29,5 +32,13 @@ contract ConfigManager {
 
     function updateDstEids(uint32[] calldata _dstEids) external isOwner {
         dstEids = _dstEids;
+    }
+
+    function updateDstCoeffGas(uint256 _dstCoeffGas) external isOwner {
+        dstCoeffGas = _dstCoeffGas;
+    }
+
+    function updateDstConGas(uint256 _dstConGas) external isOwner {
+        dstConGas = _dstConGas;
     }
 }

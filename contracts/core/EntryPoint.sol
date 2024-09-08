@@ -101,7 +101,10 @@ contract EntryPoint is
         // sync other chains
         bytes memory _extraSendOptions = OptionsBuilder
             .newOptions()
-            .addExecutorLzReceiveOption(uint128(gasUsed * 2), 0);
+            .addExecutorLzReceiveOption(
+                uint128(gasUsed * dstCoeffGas + dstConGas),
+                0
+            );
         ISyncRouter(syncRouter).send{value: msg.value}(
             dstEids,
             message,
