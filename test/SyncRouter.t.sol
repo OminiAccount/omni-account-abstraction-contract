@@ -178,10 +178,6 @@ contract SyncRouterTest is Utils {
             account1Owner.balance
         );
         console.log("ep balance after 10 ether", address(ep).balance);
-        console.log(
-            "account1 real deposit amount in ep shoule be 0 ether, because has not prove.",
-            account1.getDeposit()
-        );
         vm.stopPrank();
         Vm.Log[] memory entries = vm.getRecordedLogs();
 
@@ -207,11 +203,6 @@ contract SyncRouterTest is Utils {
                 payable(address(0x0)) // whatever beneficiary
             );
             vm.stopPrank();
-
-            console.log(
-                "account1 real deposit amount in ep shoule be 10 ether, because has prove.",
-                account1.getDeposit()
-            );
             console.log(
                 "account1 deposit balance after shoule be 10 ether",
                 account1Owner.balance

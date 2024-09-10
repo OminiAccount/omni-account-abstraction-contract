@@ -7,12 +7,8 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import "../interfaces/IEntryPoint.sol";
 
-import "forge-std/console.sol";
-
 contract SyncRouter is OApp, OAppOptionsType3 {
     address public entryPoint;
-    /// @notice Last received message data.
-    bytes public data = "";
 
     /// @notice Message types that are used to identify the various OApp operations.
     /// @dev These values are used in things like combineOptions() in OAppOptionsType3 (enforcedOptions).
@@ -148,9 +144,6 @@ contract SyncRouter is OApp, OAppOptionsType3 {
         address, // Executor address as specified by the OApp.
         bytes calldata // Any extra data or options to trigger on receipt.
     ) internal override {
-        // bytes memory _data = abi.decode(message, (string));
-        data = message;
-
         IEntryPoint(entryPoint).syncBatch(message);
 
         emit MessageReceived(

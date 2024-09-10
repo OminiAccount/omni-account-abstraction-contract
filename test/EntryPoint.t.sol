@@ -42,7 +42,7 @@ contract EntryPointTest is Utils {
         console.log("account1 balance", address(account1).balance);
         console.log("owner balance", account1Owner.balance);
         vm.startPrank(account1Owner);
-        account1.withdrawFromContract(1 ether);
+        account1.withdraw(1 ether);
         vm.stopPrank();
         console.log("account1 balance", address(account1).balance);
         console.log("owner balance", account1Owner.balance);
@@ -153,11 +153,6 @@ contract EntryPointTest is Utils {
         console.log("ep balance after 10 ether");
         assert(address(ep).balance == 10 ether);
 
-        console.log(
-            "account1 real deposit amount in ep shoule be 0 ether, because has not prove."
-        );
-        assert(account1.getDeposit() == 0 ether);
-
         vm.stopPrank();
 
         console.log("=== will execute prove to ep ===");
@@ -177,11 +172,6 @@ contract EntryPointTest is Utils {
                 payable(address(0x0)) // whatever beneficiary
             );
             vm.stopPrank();
-
-            console.log(
-                "account1 real deposit amount in ep shoule be 10 ether, because has prove."
-            );
-            assert(account1.getDeposit() == 10 ether);
         }
     }
 
@@ -207,11 +197,6 @@ contract EntryPointTest is Utils {
                 "ep balance shoule be 10 ether, because has not prove."
             );
             assert(address(ep).balance == 10 ether);
-
-            console.log(
-                "account1 real deposit amount in ep shoule be 10, because has not prove."
-            );
-            assert(account1.getDeposit() == 10 ether);
             vm.stopPrank();
         }
 
@@ -232,11 +217,6 @@ contract EntryPointTest is Utils {
                 payable(address(0x0)) // whatever beneficiary
             );
             vm.stopPrank();
-
-            console.log(
-                "account1 real deposit amount in ep shoule be 0 ether, because has prove."
-            );
-            assert(account1.getDeposit() == 0 ether);
 
             console.log("now account1 balance should be 10 ether");
             assert(address(account1).balance == 10 ether);

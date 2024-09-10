@@ -88,12 +88,6 @@ interface IEntryPoint is ITicketManager {
     event BeforeExecution();
 
     /**
-     * Signature aggregator used by the following UserOperationEvents within this bundle.
-     * @param aggregator - The aggregator used for the following UserOperationEvents.
-     */
-    event SignatureAggregatorChanged(address indexed aggregator);
-
-    /**
      * A custom revert error of handleOps, to identify the offending op.
      * Should be caught in off-chain handleOps simulation and not happen on-chain.
      * Useful for mitigating DoS attempts against batchers or for troubleshooting of factory/account/paymaster reverts.
@@ -116,12 +110,6 @@ interface IEntryPoint is ITicketManager {
 
     error PostOpReverted(bytes returnData);
 
-    /**
-     * Error case when a signature aggregator fails to verify the aggregated signature it had created.
-     * @param aggregator The aggregator that failed to verify the signature
-     */
-    error SignatureValidationFailed(address aggregator);
-
     // Return value of getSenderAddress.
     error SenderAddressResult(address sender);
 
@@ -142,10 +130,12 @@ interface IEntryPoint is ITicketManager {
      * performing simulateValidation), then handleAggregatedOps() must be used instead.
      * @param ops         - The operations to execute.
      * @param beneficiary - The address to receive the fees.
+     * @param isSync      - This flag is used to distinguish verifyBatch or syncBatch()
      */
     function handleOps(
         PackedUserOperation[] calldata ops,
-        address payable beneficiary
+        address payable beneficiary,
+        bool isSync
     ) external;
 
     /**

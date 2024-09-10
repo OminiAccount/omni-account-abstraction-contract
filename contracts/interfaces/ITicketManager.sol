@@ -37,31 +37,31 @@ interface ITicketManager {
         uint256 timestamp;
     }
 
-    /**
-     * @param deposit         - The entity's deposit.
-     */
-    struct DepositInfo {
-        uint256 deposit;
-        // uint256 notConfirmedDeposit;
-    }
+    // /**
+    //  * @param deposit         - The entity's deposit.
+    //  */
+    // struct DepositInfo {
+    //     uint256 deposit;
+    //     // uint256 notConfirmedDeposit;
+    // }
 
     function addDepositTicket(uint256 amount) external payable;
 
     function addWithdrawTicket(uint256 amount) external;
 
-    /**
-     * Get deposit info.
-     * @param account - The account to query.
-     * @return info   - Full deposit information of given account.
-     */
-    function getDepositInfo(
-        address account
-    ) external view returns (DepositInfo memory info);
+    // /**
+    //  * Get deposit info.
+    //  * @param account - The account to query.
+    //  * @return info   - Full deposit information of given account.
+    //  */
+    // function getDepositInfo(
+    //     address account
+    // ) external view returns (DepositInfo memory info);
 
-    /**
-     * Get account balance.
-     * @param account - The account to query.
-     * @return        - The deposit (for gas payment) of the account.
-     */
-    function balanceOf(address account) external view returns (uint256);
+    // /**
+    //  * Get account balance.
+    //  * @param account - The account to query.
+    //  * @return        - The deposit (for gas payment) of the account.
+    //  */
+    // function balanceOf(address account) external view returns (uint256);
 }

@@ -14,7 +14,7 @@ contract TicketManager is ITicketManager {
     error CallFailed();
 
     /// maps paymaster to their deposits
-    mapping(address => DepositInfo) public deposits;
+    // mapping(address => DepositInfo) public deposits;
 
     mapping(bytes32 => bool) public depositTickets;
     mapping(bytes32 => bool) public withdrawTickets;
@@ -59,14 +59,9 @@ contract TicketManager is ITicketManager {
 
         depositTickets[ticketHash] = false;
 
-        uint256 newDeposit = _incrementDeposit(ticket.user, ticket.amount);
+        // uint256 newDeposit = _incrementDeposit(ticket.user, ticket.amount);
 
-        emit DepositTicketDeleted(
-            ticket.user,
-            ticket.amount,
-            newDeposit,
-            ticketHash
-        );
+        emit DepositTicketDeleted(ticket.user, ticket.amount, 0, ticketHash);
     }
 
     /**
@@ -80,54 +75,49 @@ contract TicketManager is ITicketManager {
 
         withdrawTickets[ticketHash] = false;
 
-        uint256 newDeposit = _reduceDeposit(
-            payable(ticket.user),
-            ticket.amount
-        );
+        // uint256 newDeposit = _reduceDeposit(
+        //     payable(ticket.user),
+        //     ticket.amount
+        // );
 
-        emit WithdrawTicketDeleted(
-            ticket.user,
-            ticket.amount,
-            newDeposit,
-            ticketHash
-        );
+        emit WithdrawTicketDeleted(ticket.user, ticket.amount, 0, ticketHash);
     }
 
-    /// @inheritdoc ITicketManager
-    function getDepositInfo(
-        address account
-    ) public view returns (DepositInfo memory info) {
-        return deposits[account];
-    }
+    // /// @inheritdoc ITicketManager
+    // function getDepositInfo(
+    //     address account
+    // ) public view returns (DepositInfo memory info) {
+    //     return deposits[account];
+    // }
 
-    /// @inheritdoc ITicketManager
-    function balanceOf(address account) public view returns (uint256) {
-        return deposits[account].deposit;
-    }
+    // /// @inheritdoc ITicketManager
+    // function balanceOf(address account) public view returns (uint256) {
+    //     return deposits[account].deposit;
+    // }
 
-    function _incrementDeposit(
-        address account,
-        uint256 amount
-    ) internal returns (uint256) {
-        DepositInfo storage info = deposits[account];
-        uint256 newAmount = info.deposit + amount;
-        info.deposit = newAmount;
-        return newAmount;
-    }
+    // function _incrementDeposit(
+    //     address account,
+    //     uint256 amount
+    // ) internal returns (uint256) {
+    //     DepositInfo storage info = deposits[account];
+    //     uint256 newAmount = info.deposit + amount;
+    //     info.deposit = newAmount;
+    //     return newAmount;
+    // }
 
-    function _reduceDeposit(
-        address payable account,
-        uint256 amount
-    ) internal returns (uint256) {
-        DepositInfo storage info = deposits[account];
-        if (amount > info.deposit) {
-            revert InsufficientBalance();
-        }
-        info.deposit = info.deposit - amount;
-        (bool success, ) = account.call{value: amount}("");
-        if (!success) {
-            revert CallFailed();
-        }
-        return info.deposit;
-    }
+    // function _reduceDeposit(
+    //     address payable account,
+    //     uint256 amount
+    // ) internal returns (uint256) {
+    //     DepositInfo storage info = deposits[account];
+    //     if (amount > info.deposit) {
+    //         revert InsufficientBalance();
+    //     }
+    //     info.deposit = info.deposit - amount;
+    //     (bool success, ) = account.call{value: amount}("");
+    //     if (!success) {
+    //         revert CallFailed();
+    //     }
+    //     return info.deposit;
+    // }
 }

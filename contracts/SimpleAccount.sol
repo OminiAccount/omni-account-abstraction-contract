@@ -132,28 +132,20 @@ contract SimpleAccount is
     /// implement template method of BaseAccount
     function _validateOwner(
         address _owner
-    ) internal virtual override returns (uint256 validationData) {
+    ) internal virtual override returns (bool validationResult) {
         if (owner != _owner) {
-            return SIG_VALIDATION_FAILED;
+            return false;
         }
-        return SIG_VALIDATION_SUCCESS;
+        return true;
     }
 
     function _call(address target, uint256 value, bytes memory data) internal {
-        console.log("run call %s, %s ", target, value);
         (bool success, bytes memory result) = target.call{value: value}(data);
         if (!success) {
             assembly {
                 revert(add(result, 32), mload(result))
             }
         }
-    }
-
-    /**
-     * check current account deposit in the entryPoint
-     */
-    function getDeposit() public view returns (uint256) {
-        return entryPoint().balanceOf(address(this));
     }
 
     /**
@@ -173,7 +165,7 @@ contract SimpleAccount is
         entryPoint().addWithdrawTicket(amount);
     }
 
-    function withdrawFromContract(uint256 amount) external onlyOwner {
+    function withdraw(uint256 amount) external onlyOwner {
         if (amount > address(this).balance) {
             revert InsufficientBalance();
         }
