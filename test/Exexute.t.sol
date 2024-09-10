@@ -11,6 +11,7 @@ import "contracts/SimpleAccountFactory.sol";
 import "contracts/core/SyncRouter.sol";
 import "./Utils.sol";
 import "script/Address.sol";
+import "contracts/interfaces/IEntryPoint.sol";
 
 contract SyncRouterTest is Utils, AddressHelper {
     uint256 sepoliaFork;
@@ -113,7 +114,9 @@ contract SyncRouterTest is Utils, AddressHelper {
         address account = 0x01b7cA9d6B8Ac943185E107e4BE7430e5D90B5A5;
         console.log("account balance before", account.balance);
         EntryPoint ep1 = new EntryPoint();
-        vm.deal(address(ep1), 0.1 ether);
+        factory = new SimpleAccountFactory(ep1);
+        SimpleAccount account11 = factory.createAccount(account, 1);
+        vm.deal(address(account11), 0.1 ether);
         ep1.updateSyncRouter(arbitrumSepoliaSyncRouter);
         ep1.updateSmtRoot(
             bytes32(
@@ -123,9 +126,17 @@ contract SyncRouterTest is Utils, AddressHelper {
                 0x4493bc7f7ee5a764ea2fdf8b8043e63e20751d08b1b1a17667cb958724d8c4e7
             )
         );
-        vm.stopPrank();
-        bytes memory syncInfo = abi.encode(
+        IEntryPoint.ProofOutPut memory proofOutPut = abi.decode(
             arbitrumProofPublicValues,
+            (IEntryPoint.ProofOutPut)
+        );
+        proofOutPut.allUserOps[0].sender = address(account11);
+        proofOutPut.allUserOps[1].sender = address(account11);
+        proofOutPut.allUserOps[0].userAddr = account;
+        proofOutPut.allUserOps[1].userAddr = account;
+        bytes memory publicValues = abi.encode(proofOutPut);
+        bytes memory syncInfo = abi.encode(
+            publicValues,
             address(payable(owner))
         );
         vm.startPrank(arbitrumSepoliaSyncRouter);

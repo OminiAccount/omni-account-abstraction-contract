@@ -401,7 +401,6 @@ contract EntryPoint is
         uint256 prefund;
         uint256 contextOffset;
         uint256 preOpGas;
-        address sender;
     }
 
     /**
@@ -590,13 +589,13 @@ contract EntryPoint is
 
         uint256 requiredPreFund = _getRequiredPrefund(mUserOp);
 
-        // bool validationResult = IAccount(mUserOp.sender).validateUserOp{
-        //     gas: verificationGasLimit
-        // }(userOp.userAddr);
+        bool validationResult = IAccount(mUserOp.sender).validateUserOp{
+            gas: verificationGasLimit
+        }(userOp.userAddr);
 
-        // if (!validationResult) {
-        //     revert FailedOp(opIndex, "AA owner verification falied");
-        // }
+        if (!validationResult) {
+            revert FailedOp(opIndex, "AA owner verification falied");
+        }
 
         unchecked {
             if (preGas - gasleft() > verificationGasLimit) {
