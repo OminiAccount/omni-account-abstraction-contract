@@ -57,7 +57,6 @@ library UserOperationLib {
     ) internal pure returns (bytes memory ret) {
         address sender = getSender(userOp);
         uint256 chainId = userOp.chainId;
-        bytes32 hashInitCode = calldataKeccak(userOp.initCode);
         bytes32 hashCallData = calldataKeccak(userOp.callData);
         bytes32 accountGasLimits = userOp.accountGasLimits;
         uint256 preVerificationGas = userOp.preVerificationGas;
@@ -68,7 +67,6 @@ library UserOperationLib {
             abi.encode(
                 sender,
                 chainId,
-                hashInitCode,
                 hashCallData,
                 accountGasLimits,
                 preVerificationGas,

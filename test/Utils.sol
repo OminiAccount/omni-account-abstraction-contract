@@ -2,6 +2,7 @@
 pragma solidity ^0.8.23;
 import "forge-std/Test.sol";
 import "contracts/SimpleAccount.sol";
+import "contracts/core/EntryPoint.sol";
 import "contracts/SimpleAccountFactory.sol";
 
 contract Utils is Test {
@@ -47,5 +48,32 @@ contract Utils is Test {
         );
 
         return abi.encodePacked(factory, encodedData);
+    }
+
+    function deposit(
+        address _owner,
+        address payable account,
+        uint256 _depositValue
+    ) public returns (ITicketManager.Ticket[] memory) {
+        ITicketManager.Ticket[]
+            memory depositTickets = new ITicketManager.Ticket[](1);
+        vm.recordLogs();
+        vm.startPrank(_owner);
+        SimpleAccount(account).addDeposit{value: _depositValue}();
+        vm.stopPrank();
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+
+        (uint256 amount, uint256 timestamp) = abi.decode(
+            entries[0].data,
+            (uint256, uint256)
+        );
+
+        ITicketManager.Ticket memory ticket = ITicketManager.Ticket(
+            account,
+            amount,
+            timestamp
+        );
+        depositTickets[0] = ticket;
+        return depositTickets;
     }
 }

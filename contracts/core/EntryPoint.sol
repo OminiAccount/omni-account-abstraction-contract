@@ -12,7 +12,6 @@ import "../interfaces/ISyncRouter.sol";
 
 import "../utils/Exec.sol";
 import "./SmtManager.sol";
-import "./SenderCreator.sol";
 import "./Helpers.sol";
 import "./TicketManager.sol";
 import "./ConfigManager.sol";
@@ -22,6 +21,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
+import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 
 import "forge-std/console.sol";
@@ -47,12 +47,6 @@ contract EntryPoint is
     constructor() Ownable(msg.sender) {}
 
     function _isOwner() internal virtual override onlyOwner {}
-
-    SenderCreator private immutable _senderCreator = new SenderCreator();
-
-    function senderCreator() internal view virtual returns (SenderCreator) {
-        return _senderCreator;
-    }
 
     //compensate for innerHandleOps' emit message and deposit refund.
     // allow some slack for future gas price changes.
@@ -88,7 +82,7 @@ contract EntryPoint is
         bytes calldata proof,
         bytes calldata publicValues,
         address payable beneficiary
-    ) external payable {
+    ) external {
         IVerifyManager(verifier).verifyProof(publicValues, proof);
 
         uint256 startGas = gasleft();
@@ -104,7 +98,15 @@ contract EntryPoint is
                 uint128(gasUsed * dstCoeffGas + dstConGas),
                 0
             );
-        ISyncRouter(syncRouter).send{value: msg.value}(
+
+        // cal gas
+        MessagingFee memory fee = ISyncRouter(syncRouter).quote(
+            dstEids,
+            message,
+            _extraSendOptions,
+            false
+        );
+        ISyncRouter(syncRouter).send{value: fee.nativeFee * 2}(
             dstEids,
             message,
             _extraSendOptions,
@@ -113,55 +115,55 @@ contract EntryPoint is
     }
 
     function verifyBatchMock(
-        // bytes calldata proof,
-        // bytes calldata publicValues,
-        // bytes32 newSmtRoot,
-        // PackedUserOperation[] calldata userOps,
-        // address[] calldata userOpsAddrs,
-        Ticket[] calldata depositTickets,
-        Ticket[] calldata withdrawTickets,
-        address payable beneficiary
-    ) external {
-        // verify proof
-        // IVerifyManager(verifier).verifyProof(publicValues, proof);
-
-        processTickets(depositTickets, withdrawTickets);
-
-        // execute userOps
-        // handleOps(userOps, userOpsAddrs, beneficiary);
-
-        // update stateRoot
-        // updateSmtRoot(newSmtRoot);
-    }
-
-    function verifyBatchMockUserOp(
-        PackedUserOperation[] calldata allUserOps,
+        bytes calldata publicValues,
         address payable beneficiary
     ) external payable {
-        // verify proof
         uint256 startGas = gasleft();
-        PackedUserOperation[] memory userOps = allUserOps.filterByChainId(
-            block.chainid
-        );
-
-        // execute userOps
-        this.handleOps(userOps, beneficiary, false);
-
+        processBatch(publicValues, beneficiary, false);
         uint256 gasUsed = startGas - gasleft();
 
-        console.log("gasUsed", gasUsed);
+        bytes memory message = abi.encode(publicValues, beneficiary);
 
-        bytes memory message = abi.encode(allUserOps, beneficiary);
-
+        // sync other chains
         bytes memory _extraSendOptions = OptionsBuilder
             .newOptions()
-            .addExecutorLzReceiveOption(uint128(gasUsed * 2), 0);
-        ISyncRouter(syncRouter).send{value: msg.value}(
+            .addExecutorLzReceiveOption(
+                uint128(gasUsed * dstCoeffGas + dstConGas),
+                0
+            );
+
+        // cal gas
+        MessagingFee memory fee = ISyncRouter(syncRouter).quote(
+            dstEids,
+            message,
+            _extraSendOptions,
+            false
+        );
+        ISyncRouter(syncRouter).send{value: fee.nativeFee}(
             dstEids,
             message,
             _extraSendOptions,
             beneficiary
         );
+    }
+
+    function estimateSyncFee(
+        bytes calldata message,
+        uint128 usedGasLimit
+    ) external view returns (uint256) {
+        bytes memory _extraSendOptions = OptionsBuilder
+            .newOptions()
+            .addExecutorLzReceiveOption(usedGasLimit, 0);
+
+        // cal gas
+        MessagingFee memory fee = ISyncRouter(syncRouter).quote(
+            dstEids,
+            message,
+            _extraSendOptions,
+            false
+        );
+
+        return fee.nativeFee;
     }
 
     function syncBatch(bytes calldata syncInfo) external isSyncRouter {
@@ -381,7 +383,7 @@ contract EntryPoint is
 
     /**
      * A memory copy of UserOp static fields only.
-     * Excluding: userAddr, chainId, callData and initCode. Replacing paymasterAndData with paymaster.
+     * Excluding: userAddr, chainId, callData. Replacing paymasterAndData with paymaster.
      */
     struct MemoryUserOp {
         address sender;
@@ -516,46 +518,6 @@ contract EntryPoint is
 
             requiredPrefund = requiredGas * mUserOp.maxFeePerGas;
         }
-    }
-
-    /**
-     * Create sender smart contract account if init code is provided.
-     * @param opIndex  - The operation index.
-     * @param opInfo   - The operation info.
-     * @param initCode - The init code for the smart contract account.
-     */
-    function _createSenderIfNeeded(
-        uint256 opIndex,
-        UserOpInfo memory opInfo,
-        bytes calldata initCode
-    ) internal {
-        if (initCode.length != 0) {
-            address sender = opInfo.mUserOp.sender;
-            if (sender.code.length != 0)
-                revert FailedOp(opIndex, "AA10 sender already constructed");
-            address sender1 = senderCreator().createSender{
-                gas: opInfo.mUserOp.verificationGasLimit
-            }(initCode);
-            if (sender1 == address(0))
-                revert FailedOp(opIndex, "AA13 initCode failed or OOG");
-            if (sender1 != sender)
-                revert FailedOp(opIndex, "AA14 initCode must return sender");
-            if (sender1.code.length == 0)
-                revert FailedOp(opIndex, "AA15 initCode must create sender");
-            address factory = address(bytes20(initCode[0:20]));
-            emit AccountDeployed(
-                opInfo.userOpHash,
-                sender,
-                factory,
-                opInfo.mUserOp.paymaster
-            );
-        }
-    }
-
-    /// @inheritdoc IEntryPoint
-    function getSenderAddress(bytes calldata initCode) public {
-        address sender = senderCreator().createSender(initCode);
-        revert SenderAddressResult(sender);
     }
 
     /**

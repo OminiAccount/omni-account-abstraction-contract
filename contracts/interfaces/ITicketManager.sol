@@ -21,13 +21,11 @@ interface ITicketManager {
     event DepositTicketDeleted(
         address indexed user,
         uint256 amount,
-        uint256 totalDeposit,
         bytes32 ticketHash
     );
     event WithdrawTicketDeleted(
         address indexed user,
         uint256 amount,
-        uint256 totalDeposit,
         bytes32 ticketHash
     );
 

@@ -6,37 +6,8 @@
   },
   {
     "type": "function",
-    "name": "accountOwners",
-    "inputs": [
-      {
-        "name": "owner",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "accountAddress",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "addDepositTicket",
     "inputs": [
-      {
-        "name": "accountAddress",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
-        "name": "owner",
-        "type": "address",
-        "internalType": "address"
-      },
       {
         "name": "amount",
         "type": "uint256",
@@ -51,11 +22,6 @@
     "name": "addWithdrawTicket",
     "inputs": [
       {
-        "name": "user",
-        "type": "address",
-        "internalType": "address"
-      },
-      {
         "name": "amount",
         "type": "uint256",
         "internalType": "uint256"
@@ -63,25 +29,6 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "balanceOf",
-    "inputs": [
-      {
-        "name": "account",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -122,45 +69,6 @@
   },
   {
     "type": "function",
-    "name": "deposits",
-    "inputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "deposit",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "staked",
-        "type": "bool",
-        "internalType": "bool"
-      },
-      {
-        "name": "stake",
-        "type": "uint112",
-        "internalType": "uint112"
-      },
-      {
-        "name": "unstakeDelaySec",
-        "type": "uint32",
-        "internalType": "uint32"
-      },
-      {
-        "name": "withdrawTime",
-        "type": "uint48",
-        "internalType": "uint48"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
     "name": "dstEids",
     "inputs": [
       {
@@ -174,52 +82,6 @@
         "name": "",
         "type": "uint32",
         "internalType": "uint32"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getDepositInfo",
-    "inputs": [
-      {
-        "name": "account",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "info",
-        "type": "tuple",
-        "internalType": "struct IStakeManager.DepositInfo",
-        "components": [
-          {
-            "name": "deposit",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "staked",
-            "type": "bool",
-            "internalType": "bool"
-          },
-          {
-            "name": "stake",
-            "type": "uint112",
-            "internalType": "uint112"
-          },
-          {
-            "name": "unstakeDelaySec",
-            "type": "uint32",
-            "internalType": "uint32"
-          },
-          {
-            "name": "withdrawTime",
-            "type": "uint48",
-            "internalType": "uint48"
-          }
-        ]
       }
     ],
     "stateMutability": "view"
@@ -363,6 +225,11 @@
         "name": "beneficiary",
         "type": "address",
         "internalType": "address payable"
+      },
+      {
+        "name": "isSync",
+        "type": "bool",
+        "internalType": "bool"
       }
     ],
     "outputs": [],
@@ -453,16 +320,6 @@
             "name": "preOpGas",
             "type": "uint256",
             "internalType": "uint256"
-          },
-          {
-            "name": "sender",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "userAddr",
-            "type": "address",
-            "internalType": "address"
           }
         ]
       },
@@ -548,19 +405,6 @@
   },
   {
     "type": "function",
-    "name": "syncBatchMock",
-    "inputs": [
-      {
-        "name": "syncInfo",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
     "name": "syncRouter",
     "inputs": [],
     "outputs": [
@@ -587,12 +431,56 @@
   },
   {
     "type": "function",
+    "name": "updateDstCoeffGas",
+    "inputs": [
+      {
+        "name": "_dstCoeffGas",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "updateDstConGas",
+    "inputs": [
+      {
+        "name": "_dstConGas",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "updateDstEids",
     "inputs": [
       {
         "name": "_dstEids",
         "type": "uint32[]",
         "internalType": "uint32[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "updateSmtRoot",
+    "inputs": [
+      {
+        "name": "oldSmtRoot",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "newSmtRoot",
+        "type": "bytes32",
+        "internalType": "bytes32"
       }
     ],
     "outputs": [],
@@ -896,25 +784,6 @@
   },
   {
     "type": "event",
-    "name": "Deposited",
-    "inputs": [
-      {
-        "name": "account",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "totalDeposit",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
     "name": "OwnershipTransferred",
     "inputs": [
       {
@@ -953,19 +822,6 @@
         "type": "bytes",
         "indexed": false,
         "internalType": "bytes"
-      }
-    ],
-    "anonymous": false
-  },
-  {
-    "type": "event",
-    "name": "SignatureAggregatorChanged",
-    "inputs": [
-      {
-        "name": "aggregator",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
       }
     ],
     "anonymous": false
@@ -1114,29 +970,9 @@
     "anonymous": false
   },
   {
-    "type": "event",
-    "name": "Withdrawn",
-    "inputs": [
-      {
-        "name": "account",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "withdrawAddress",
-        "type": "address",
-        "indexed": false,
-        "internalType": "address"
-      },
-      {
-        "name": "amount",
-        "type": "uint256",
-        "indexed": false,
-        "internalType": "uint256"
-      }
-    ],
-    "anonymous": false
+    "type": "error",
+    "name": "CallFailed",
+    "inputs": []
   },
   {
     "type": "error",
@@ -1190,6 +1026,11 @@
         "internalType": "bytes"
       }
     ]
+  },
+  {
+    "type": "error",
+    "name": "InsufficientBalance",
+    "inputs": []
   },
   {
     "type": "error",
@@ -1269,13 +1110,12 @@
   },
   {
     "type": "error",
-    "name": "SignatureValidationFailed",
-    "inputs": [
-      {
-        "name": "aggregator",
-        "type": "address",
-        "internalType": "address"
-      }
-    ]
+    "name": "TicketNotExist",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ValueNotEqual",
+    "inputs": []
   }
 ]

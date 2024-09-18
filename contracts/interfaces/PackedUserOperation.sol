@@ -5,7 +5,6 @@ pragma solidity >=0.7.5;
  * User Operation struct
  * @param sender                - The sender account of this request.
  * @param chainId               - ChainId.
- * @param initCode              - If set, the account contract will be created by this constructor/
  * @param callData              - The method call to execute on this account.
  * @param accountGasLimits      - Packed gas limits for validateUserOp and gas limit passed to the callData method call.
  * @param preVerificationGas    - Gas not calculated by the handleOps method, but added to the gas paid.
@@ -18,7 +17,6 @@ pragma solidity >=0.7.5;
 struct PackedUserOperation {
     address sender;
     uint256 chainId;
-    bytes initCode;
     bytes callData;
     bytes32 accountGasLimits;
     uint256 preVerificationGas;

@@ -9,7 +9,7 @@ contract TicketManager is ITicketManager {
     using TicketLib for Ticket;
 
     error InsufficientBalance();
-    error TicketNotExist();
+    error TicketNotExist(Ticket ticket);
     error ValueNotEqual();
     error CallFailed();
 
@@ -27,12 +27,16 @@ contract TicketManager is ITicketManager {
             revert ValueNotEqual();
         }
 
-        uint256 timestamp = block.timestamp;
-        Ticket memory ticket = Ticket(msg.sender, amount, timestamp);
+        Ticket memory ticket = Ticket(msg.sender, amount, block.timestamp);
         bytes32 ticketHash = ticket.hash();
 
         depositTickets[ticketHash] = true;
-        emit DepositTicketAdded(msg.sender, ticketHash, amount, timestamp);
+        emit DepositTicketAdded(
+            msg.sender,
+            ticketHash,
+            amount,
+            block.timestamp
+        );
     }
 
     /**
@@ -54,14 +58,12 @@ contract TicketManager is ITicketManager {
     function delDepositTicket(Ticket memory ticket) internal {
         bytes32 ticketHash = ticket.hash();
         if (!depositTickets[ticketHash]) {
-            revert TicketNotExist();
+            revert TicketNotExist(ticket);
         }
 
         depositTickets[ticketHash] = false;
 
-        // uint256 newDeposit = _incrementDeposit(ticket.user, ticket.amount);
-
-        emit DepositTicketDeleted(ticket.user, ticket.amount, 0, ticketHash);
+        emit DepositTicketDeleted(ticket.user, ticket.amount, ticketHash);
     }
 
     /**
@@ -70,54 +72,11 @@ contract TicketManager is ITicketManager {
     function delWithdrawTicket(Ticket memory ticket) internal {
         bytes32 ticketHash = ticket.hash();
         if (!withdrawTickets[ticketHash]) {
-            revert TicketNotExist();
+            revert TicketNotExist(ticket);
         }
 
         withdrawTickets[ticketHash] = false;
 
-        // uint256 newDeposit = _reduceDeposit(
-        //     payable(ticket.user),
-        //     ticket.amount
-        // );
-
-        emit WithdrawTicketDeleted(ticket.user, ticket.amount, 0, ticketHash);
+        emit WithdrawTicketDeleted(ticket.user, ticket.amount, ticketHash);
     }
-
-    // /// @inheritdoc ITicketManager
-    // function getDepositInfo(
-    //     address account
-    // ) public view returns (DepositInfo memory info) {
-    //     return deposits[account];
-    // }
-
-    // /// @inheritdoc ITicketManager
-    // function balanceOf(address account) public view returns (uint256) {
-    //     return deposits[account].deposit;
-    // }
-
-    // function _incrementDeposit(
-    //     address account,
-    //     uint256 amount
-    // ) internal returns (uint256) {
-    //     DepositInfo storage info = deposits[account];
-    //     uint256 newAmount = info.deposit + amount;
-    //     info.deposit = newAmount;
-    //     return newAmount;
-    // }
-
-    // function _reduceDeposit(
-    //     address payable account,
-    //     uint256 amount
-    // ) internal returns (uint256) {
-    //     DepositInfo storage info = deposits[account];
-    //     if (amount > info.deposit) {
-    //         revert InsufficientBalance();
-    //     }
-    //     info.deposit = info.deposit - amount;
-    //     (bool success, ) = account.call{value: amount}("");
-    //     if (!success) {
-    //         revert CallFailed();
-    //     }
-    //     return info.deposit;
-    // }
 }
