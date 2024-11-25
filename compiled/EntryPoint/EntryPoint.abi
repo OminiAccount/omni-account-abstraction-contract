@@ -6,32 +6,6 @@
   },
   {
     "type": "function",
-    "name": "addDepositTicket",
-    "inputs": [
-      {
-        "name": "amount",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "payable"
-  },
-  {
-    "type": "function",
-    "name": "addWithdrawTicket",
-    "inputs": [
-      {
-        "name": "amount",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
     "name": "delegateAndRevert",
     "inputs": [
       {
@@ -47,25 +21,6 @@
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "depositTickets",
-    "inputs": [
-      {
-        "name": "",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool",
-        "internalType": "bool"
-      }
-    ],
-    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -88,16 +43,22 @@
   },
   {
     "type": "function",
-    "name": "getSenderAddress",
+    "name": "getPreGasBalanceInfo",
     "inputs": [
       {
-        "name": "initCode",
-        "type": "bytes",
-        "internalType": "bytes"
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
       }
     ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
   },
   {
     "type": "function",
@@ -109,19 +70,29 @@
         "internalType": "struct PackedUserOperation",
         "components": [
           {
+            "name": "operationType",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "operationValue",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
             "name": "sender",
             "type": "address",
             "internalType": "address"
           },
           {
-            "name": "chainId",
-            "type": "uint256",
-            "internalType": "uint256"
+            "name": "nonce",
+            "type": "uint64",
+            "internalType": "uint64"
           },
           {
-            "name": "initCode",
-            "type": "bytes",
-            "internalType": "bytes"
+            "name": "chainId",
+            "type": "uint64",
+            "internalType": "uint64"
           },
           {
             "name": "callData",
@@ -129,27 +100,32 @@
             "internalType": "bytes"
           },
           {
-            "name": "accountGasLimits",
-            "type": "bytes32",
-            "internalType": "bytes32"
-          },
-          {
-            "name": "preVerificationGas",
+            "name": "mainChainGasLimit",
             "type": "uint256",
             "internalType": "uint256"
           },
           {
-            "name": "gasFees",
-            "type": "bytes32",
-            "internalType": "bytes32"
+            "name": "destChainGasLimit",
+            "type": "uint256",
+            "internalType": "uint256"
           },
           {
-            "name": "paymasterAndData",
-            "type": "bytes",
-            "internalType": "bytes"
+            "name": "zkVerificationGasLimit",
+            "type": "uint256",
+            "internalType": "uint256"
           },
           {
-            "name": "userAddr",
+            "name": "mainChainGasPrice",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "destChainGasPrice",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "owner",
             "type": "address",
             "internalType": "address"
           }
@@ -175,19 +151,29 @@
         "internalType": "struct PackedUserOperation[]",
         "components": [
           {
+            "name": "operationType",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "operationValue",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
             "name": "sender",
             "type": "address",
             "internalType": "address"
           },
           {
-            "name": "chainId",
-            "type": "uint256",
-            "internalType": "uint256"
+            "name": "nonce",
+            "type": "uint64",
+            "internalType": "uint64"
           },
           {
-            "name": "initCode",
-            "type": "bytes",
-            "internalType": "bytes"
+            "name": "chainId",
+            "type": "uint64",
+            "internalType": "uint64"
           },
           {
             "name": "callData",
@@ -195,27 +181,32 @@
             "internalType": "bytes"
           },
           {
-            "name": "accountGasLimits",
-            "type": "bytes32",
-            "internalType": "bytes32"
-          },
-          {
-            "name": "preVerificationGas",
+            "name": "mainChainGasLimit",
             "type": "uint256",
             "internalType": "uint256"
           },
           {
-            "name": "gasFees",
-            "type": "bytes32",
-            "internalType": "bytes32"
+            "name": "destChainGasLimit",
+            "type": "uint256",
+            "internalType": "uint256"
           },
           {
-            "name": "paymasterAndData",
-            "type": "bytes",
-            "internalType": "bytes"
+            "name": "zkVerificationGasLimit",
+            "type": "uint256",
+            "internalType": "uint256"
           },
           {
-            "name": "userAddr",
+            "name": "mainChainGasPrice",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "destChainGasPrice",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "owner",
             "type": "address",
             "internalType": "address"
           }
@@ -260,42 +251,37 @@
                 "internalType": "address"
               },
               {
-                "name": "verificationGasLimit",
+                "name": "chainId",
                 "type": "uint256",
                 "internalType": "uint256"
               },
               {
-                "name": "callGasLimit",
+                "name": "operationValue",
                 "type": "uint256",
                 "internalType": "uint256"
               },
               {
-                "name": "paymasterVerificationGasLimit",
+                "name": "zkVerificationGasLimit",
                 "type": "uint256",
                 "internalType": "uint256"
               },
               {
-                "name": "paymasterPostOpGasLimit",
+                "name": "mainChainGasLimit",
                 "type": "uint256",
                 "internalType": "uint256"
               },
               {
-                "name": "preVerificationGas",
+                "name": "destChainGasLimit",
                 "type": "uint256",
                 "internalType": "uint256"
               },
               {
-                "name": "paymaster",
-                "type": "address",
-                "internalType": "address"
-              },
-              {
-                "name": "maxFeePerGas",
+                "name": "mainChainGasPrice",
                 "type": "uint256",
                 "internalType": "uint256"
               },
               {
-                "name": "maxPriorityFeePerGas",
+                "name": "destChainGasPrice",
                 "type": "uint256",
                 "internalType": "uint256"
               }
@@ -353,6 +339,38 @@
   },
   {
     "type": "function",
+    "name": "preGasBalance",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "redeemGasOperation",
+    "inputs": [
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "renounceOwnership",
     "inputs": [],
     "outputs": [],
@@ -373,6 +391,32 @@
   },
   {
     "type": "function",
+    "name": "submitDepositOperation",
+    "inputs": [
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "submitWithdrawOperation",
+    "inputs": [
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "supportsInterface",
     "inputs": [
       {
@@ -389,19 +433,6 @@
       }
     ],
     "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "syncBatch",
-    "inputs": [
-      {
-        "name": "syncInfo",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
   },
   {
     "type": "function",
@@ -535,64 +566,86 @@
         "internalType": "bytes"
       },
       {
-        "name": "publicValues",
-        "type": "bytes",
-        "internalType": "bytes"
-      },
-      {
-        "name": "beneficiary",
-        "type": "address",
-        "internalType": "address payable"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "payable"
-  },
-  {
-    "type": "function",
-    "name": "verifyBatchMock",
-    "inputs": [
-      {
-        "name": "depositTickets",
+        "name": "batches",
         "type": "tuple[]",
-        "internalType": "struct ITicketManager.Ticket[]",
+        "internalType": "struct IEntryPoint.BatchData[]",
         "components": [
           {
-            "name": "user",
-            "type": "address",
-            "internalType": "address"
+            "name": "userOperations",
+            "type": "tuple[]",
+            "internalType": "struct PackedUserOperation[]",
+            "components": [
+              {
+                "name": "operationType",
+                "type": "uint8",
+                "internalType": "uint8"
+              },
+              {
+                "name": "operationValue",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "sender",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "nonce",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "chainId",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "callData",
+                "type": "bytes",
+                "internalType": "bytes"
+              },
+              {
+                "name": "mainChainGasLimit",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destChainGasLimit",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "zkVerificationGasLimit",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "mainChainGasPrice",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destChainGasPrice",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "owner",
+                "type": "address",
+                "internalType": "address"
+              }
+            ]
           },
           {
-            "name": "amount",
-            "type": "uint256",
-            "internalType": "uint256"
+            "name": "oldStateRoot",
+            "type": "bytes32",
+            "internalType": "bytes32"
           },
           {
-            "name": "timestamp",
-            "type": "uint256",
-            "internalType": "uint256"
-          }
-        ]
-      },
-      {
-        "name": "withdrawTickets",
-        "type": "tuple[]",
-        "internalType": "struct ITicketManager.Ticket[]",
-        "components": [
-          {
-            "name": "user",
-            "type": "address",
-            "internalType": "address"
-          },
-          {
-            "name": "amount",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "timestamp",
-            "type": "uint256",
-            "internalType": "uint256"
+            "name": "newStateRoot",
+            "type": "bytes32",
+            "internalType": "bytes32"
           }
         ]
       },
@@ -607,57 +660,89 @@
   },
   {
     "type": "function",
-    "name": "verifyBatchMockUserOp",
+    "name": "verifyBatchMock",
     "inputs": [
       {
-        "name": "allUserOps",
+        "name": "batches",
         "type": "tuple[]",
-        "internalType": "struct PackedUserOperation[]",
+        "internalType": "struct IEntryPoint.BatchData[]",
         "components": [
           {
-            "name": "sender",
-            "type": "address",
-            "internalType": "address"
+            "name": "userOperations",
+            "type": "tuple[]",
+            "internalType": "struct PackedUserOperation[]",
+            "components": [
+              {
+                "name": "operationType",
+                "type": "uint8",
+                "internalType": "uint8"
+              },
+              {
+                "name": "operationValue",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "sender",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "nonce",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "chainId",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "callData",
+                "type": "bytes",
+                "internalType": "bytes"
+              },
+              {
+                "name": "mainChainGasLimit",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destChainGasLimit",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "zkVerificationGasLimit",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "mainChainGasPrice",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destChainGasPrice",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "owner",
+                "type": "address",
+                "internalType": "address"
+              }
+            ]
           },
           {
-            "name": "chainId",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "initCode",
-            "type": "bytes",
-            "internalType": "bytes"
-          },
-          {
-            "name": "callData",
-            "type": "bytes",
-            "internalType": "bytes"
-          },
-          {
-            "name": "accountGasLimits",
+            "name": "oldStateRoot",
             "type": "bytes32",
             "internalType": "bytes32"
           },
           {
-            "name": "preVerificationGas",
-            "type": "uint256",
-            "internalType": "uint256"
-          },
-          {
-            "name": "gasFees",
+            "name": "newStateRoot",
             "type": "bytes32",
             "internalType": "bytes32"
-          },
-          {
-            "name": "paymasterAndData",
-            "type": "bytes",
-            "internalType": "bytes"
-          },
-          {
-            "name": "userAddr",
-            "type": "address",
-            "internalType": "address"
           }
         ]
       },
@@ -669,25 +754,6 @@
     ],
     "outputs": [],
     "stateMutability": "payable"
-  },
-  {
-    "type": "function",
-    "name": "withdrawTickets",
-    "inputs": [
-      {
-        "name": "",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool",
-        "internalType": "bool"
-      }
-    ],
-    "stateMutability": "view"
   },
   {
     "type": "event",
@@ -731,16 +797,10 @@
     "name": "DepositTicketAdded",
     "inputs": [
       {
-        "name": "user",
+        "name": "account",
         "type": "address",
         "indexed": true,
         "internalType": "address"
-      },
-      {
-        "name": "ticketHash",
-        "type": "bytes32",
-        "indexed": true,
-        "internalType": "bytes32"
       },
       {
         "name": "amount",
@@ -762,7 +822,7 @@
     "name": "DepositTicketDeleted",
     "inputs": [
       {
-        "name": "user",
+        "name": "account",
         "type": "address",
         "indexed": true,
         "internalType": "address"
@@ -772,12 +832,6 @@
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
-      },
-      {
-        "name": "ticketHash",
-        "type": "bytes32",
-        "indexed": false,
-        "internalType": "bytes32"
       }
     ],
     "anonymous": false
@@ -838,12 +892,6 @@
       },
       {
         "name": "sender",
-        "type": "address",
-        "indexed": true,
-        "internalType": "address"
-      },
-      {
-        "name": "paymaster",
         "type": "address",
         "indexed": true,
         "internalType": "address"
@@ -918,16 +966,10 @@
     "name": "WithdrawTicketAdded",
     "inputs": [
       {
-        "name": "user",
+        "name": "account",
         "type": "address",
         "indexed": true,
         "internalType": "address"
-      },
-      {
-        "name": "ticketHash",
-        "type": "bytes32",
-        "indexed": true,
-        "internalType": "bytes32"
       },
       {
         "name": "amount",
@@ -949,7 +991,7 @@
     "name": "WithdrawTicketDeleted",
     "inputs": [
       {
-        "name": "user",
+        "name": "account",
         "type": "address",
         "indexed": true,
         "internalType": "address"
@@ -959,12 +1001,6 @@
         "type": "uint256",
         "indexed": false,
         "internalType": "uint256"
-      },
-      {
-        "name": "ticketHash",
-        "type": "bytes32",
-        "indexed": false,
-        "internalType": "bytes32"
       }
     ],
     "anonymous": false
@@ -1034,17 +1070,6 @@
   },
   {
     "type": "error",
-    "name": "InvalidOptionType",
-    "inputs": [
-      {
-        "name": "optionType",
-        "type": "uint16",
-        "internalType": "uint16"
-      }
-    ]
-  },
-  {
-    "type": "error",
     "name": "OwnableInvalidOwner",
     "inputs": [
       {
@@ -1083,22 +1108,6 @@
   },
   {
     "type": "error",
-    "name": "SafeCastOverflowedUintDowncast",
-    "inputs": [
-      {
-        "name": "bits",
-        "type": "uint8",
-        "internalType": "uint8"
-      },
-      {
-        "name": "value",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ]
-  },
-  {
-    "type": "error",
     "name": "SenderAddressResult",
     "inputs": [
       {
@@ -1107,11 +1116,6 @@
         "internalType": "address"
       }
     ]
-  },
-  {
-    "type": "error",
-    "name": "TicketNotExist",
-    "inputs": []
   },
   {
     "type": "error",

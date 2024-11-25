@@ -1,39 +1,37 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >=0.7.5;
 
+import "./PackedUserOperation.sol";
 /**
  * Ticket to manage deposit and withdraw.
  * Deposit is just a balance used to pay for UserOperations (either by a paymaster or an account).
  */
-interface ITicketManager {
+interface IPreGasManager {
+    error InsufficientBalance();
+    error ValueNotEqual();
+    error CallFailed();
+
     event DepositTicketAdded(
-        address indexed user,
-        bytes32 indexed ticketHash,
+        address indexed account,
         uint256 amount,
         uint256 timestamp
     );
     event WithdrawTicketAdded(
-        address indexed user,
-        bytes32 indexed ticketHash,
+        address indexed account,
         uint256 amount,
         uint256 timestamp
     );
-    event DepositTicketDeleted(
-        address indexed user,
-        uint256 amount,
-        bytes32 ticketHash
-    );
-    event WithdrawTicketDeleted(
-        address indexed user,
-        uint256 amount,
-        bytes32 ticketHash
-    );
+    event DepositTicketDeleted(address indexed account, uint256 amount);
+    event WithdrawTicketDeleted(address indexed account, uint256 amount);
 
-    struct Ticket {
-        address user;
-        uint256 amount;
-        uint256 timestamp;
-    }
+    /**
+     * Get preGasBalance info.
+     * @param account - The account to query.
+     * @return info   - PreGasBalance information of given account.
+     */
+    function getPreGasBalanceInfo(
+        address account
+    ) external view returns (uint256);
 
     // /**
     //  * @param deposit         - The entity's deposit.
@@ -43,9 +41,11 @@ interface ITicketManager {
     //     // uint256 notConfirmedDeposit;
     // }
 
-    function addDepositTicket(uint256 amount) external payable;
+    function submitDepositOperation(uint256 amount) external payable;
 
-    function addWithdrawTicket(uint256 amount) external;
+    function submitWithdrawOperation(uint256 amount) external;
+
+    function redeemGasOperation(uint256 amount) external;
 
     // /**
     //  * Get deposit info.

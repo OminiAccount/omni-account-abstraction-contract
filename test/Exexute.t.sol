@@ -3,7 +3,7 @@ pragma solidity ^0.8.23;
 
 import "forge-std/console.sol";
 import "contracts/core/EntryPoint.sol";
-import "contracts/interfaces/ITicketManager.sol";
+import "contracts/interfaces/IPreGasManager.sol";
 import "contracts/interfaces/PackedUserOperation.sol";
 import "contracts/SimpleAccount.sol";
 import "contracts/core/UserOperationLib.sol";
@@ -13,164 +13,137 @@ import "./Utils.sol";
 import "script/Address.sol";
 import "contracts/interfaces/IEntryPoint.sol";
 
-contract SyncRouterTest is Utils, AddressHelper {
-    uint256 sepoliaFork;
-    uint256 arbitrumSepoliaFork;
+contract ExecuteTest is Utils, AddressHelper {
     EntryPoint ep;
     SimpleAccountFactory factory;
     SimpleAccount account1;
     address deployer = owner;
-    address account1Owner = address(0x01);
+    address account1Owner = address(0x96f3088fC6E3e4C4535441f5Bc4d69C4eF3FE9c5);
     address account2Owner = address(0xe25A045cBC0407DB4743c9c5B8dcbdDE2021e3Aa);
 
-    bytes arbitrumProofPublicValues =
-        hex"000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000a04493bc7f7ee5a764ea2fdf8b8043e63e20751d08b1b1a17667cb958724d8c4e77c8c20082c352dca58293e2e1e99478afd230e86728a99d357dfbc7afd7030d60000000000000000000000000000000000000000000000000000000000000560000000000000000000000000000000000000000000000000000000000000058000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000026000000000000000000000000038bdb2abd66c00cbf05584a9717c1094181a87800000000000000000000000000000000000000000000000000000000000066eee0000000000000000000000000000000000000000000000000000000000000120000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000041eb000000000000000000000000000030d400000000000000000000000000000000000000000000000000000000000029810000000000000000000000006fc23ac0000000000000000000000000077359400000000000000000000000000000000000000000000000000000000000000020000000000000000000000000001b7ca9d6b8ac943185e107e4be7430e5d90b5a500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000084b61d27f600000000000000000000000001b7ca9d6b8ac943185e107e4be7430e5d90b5a5000000000000000000000000000000000000000000000000002386f26fc100000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000038bdb2abd66c00cbf05584a9717c1094181a87800000000000000000000000000000000000000000000000000000000000066eee0000000000000000000000000000000000000000000000000000000000000120000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000041eb000000000000000000000000000030d400000000000000000000000000000000000000000000000000000000000029810000000000000000000000006fc23ac0000000000000000000000000077359400000000000000000000000000000000000000000000000000000000000000022000000000000000000000000001b7ca9d6b8ac943185e107e4be7430e5d90b5a5000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a4b61d27f600000000000000000000000059fb398996726fb8c7bee023ef733a5f0e86ce04000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000004d09de08a0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-    bytes sepoliaProofPublicValues =
-        hex"000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000a0b178c245c947ea7e21ecede07728941a6ab1b706143c06873baff8ebd6de63084493bc7f7ee5a764ea2fdf8b8043e63e20751d08b1b1a17667cb958724d8c4e7000000000000000000000000000000000000000000000000000000000000056000000000000000000000000000000000000000000000000000000000000005e000000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000026000000000000000000000000038bdb2abd66c00cbf05584a9717c1094181a87800000000000000000000000000000000000000000000000000000000000aa36a70000000000000000000000000000000000000000000000000000000000000120000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000041eb000000000000000000000000000030d400000000000000000000000000000000000000000000000000000000000029810000000000000000000000006fc23ac0000000000000000000000000077359400000000000000000000000000000000000000000000000000000000000000020000000000000000000000000001b7ca9d6b8ac943185e107e4be7430e5d90b5a500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000084b61d27f600000000000000000000000001b7ca9d6b8ac943185e107e4be7430e5d90b5a5000000000000000000000000000000000000000000000000002386f26fc100000000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000038bdb2abd66c00cbf05584a9717c1094181a87800000000000000000000000000000000000000000000000000000000000aa36a70000000000000000000000000000000000000000000000000000000000000120000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000041eb000000000000000000000000000030d400000000000000000000000000000000000000000000000000000000000029810000000000000000000000006fc23ac0000000000000000000000000077359400000000000000000000000000000000000000000000000000000000000000022000000000000000000000000001b7ca9d6b8ac943185e107e4be7430e5d90b5a5000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000a4b61d27f6000000000000000000000000c97e73b2770a0eb767407242fb3d35524fe229de000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000004d09de08a00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000038bdb2abd66c00cbf05584a9717c1094181a878000000000000000000000000000000000000000000000000006f05b59d3b200000000000000000000000000000000000000000000000000000000000066ddaf48000000000000000000000000000000000000000000000000000000000000000100000000000000000000000038bdb2abd66c00cbf05584a9717c1094181a8780000000000000000000000000000000000000000000000000016345785d8a00000000000000000000000000000000000000000000000000000000000066ddaf6c";
-    struct OutPut {
-        PackedUserOperation[] userOps;
-        bytes32 newSmtRoot;
-        ITicketManager.Ticket[] depositTickets;
-        ITicketManager.Ticket[] withdrawTickets;
-    }
-
     function setUp() public {
-        string memory SEPOLIA_RPC_URL = vm.envString("SEPOLIA_RPC_URL");
-        sepoliaFork = vm.createFork(SEPOLIA_RPC_URL);
-        string memory ARBITRUM_SEPOLIA_RPC_URL = vm.envString(
-            "ARBITRUM_SEPOLIA_RPC_URL"
-        );
-        arbitrumSepoliaFork = vm.createFork(ARBITRUM_SEPOLIA_RPC_URL);
-        // vm.selectFork(arbitrumSepoliaFork);
-        // vm.selectFork(sepoliaFork);
-        // ep = EntryPoint(sepoliaEntryPoint);
-        // factory = SimpleAccountFactory(sepoliaFactory);
-
-        // account1 = factory.createAccount(account1Owner, 0);
-
-        // assert(address(account1).balance == 0);
-
-        // vm.deal(deployer, 100 ether);
+        vm.deal(deployer, 100 ether);
+        vm.deal(account1Owner, 20 ether);
+        vm.startPrank(deployer);
+        ep = new EntryPoint();
+        factory = new SimpleAccountFactory(ep);
+        account1 = factory.createAccount(account1Owner, 0);
+        address mock_address = factory.getAccountAddress(account1Owner, 0);
+        console.log("get mock %s", mock_address);
+        console.log("account %s", address(account1));
+        vm.stopPrank();
+        vm.deal(address(account1), 1 ether);
+        console.log("ep address", address(ep));
+        console.log("factory address", address(factory));
+        console.log("account1 balance", address(account1).balance);
     }
 
     function getUserOp(
         address sender,
         address owner,
         uint256 chainId,
-        address transferTo
-    ) public pure returns (PackedUserOperation[] memory) {
-        PackedUserOperation[] memory userOps = new PackedUserOperation[](1);
-        bytes memory data = encodeTransferCalldata(transferTo, 1 ether);
-        bytes32 accountGasLimits = packUints(40000, 55000);
-        uint256 preVerificationGas = 17000;
-        bytes32 gasFees = packUints(2500000000, 30000000000);
-        bytes memory paymasterAndData = "";
+        address transferTo,
+        uint64 nonce
+    ) public pure returns (PackedUserOperation memory) {
+        bytes memory data = encodeTransferCalldata(transferTo, 0.001 ether);
+        uint256 operationValue = 0;
+        uint256 mainChainGasLimit = 200000;
+        uint256 destChainGasLimit = 0;
+        uint256 zkVerificationGasLimit = 2200;
+        uint256 mainChainGasPrice = 2500000000;
+        uint256 destChainGasPrice = 0;
         PackedUserOperation memory account1OwnerUserOp = PackedUserOperation(
+            0,
+            operationValue,
             sender,
-            chainId,
+            nonce,
+            uint64(chainId),
             data,
-            accountGasLimits,
-            preVerificationGas,
-            gasFees,
-            paymasterAndData,
+            mainChainGasLimit,
+            destChainGasLimit,
+            zkVerificationGasLimit,
+            mainChainGasPrice,
+            destChainGasPrice,
             owner
         );
-        userOps[0] = account1OwnerUserOp;
-        return userOps;
+        return account1OwnerUserOp;
     }
 
     function test_executeUserop() public {
         vm.deal(account1Owner, 20 ether);
-        vm.selectFork(sepoliaFork);
-        vm.startPrank(deployer);
+        // vm.startPrank(deployer);
 
-        EntryPoint ep1 = new EntryPoint();
-        factory = new SimpleAccountFactory(ep1);
-        SyncRouter router = SyncRouter(sepoliaSyncRouter);
-        router.updateEntryPoint(address(ep1));
-
-        // vm.deal(address(ep1), 0.5 ether);
-
-        ep1.updateSyncRouter(sepoliaSyncRouter);
-        ep1.updateVerifier(0xdcA32db1CBFa716BA6996a929A9046e706C9cea5);
-        ep1.updateDstEids(sepoliaDstEids);
-        ep1.updateDstCoeffGas(50);
-        ep1.updateDstConGas(200000);
-        vm.stopPrank();
-
-        vm.startPrank(account1Owner);
-        account1 = factory.createAccount(account1Owner, 0);
-        vm.stopPrank();
-
-        assert(address(account1).balance == 0);
-        vm.deal(address(account1), 1 ether);
-        ITicketManager.Ticket[] memory depositTickets = deposit(
+        PackedUserOperation[] memory ops = new PackedUserOperation[](64);
+        ops[0] = deposit(account1Owner, payable(address(account1)), 0.2 ether);
+        ops[1] = withdraw(
             account1Owner,
             payable(address(account1)),
-            1 ether
+            0.05 ether
         );
-        PackedUserOperation[] memory userOps = getUserOp(
-            address(account1),
-            account1Owner,
-            block.chainid,
-            account2Owner
-        );
-        IEntryPoint.ProofOutPut memory proofOutPut;
-        proofOutPut.allUserOps = userOps;
-        proofOutPut.depositTickets = depositTickets;
-        proofOutPut.oldSmtRoot = bytes32(
+        for (uint256 index = 2; index < 64; index++) {
+            ops[index] = getUserOp(
+                address(account1),
+                account1Owner,
+                block.chainid,
+                account2Owner,
+                uint64(index + 1)
+            );
+        }
+
+        IEntryPoint.BatchData[] memory batches = new IEntryPoint.BatchData[](1);
+        batches[0].userOperations = ops;
+        batches[0].oldStateRoot = bytes32(
             0xb178c245c947ea7e21ecede07728941a6ab1b706143c06873baff8ebd6de6308
         );
-        proofOutPut.newSmtRoot = bytes32(
+        batches[0].newStateRoot = bytes32(
             0x4493bc7f7ee5a764ea2fdf8b8043e63e20751d08b1b1a17667cb958724d8c4e7
         );
-        bytes memory pubValues = abi.encode(proofOutPut);
         vm.startPrank(deployer);
-        console.log("balance", address(ep1).balance);
+        // console.log("balance", address(ep1).balance);
 
-        console.log("basic fee", ep1.estimateSyncFee("", 400000));
+        // console.log("basic fee", ep1.estimateSyncFee("", 400000));
 
-        ep1.verifyBatchMock(pubValues, payable(owner)); // 558499499735571
+        ep.verifyBatchMock{value: 0.01 ether}(batches, payable(owner)); // 558499499735571
         // 108633674447005
         // 148633574447005
-        console.log("balance", address(ep1).balance);
+        console.log("balance", account2Owner.balance);
         vm.stopPrank();
     }
 
-    function test_syncBatch() public {
-        vm.selectFork(arbitrumSepoliaFork);
-        vm.startPrank(deployer);
-        address account = 0x01b7cA9d6B8Ac943185E107e4BE7430e5D90B5A5;
-        console.log("account balance before", account.balance);
-        EntryPoint ep1 = new EntryPoint();
-        factory = new SimpleAccountFactory(ep1);
-        SimpleAccount account11 = factory.createAccount(account, 1);
-        vm.deal(address(account11), 0.1 ether);
-        ep1.updateSyncRouter(arbitrumSepoliaSyncRouter);
-        ep1.updateSmtRoot(
-            bytes32(
-                0xb178c245c947ea7e21ecede07728941a6ab1b706143c06873baff8ebd6de6308
-            ),
-            bytes32(
-                0x4493bc7f7ee5a764ea2fdf8b8043e63e20751d08b1b1a17667cb958724d8c4e7
-            )
-        );
-        IEntryPoint.ProofOutPut memory proofOutPut = abi.decode(
-            arbitrumProofPublicValues,
-            (IEntryPoint.ProofOutPut)
-        );
-        proofOutPut.allUserOps[0].sender = address(account11);
-        proofOutPut.allUserOps[1].sender = address(account11);
-        proofOutPut.allUserOps[0].userAddr = account;
-        proofOutPut.allUserOps[1].userAddr = account;
-        bytes memory publicValues = abi.encode(proofOutPut);
-        bytes memory syncInfo = abi.encode(
-            publicValues,
-            address(payable(owner))
-        );
-        vm.startPrank(arbitrumSepoliaSyncRouter);
-        ep1.syncBatch(syncInfo);
-        console.log("account balance after", account.balance);
-        vm.stopPrank();
-    }
+    // function test_syncBatch() public {
+    //     vm.selectFork(arbitrumSepoliaFork);
+    //     vm.startPrank(deployer);
+    //     address account = 0x01b7cA9d6B8Ac943185E107e4BE7430e5D90B5A5;
+    //     console.log("account balance before", account.balance);
+    //     EntryPoint ep1 = new EntryPoint();
+    //     factory = new SimpleAccountFactory(ep1);
+    //     SimpleAccount account11 = factory.createAccount(account, 1);
+    //     vm.deal(address(account11), 0.1 ether);
+    //     ep1.updateSyncRouter(arbitrumSepoliaSyncRouter);
+    //     ep1.updateSmtRoot(
+    //         bytes32(
+    //             0xb178c245c947ea7e21ecede07728941a6ab1b706143c06873baff8ebd6de6308
+    //         ),
+    //         bytes32(
+    //             0x4493bc7f7ee5a764ea2fdf8b8043e63e20751d08b1b1a17667cb958724d8c4e7
+    //         )
+    //     );
+    //     IEntryPoint.ProofOutPut memory proofOutPut = abi.decode(
+    //         arbitrumProofPublicValues,
+    //         (IEntryPoint.ProofOutPut)
+    //     );
+    //     proofOutPut.allUserOps[0].sender = address(account11);
+    //     proofOutPut.allUserOps[1].sender = address(account11);
+    //     proofOutPut.allUserOps[0].owner = account;
+    //     proofOutPut.allUserOps[1].owner = account;
+    //     bytes memory publicValues = abi.encode(proofOutPut);
+    //     bytes memory syncInfo = abi.encode(
+    //         publicValues,
+    //         address(payable(owner))
+    //     );
+    //     vm.startPrank(arbitrumSepoliaSyncRouter);
+    //     ep1.syncBatch(syncInfo);
+    //     console.log("account balance after", account.balance);
+    //     vm.stopPrank();
+    // }
 }

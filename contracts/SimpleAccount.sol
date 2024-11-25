@@ -148,11 +148,15 @@ contract SimpleAccount is
         }
     }
 
+    function getPreGasBalance() external view returns (uint256) {
+        return entryPoint().getPreGasBalanceInfo(address(this));
+    }
+
     /**
      * deposit more funds for this account in the entryPoint
      */
-    function addDeposit() public payable {
-        entryPoint().addDepositTicket{value: msg.value}(msg.value);
+    function depositGas() public payable {
+        entryPoint().submitDepositOperation{value: msg.value}(msg.value);
     }
 
     /**
@@ -161,8 +165,12 @@ contract SimpleAccount is
      * @notice Currently, only owner's own withdrawal is supported.
      * After the circuit data is updated later, withdrawTo fields can be added.
      */
-    function withdrawDepositTo(uint256 amount) public onlyOwner {
-        entryPoint().addWithdrawTicket(amount);
+    function withdrawGas(uint256 amount) public onlyOwner {
+        entryPoint().submitWithdrawOperation(amount);
+    }
+
+    function redeemGas(uint256 amount) public onlyOwner {
+        entryPoint().redeemGasOperation(amount);
     }
 
     function withdraw(uint256 amount) external onlyOwner {

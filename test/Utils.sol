@@ -4,6 +4,7 @@ import "forge-std/Test.sol";
 import "contracts/SimpleAccount.sol";
 import "contracts/core/EntryPoint.sol";
 import "contracts/SimpleAccountFactory.sol";
+import "contracts/interfaces/PackedUserOperation.sol";
 
 contract Utils is Test {
     function encodeTransferCalldata(
@@ -54,26 +55,68 @@ contract Utils is Test {
         address _owner,
         address payable account,
         uint256 _depositValue
-    ) public returns (ITicketManager.Ticket[] memory) {
-        ITicketManager.Ticket[]
-            memory depositTickets = new ITicketManager.Ticket[](1);
+    ) public returns (PackedUserOperation memory) {
         vm.recordLogs();
         vm.startPrank(_owner);
-        SimpleAccount(account).addDeposit{value: _depositValue}();
+        uint256 beforePreGasBalance = SimpleAccount(account).getPreGasBalance();
+        SimpleAccount(account).depositGas{value: _depositValue}();
+        uint256 afterPreGasBalance = SimpleAccount(account).getPreGasBalance();
+        assert(afterPreGasBalance == beforePreGasBalance + _depositValue);
         vm.stopPrank();
         Vm.Log[] memory entries = vm.getRecordedLogs();
 
-        (uint256 amount, uint256 timestamp) = abi.decode(
-            entries[0].data,
-            (uint256, uint256)
-        );
-
-        ITicketManager.Ticket memory ticket = ITicketManager.Ticket(
+        uint256 operationValue = abi.decode(entries[0].data, (uint256));
+        bytes memory data = "";
+        uint256 mainChainGasLimit = 0x30d40;
+        uint256 destChainGasLimit = 0;
+        uint256 zkVerificationGasLimit = 1700;
+        uint256 mainChainGasPrice = 2500000000;
+        uint256 destChainGasPrice = 0;
+        PackedUserOperation memory account1OwnerUserOp = PackedUserOperation(
+            1,
+            operationValue,
             account,
-            amount,
-            timestamp
+            1,
+            uint64(block.chainid),
+            data,
+            mainChainGasLimit,
+            destChainGasLimit,
+            zkVerificationGasLimit,
+            mainChainGasPrice,
+            destChainGasPrice,
+            _owner
         );
-        depositTickets[0] = ticket;
-        return depositTickets;
+        return account1OwnerUserOp;
+    }
+
+    function withdraw(
+        address _owner,
+        address payable account,
+        uint256 _withdrawValue
+    ) public returns (PackedUserOperation memory) {
+        vm.startPrank(_owner);
+        SimpleAccount(account).withdrawGas(_withdrawValue);
+        vm.stopPrank();
+        bytes memory data = "";
+        uint256 mainChainGasLimit = 0x30d40;
+        uint256 destChainGasLimit = 0;
+        uint256 zkVerificationGasLimit = 1700;
+        uint256 mainChainGasPrice = 2500000000;
+        uint256 destChainGasPrice = 0;
+        PackedUserOperation memory op = PackedUserOperation(
+            2,
+            _withdrawValue,
+            account,
+            2,
+            uint64(block.chainid),
+            data,
+            mainChainGasLimit,
+            destChainGasLimit,
+            zkVerificationGasLimit,
+            mainChainGasPrice,
+            destChainGasPrice,
+            _owner
+        );
+        return op;
     }
 }

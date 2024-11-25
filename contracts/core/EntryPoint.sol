@@ -13,16 +13,13 @@ import "../interfaces/ISyncRouter.sol";
 import "../utils/Exec.sol";
 import "./SmtManager.sol";
 import "./Helpers.sol";
-import "./TicketManager.sol";
+import "./PreGasManager.sol";
 import "./ConfigManager.sol";
 import "./UserOperationLib.sol";
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-
-import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
-import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
 
 import "forge-std/console.sol";
 /*
@@ -34,13 +31,12 @@ import "forge-std/console.sol";
 contract EntryPoint is
     IEntryPoint,
     SmtManager,
-    TicketManager,
+    PreGasManager,
     ConfigManager,
     ReentrancyGuard,
     Ownable,
     ERC165
 {
-    using OptionsBuilder for bytes;
     using UserOperationLib for PackedUserOperation;
     using UserOperationsLib for PackedUserOperation[];
 
@@ -67,159 +63,132 @@ contract EntryPoint is
         return
             interfaceId ==
             (type(IEntryPoint).interfaceId ^
-                type(ITicketManager).interfaceId) ||
+                type(IPreGasManager).interfaceId) ||
             interfaceId == type(IEntryPoint).interfaceId ||
-            interfaceId == type(ITicketManager).interfaceId ||
+            interfaceId == type(IPreGasManager).interfaceId ||
             super.supportsInterface(interfaceId);
     }
 
     /**
      * Verify a batch containing userOps,tickets and newSmtRoot
      * @param proof The encoded proof.
-     * @param publicValues The encoded public values.
+     * @param batches The encoded public values.
      */
     function verifyBatch(
         bytes calldata proof,
-        bytes calldata publicValues,
+        BatchData[] calldata batches,
+        // ChainExecuteInfo[] calldata executeInfos,
         address payable beneficiary
     ) external {
-        IVerifyManager(verifier).verifyProof(publicValues, proof);
+        // IVerifyManager(verifier).verifyProof(publicValues, proof);
+        bytes32[] memory batchHashs = new bytes32[](batches.length);
+        unchecked {
+            for (uint256 i = 0; i < batches.length; ) {
+                batchHashs[i] = batches[i].userOperations.calculateHash();
+                ++i;
+            }
+        }
 
         uint256 startGas = gasleft();
-        processBatch(publicValues, beneficiary, false);
+        processBatch(batches, batchHashs, beneficiary, false);
         uint256 gasUsed = startGas - gasleft();
 
-        bytes memory message = abi.encode(publicValues, beneficiary);
+        bytes memory message = abi.encode(batches, batchHashs);
 
-        // sync other chains
-        bytes memory _extraSendOptions = OptionsBuilder
-            .newOptions()
-            .addExecutorLzReceiveOption(
-                uint128(gasUsed * dstCoeffGas + dstConGas),
-                0
-            );
+        // // sync other chains
+        // bytes memory _extraSendOptions = OptionsBuilder
+        //     .newOptions()
+        //     .addExecutorLzReceiveOption(
+        //         uint128(gasUsed * dstCoeffGas + dstConGas),
+        //         0
+        //     );
 
-        // cal gas
-        MessagingFee memory fee = ISyncRouter(syncRouter).quote(
-            dstEids,
-            message,
-            _extraSendOptions,
-            false
-        );
-        ISyncRouter(syncRouter).send{value: fee.nativeFee * 2}(
-            dstEids,
-            message,
-            _extraSendOptions,
-            beneficiary
-        );
+        // // cal gas
+        // MessagingFee memory fee = ISyncRouter(syncRouter).quote(
+        //     dstEids,
+        //     message,
+        //     _extraSendOptions,
+        //     false
+        // );
+        // ISyncRouter(syncRouter).send{value: fee.nativeFee * 2}(
+        //     dstEids,
+        //     message,
+        //     _extraSendOptions,
+        //     beneficiary
+        // );
     }
 
     function verifyBatchMock(
-        bytes calldata publicValues,
+        BatchData[] calldata batches,
         address payable beneficiary
     ) external payable {
+        // cal hash
+        bytes32[] memory batchHashs = new bytes32[](batches.length);
+        unchecked {
+            for (uint256 i = 0; i < batches.length; ) {
+                batchHashs[i] = batches[i].userOperations.calculateHash();
+                ++i;
+            }
+        }
+
         uint256 startGas = gasleft();
-        processBatch(publicValues, beneficiary, false);
+        processBatch(batches, batchHashs, beneficiary, false);
         uint256 gasUsed = startGas - gasleft();
 
-        bytes memory message = abi.encode(publicValues, beneficiary);
+        // bytes memory message = abi.encode(publicValues, beneficiary);
 
         // sync other chains
-        bytes memory _extraSendOptions = OptionsBuilder
-            .newOptions()
-            .addExecutorLzReceiveOption(
-                uint128(gasUsed * dstCoeffGas + dstConGas),
-                0
-            );
+        // bytes memory _extraSendOptions = OptionsBuilder
+        //     .newOptions()
+        //     .addExecutorLzReceiveOption(
+        //         uint128(gasUsed * dstCoeffGas + dstConGas),
+        //         0
+        //     );
 
         // cal gas
-        MessagingFee memory fee = ISyncRouter(syncRouter).quote(
-            dstEids,
-            message,
-            _extraSendOptions,
-            false
-        );
-        ISyncRouter(syncRouter).send{value: fee.nativeFee}(
-            dstEids,
-            message,
-            _extraSendOptions,
-            beneficiary
-        );
+        // MessagingFee memory fee = ISyncRouter(syncRouter).quote(
+        //     dstEids,
+        //     message,
+        //     _extraSendOptions,
+        //     false
+        // );
+        // ISyncRouter(syncRouter).send{value: fee.nativeFee}(
+        //     dstEids,
+        //     message,
+        //     _extraSendOptions,
+        //     beneficiary
+        // );
     }
 
-    function estimateSyncFee(
-        bytes calldata message,
-        uint128 usedGasLimit
-    ) external view returns (uint256) {
-        bytes memory _extraSendOptions = OptionsBuilder
-            .newOptions()
-            .addExecutorLzReceiveOption(usedGasLimit, 0);
-
-        // cal gas
-        MessagingFee memory fee = ISyncRouter(syncRouter).quote(
-            dstEids,
-            message,
-            _extraSendOptions,
-            false
-        );
-
-        return fee.nativeFee;
-    }
-
-    function syncBatch(bytes calldata syncInfo) external isSyncRouter {
-        (bytes memory publicValues, address payable beneficiary) = abi.decode(
-            syncInfo,
-            (bytes, address)
-        );
-
-        processBatch(publicValues, beneficiary, true);
+    function syncBatch(
+        BatchData[] calldata batches,
+        bytes32[] calldata batchHashs
+    ) external isSyncRouter {
+        // Todo: remove beneficiary address(0x01), because the synchronization module does not need
+        processBatch(batches, batchHashs, payable(address(0x01)), true);
     }
 
     function processBatch(
-        bytes memory publicValues,
+        BatchData[] calldata batches,
+        bytes32[] memory batchHashs,
         address payable beneficiary,
         bool isSync
     ) internal {
-        ProofOutPut memory proofOutPut = abi.decode(
-            publicValues,
-            (ProofOutPut)
-        );
-
-        PackedUserOperation[] memory userOps = proofOutPut
-            .allUserOps
-            .filterByChainId(block.chainid);
-
-        // process tickets
-        if (!isSync) {
-            processTickets(
-                proofOutPut.depositTickets,
-                proofOutPut.withdrawTickets
-            );
-        }
-
-        // execute userOps
-        this.handleOps(userOps, beneficiary, isSync);
-
-        // update stateRoot
-        updateSmtRoot(proofOutPut.oldSmtRoot, proofOutPut.newSmtRoot);
-    }
-
-    function processTickets(
-        Ticket[] memory depositTickets,
-        Ticket[] memory withdrawTickets
-    ) internal {
-        uint256 dtslen = depositTickets.length;
-        uint256 wtslen = withdrawTickets.length;
-
         unchecked {
-            for (uint256 i = 0; i < dtslen; i++) {
-                Ticket memory ticket = depositTickets[i];
-                delDepositTicket(ticket);
-            }
+            for (uint256 i = 0; i < batches.length; ) {
+                PackedUserOperation[] memory userOps = batches[i]
+                    .userOperations
+                    .filterByChainId(block.chainid);
 
-            for (uint256 i = 0; i < wtslen; i++) {
-                Ticket memory ticket = withdrawTickets[i];
-                delWithdrawTicket(ticket);
+                // execute userOps
+                // Todo: change handleOps from public to internal, or modify about logic
+                // But keep ops is calldata
+                this.handleOps(userOps, beneficiary, isSync);
+
+                // update stateRoot
+                updateSmtRoot(batches[i].oldStateRoot, batches[i].newStateRoot);
+
+                ++i;
             }
         }
     }
@@ -340,7 +309,6 @@ contract EntryPoint is
         emit UserOperationEvent(
             opInfo.userOpHash,
             opInfo.mUserOp.sender,
-            opInfo.mUserOp.paymaster,
             success,
             actualGasCost,
             actualGas
@@ -352,6 +320,26 @@ contract EntryPoint is
             opInfo.userOpHash,
             opInfo.mUserOp.sender
         );
+    }
+
+    /**
+     * Execute a gas operation.
+     * @param gasOp      - The gasOp to execute.
+     * @param opInfo     - The opInfo filled by validatePrepayment for this gasOp.
+     * @return collected - The total amount this gasOp paid.
+     */
+    function _processGasOperation(
+        PackedUserOperation calldata gasOp,
+        UserOpInfo memory opInfo
+    ) internal returns (uint256) {
+        if (gasOp.operationType == UserOperationLib.DEPOSIT_OPERATION) {
+            // 4462 5000
+            _commitDepositOperation(gasOp);
+        } else if (gasOp.operationType == UserOperationLib.WITHDRAW_OPERATION) {
+            // 11462 12000
+            _commitWithdrawOperation(gasOp);
+        }
+        return opInfo.prefund;
     }
 
     /// @inheritdoc IEntryPoint
@@ -373,7 +361,11 @@ contract EntryPoint is
             emit BeforeExecution();
 
             for (uint256 i = 0; i < opslen; i++) {
-                collected += _executeUserOp(i, ops[i], opInfos[i]);
+                if (ops[i].isGasOperation()) {
+                    collected += _processGasOperation(ops[i], opInfos[i]);
+                } else {
+                    collected += _executeUserOp(i, ops[i], opInfos[i]);
+                }
             }
             if (!isSync) {
                 _compensate(beneficiary, collected);
@@ -387,14 +379,13 @@ contract EntryPoint is
      */
     struct MemoryUserOp {
         address sender;
-        uint256 verificationGasLimit;
-        uint256 callGasLimit;
-        uint256 paymasterVerificationGasLimit;
-        uint256 paymasterPostOpGasLimit;
-        uint256 preVerificationGas;
-        address paymaster;
-        uint256 maxFeePerGas;
-        uint256 maxPriorityFeePerGas;
+        uint256 chainId;
+        uint256 operationValue;
+        uint256 zkVerificationGasLimit;
+        uint256 mainChainGasLimit;
+        uint256 destChainGasLimit;
+        uint256 mainChainGasPrice;
+        uint256 destChainGasPrice;
     }
 
     struct UserOpInfo {
@@ -422,21 +413,21 @@ contract EntryPoint is
         require(msg.sender == address(this), "AA92 internal call only");
         MemoryUserOp memory mUserOp = opInfo.mUserOp;
 
-        uint256 callGasLimit = mUserOp.callGasLimit;
-        unchecked {
-            // handleOps was called with gas limit too low. abort entire bundle.
-            if (
-                (gasleft() * 63) / 64 <
-                callGasLimit +
-                    mUserOp.paymasterPostOpGasLimit +
-                    INNER_GAS_OVERHEAD
-            ) {
-                assembly ("memory-safe") {
-                    mstore(0, INNER_OUT_OF_GAS)
-                    revert(0, 32)
-                }
-            }
-        }
+        uint256 callGasLimit = mUserOp.mainChainGasLimit * 200;
+        // unchecked {
+        //     // handleOps was called with gas limit too low. abort entire bundle.
+        //     if (
+        //         (gasleft() * 63) / 64 <
+        //         callGasLimit +
+        //             mUserOp.paymasterPostOpGasLimit +
+        //             INNER_GAS_OVERHEAD
+        //     ) {
+        //         assembly ("memory-safe") {
+        //             mstore(0, INNER_OUT_OF_GAS)
+        //             revert(0, 32)
+        //         }
+        //     }
+        // }
 
         IPaymaster.PostOpMode mode = IPaymaster.PostOpMode.opSucceeded;
         if (callData.length > 0) {
@@ -464,8 +455,7 @@ contract EntryPoint is
     function getUserOpHash(
         PackedUserOperation calldata userOp
     ) public view returns (bytes32) {
-        return
-            keccak256(abi.encode(userOp.hash(), address(this), block.chainid));
+        return keccak256(userOp.encode());
     }
 
     /**
@@ -478,28 +468,13 @@ contract EntryPoint is
         MemoryUserOp memory mUserOp
     ) internal pure {
         mUserOp.sender = userOp.sender;
-        (mUserOp.verificationGasLimit, mUserOp.callGasLimit) = UserOperationLib
-            .unpackUints(userOp.accountGasLimits);
-        mUserOp.preVerificationGas = userOp.preVerificationGas;
-        (mUserOp.maxPriorityFeePerGas, mUserOp.maxFeePerGas) = UserOperationLib
-            .unpackUints(userOp.gasFees);
-        bytes calldata paymasterAndData = userOp.paymasterAndData;
-        if (paymasterAndData.length > 0) {
-            require(
-                paymasterAndData.length >=
-                    UserOperationLib.PAYMASTER_DATA_OFFSET,
-                "AA93 invalid paymasterAndData"
-            );
-            (
-                mUserOp.paymaster,
-                mUserOp.paymasterVerificationGasLimit,
-                mUserOp.paymasterPostOpGasLimit
-            ) = UserOperationLib.unpackPaymasterStaticFields(paymasterAndData);
-        } else {
-            mUserOp.paymaster = address(0);
-            mUserOp.paymasterVerificationGasLimit = 0;
-            mUserOp.paymasterPostOpGasLimit = 0;
-        }
+        mUserOp.chainId = userOp.chainId;
+        mUserOp.operationValue = userOp.operationValue;
+        mUserOp.zkVerificationGasLimit = userOp.zkVerificationGasLimit;
+        mUserOp.mainChainGasPrice = userOp.mainChainGasPrice;
+        mUserOp.destChainGasPrice = userOp.destChainGasPrice;
+        mUserOp.mainChainGasLimit = userOp.mainChainGasLimit;
+        mUserOp.destChainGasLimit = userOp.destChainGasLimit;
     }
 
     /**
@@ -509,14 +484,14 @@ contract EntryPoint is
     function _getRequiredPrefund(
         MemoryUserOp memory mUserOp
     ) internal pure returns (uint256 requiredPrefund) {
+        // (mainChainGasLimit + zkVerficationGasLimit) * mainChainGasPrice +
+        // destChainGasPrice * destChainGasLimit
         unchecked {
-            uint256 requiredGas = mUserOp.verificationGasLimit +
-                mUserOp.callGasLimit +
-                mUserOp.paymasterVerificationGasLimit +
-                mUserOp.paymasterPostOpGasLimit +
-                mUserOp.preVerificationGas;
-
-            requiredPrefund = requiredGas * mUserOp.maxFeePerGas;
+            requiredPrefund =
+                (mUserOp.mainChainGasLimit + mUserOp.zkVerificationGasLimit) *
+                mUserOp.mainChainGasPrice +
+                mUserOp.destChainGasLimit *
+                mUserOp.destChainGasPrice;
         }
     }
 
@@ -535,52 +510,56 @@ contract EntryPoint is
         uint256 preGas = gasleft();
         MemoryUserOp memory mUserOp = outOpInfo.mUserOp;
         _copyUserOpToMemory(userOp, mUserOp);
-        outOpInfo.userOpHash = getUserOpHash(userOp);
+        // avoid to over validateOwnerGasLimit
+        // outOpInfo.userOpHash = getUserOpHash(userOp);
 
         // Validate all numeric values in userOp are well below 128 bit, so they can safely be added
         // and multiplied without causing overflow.
-        uint256 verificationGasLimit = mUserOp.verificationGasLimit;
-        uint256 maxGasValues = mUserOp.preVerificationGas |
-            verificationGasLimit |
-            mUserOp.callGasLimit |
-            mUserOp.paymasterVerificationGasLimit |
-            mUserOp.paymasterPostOpGasLimit |
-            mUserOp.maxFeePerGas |
-            mUserOp.maxPriorityFeePerGas;
+        uint256 zkVerificationGasLimit = mUserOp.zkVerificationGasLimit;
+        uint256 maxGasValues = mUserOp.mainChainGasLimit |
+            mUserOp.zkVerificationGasLimit |
+            mUserOp.destChainGasLimit |
+            mUserOp.mainChainGasPrice |
+            mUserOp.destChainGasPrice;
         require(maxGasValues <= type(uint120).max, "AA94 gas values overflow");
+        require(
+            mUserOp.operationValue <= type(uint248).max,
+            "AA94 operation value overflow"
+        );
 
         uint256 requiredPreFund = _getRequiredPrefund(mUserOp);
 
+        // Check if the account balance is sufficient
+        // Constraints are made in the circuit
+        // uint256 accountPreBalance = getPreGasBalanceInfo(mUserOp.sender);
+
+        // if (requiredPreFund > accountPreBalance) {
+        //     revert FailedOp(opIndex, "AA insufficient account preBalance");
+        // }
+
+        uint256 validateOwnerGasLimit = userOp.getValidateOwnerGasLimit();
+
         bool validationResult = IAccount(mUserOp.sender).validateUserOp{
-            gas: verificationGasLimit
-        }(userOp.userAddr);
+            gas: validateOwnerGasLimit
+        }(userOp.owner);
 
         if (!validationResult) {
             revert FailedOp(opIndex, "AA owner verification falied");
         }
 
+        // Todo How to check the gas limit of the authentication owner
         unchecked {
-            if (preGas - gasleft() > verificationGasLimit) {
-                console.logUint(preGas - gasleft());
-                console.logUint(verificationGasLimit);
-                revert FailedOp(opIndex, "AA26 over verificationGasLimit");
+            if (preGas - gasleft() > validateOwnerGasLimit) {
+                revert FailedOp(opIndex, "AA26 over verificationOwnerGasLimit");
             }
         }
 
         bytes memory context;
-        // Todo Do not consider paymaster issues for the time being
-        // if (mUserOp.paymaster != address(0)) {
-        //     (context, paymasterValidationData) = _validatePaymasterPrepayment(
-        //         opIndex,
-        //         userOp,
-        //         outOpInfo,
-        //         requiredPreFund
-        //     );
-        // }
+
         unchecked {
             outOpInfo.prefund = requiredPreFund;
             outOpInfo.contextOffset = getOffsetOfMemoryBytes(context);
-            outOpInfo.preOpGas = preGas - gasleft() + userOp.preVerificationGas;
+            outOpInfo.preOpGas = preGas - gasleft() + validateOwnerGasLimit;
         }
     }
 
@@ -605,37 +584,14 @@ contract EntryPoint is
             MemoryUserOp memory mUserOp = opInfo.mUserOp;
             uint256 gasPrice = getUserOpGasPrice(mUserOp);
 
-            address paymaster = mUserOp.paymaster;
-            // Todo Do not consider paymaster issues for the time being
-            if (paymaster == address(0)) {
-                refundAddress = mUserOp.sender;
-            } else {
-                refundAddress = paymaster;
-                if (context.length > 0) {
-                    actualGasCost = actualGas * gasPrice;
-                    if (mode != IPaymaster.PostOpMode.postOpReverted) {
-                        try
-                            IPaymaster(paymaster).postOp{
-                                gas: mUserOp.paymasterPostOpGasLimit
-                            }(mode, context, actualGasCost, gasPrice)
-                        // solhint-disable-next-line no-empty-blocks
-                        {
-
-                        } catch {
-                            bytes memory reason = Exec.getReturnData(
-                                REVERT_REASON_MAX_LEN
-                            );
-                            revert PostOpReverted(reason);
-                        }
-                    }
-                }
-            }
+            refundAddress = mUserOp.sender;
             actualGas += preGas - gasleft();
 
             // Calculating a penalty for unused execution gas
             {
-                uint256 executionGasLimit = mUserOp.callGasLimit +
-                    mUserOp.paymasterPostOpGasLimit;
+                uint256 executionGasLimit = mUserOp.zkVerificationGasLimit +
+                    mUserOp.mainChainGasLimit +
+                    mUserOp.destChainGasLimit;
                 uint256 executionGasUsed = actualGas - opInfo.preOpGas;
                 // this check is required for the gas used within EntryPoint and not covered by explicit gas limits
                 if (executionGasLimit > executionGasUsed) {
@@ -647,7 +603,10 @@ contract EntryPoint is
             }
 
             actualGasCost = actualGas * gasPrice;
+
             uint256 prefund = opInfo.prefund;
+
+            // The gas prefund by the user is sufficient to cover the actualGasCost.
             if (prefund < actualGasCost) {
                 if (mode == IPaymaster.PostOpMode.postOpReverted) {
                     actualGasCost = prefund;
@@ -685,13 +644,10 @@ contract EntryPoint is
         MemoryUserOp memory mUserOp
     ) internal view returns (uint256) {
         unchecked {
-            uint256 maxFeePerGas = mUserOp.maxFeePerGas;
-            uint256 maxPriorityFeePerGas = mUserOp.maxPriorityFeePerGas;
-            if (maxFeePerGas == maxPriorityFeePerGas) {
-                //legacy mode (for networks that don't support basefee opcode)
-                return maxFeePerGas;
-            }
-            return min(maxFeePerGas, maxPriorityFeePerGas + block.basefee);
+            return
+                mUserOp.chainId == block.chainid
+                    ? mUserOp.mainChainGasPrice
+                    : mUserOp.destChainGasPrice;
         }
     }
 

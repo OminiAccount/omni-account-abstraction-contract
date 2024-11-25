@@ -12,15 +12,19 @@ pragma solidity >=0.7.5;
  * @param gasFees               - packed gas fields maxPriorityFeePerGas and maxFeePerGas - Same as EIP-1559 gas parameters.
  * @param paymasterAndData      - If set, this field holds the paymaster address, verification gas limit, postOp gas limit and paymaster-specific extra data
  *                                The paymaster will pay for the transaction instead of the sender.
- * @param userAddr              - Owner of the account that generated this request.
+ * @param owner                 - Owner of the account that generated this request.
  */
 struct PackedUserOperation {
+    uint8 operationType; // 0 user; 1 deposit,2 withdraw system
+    uint256 operationValue;
     address sender;
-    uint256 chainId;
+    uint64 nonce; // only used for batchdata
+    uint64 chainId;
     bytes callData;
-    bytes32 accountGasLimits;
-    uint256 preVerificationGas;
-    bytes32 gasFees;
-    bytes paymasterAndData;
-    address userAddr;
+    uint256 mainChainGasLimit;
+    uint256 destChainGasLimit;
+    uint256 zkVerificationGasLimit;
+    uint256 mainChainGasPrice;
+    uint256 destChainGasPrice;
+    address owner;
 }

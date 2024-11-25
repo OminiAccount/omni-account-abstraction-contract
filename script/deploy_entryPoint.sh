@@ -1,4 +1,4 @@
 #!/bin/bash
 source .env
 
-CHAIN1_RPC_URL=$SEPOLIA_RPC_URL CHAIN2_RPC_URL=$ARBITRUM_SEPOLIA_RPC_URL forge script script/deployEntryPoint.s.sol --broadcast  --legacy -vvvv
+forge script script/deployEntryPoint_0.s.sol --broadcast  --legacy -vvvv --rpc-url $LOCAL_RPC_URL

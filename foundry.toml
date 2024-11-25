@@ -1,27 +1,33 @@
 [profile.default]
-  evm_version = "shanghai"
-  ffi = true
-  gas_limit = "18446744073709551615"
-  libs = ['lib']
-  memory_limit = 43554432
-  optimizer = true
-  optimizer_runs = 100000
-  via_ir = true
-  out = 'out'
-  solc = "0.8.23"
-  src = 'contracts'
+evm_version = "shanghai"
+ffi = true
+gas_limit = "18446744073709551615"
+libs = ['lib']
+memory_limit = 43554432
+optimizer = true
+optimizer_runs = 100000
+via_ir = true
+out = 'out'
+solc = "0.8.23"
+src = 'contracts'
+libraries = [
+    "src/library/GoldilocksPoseidon.sol:GoldilocksPoseidon:0x700b6A60ce7EaaEA56F065753d8dcB9653dbAD35",
+]
 
 [profile.default.optimizer_details]
-  constantOptimizer = false
-  yul = false
+constantOptimizer = false
+yul = false
 
 [fmt]
-  bracket_spacing = true
-  int_types = "long"
-  line_length = 120
-  multiline_func_header = "attributes_first"
-  number_underscore = "thousands"
-  quote_style = "double"
-  single_line_statement_blocks = "multi"
-  tab_width = 4
-  wrap_comments = false
+bracket_spacing = true
+int_types = "long"
+line_length = 120
+multiline_func_header = "attributes_first"
+number_underscore = "thousands"
+quote_style = "double"
+single_line_statement_blocks = "multi"
+tab_width = 4
+wrap_comments = false
+
+[rpc_endpoints]
+"aarpc" = "http://192.168.1.96:8545"

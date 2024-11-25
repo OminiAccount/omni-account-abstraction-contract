@@ -17,24 +17,26 @@ contract SetupSyncRouter is Script, Utils, AddressHelper {
 
         vm.createSelectFork(arbitrumSepoliaRpc);
         vm.startBroadcast(deployerPrivateKey);
-        SyncRouter(arbitrumSepoliaSyncRouter).setPeer(
-            sepoliaEid,
-            addressToBytes32(address(sepoliaSyncRouter))
-        );
+        // Todo:update to vizing
+        // SyncRouter(arbitrumSepoliaSyncRouter).setPeer(
+        //     sepoliaEid,
+        //     addressToBytes32(address(sepoliaSyncRouter))
+        // );
         // config entrypoint address
-        SyncRouter(arbitrumSepoliaSyncRouter).updateEntryPoint(
-            arbitrumSepoliaEntryPoint
-        );
+        // SyncRouter(arbitrumSepoliaSyncRouter).updateEntryPoint(
+        //     arbitrumSepoliaEntryPoint
+        // );
         vm.stopBroadcast();
 
         vm.createSelectFork(sepoliaRpc);
         vm.startBroadcast(deployerPrivateKey);
-        SyncRouter(sepoliaSyncRouter).setPeer(
-            arbitrumSepoliaEid,
-            addressToBytes32(address(arbitrumSepoliaSyncRouter))
-        );
+        // Todo:update to vizing
+        // SyncRouter(sepoliaSyncRouter).setPeer(
+        //     arbitrumSepoliaEid,
+        //     addressToBytes32(address(arbitrumSepoliaSyncRouter))
+        // );
         // config entrypoint address
-        SyncRouter(sepoliaSyncRouter).updateEntryPoint(sepoliaEntryPoint);
+        // SyncRouter(sepoliaSyncRouter).updateEntryPoint(sepoliaEntryPoint);
         vm.stopBroadcast();
     }
 }

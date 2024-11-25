@@ -24,11 +24,11 @@ contract SetupEntryPoint is Script, AddressHelper {
         vm.stopBroadcast();
 
         // config SyncRouter
-        vm.createSelectFork(arbitrumSepoliaRpc);
-        vm.startBroadcast(deployerPrivateKey);
-        EntryPoint(arbitrumSepoliaEntryPoint).updateSyncRouter(
-            arbitrumSepoliaSyncRouter
-        );
-        vm.stopBroadcast();
+        // vm.createSelectFork(arbitrumSepoliaRpc);
+        // vm.startBroadcast(deployerPrivateKey);
+        // EntryPoint(arbitrumSepoliaEntryPoint).updateSyncRouter(
+        //     arbitrumSepoliaSyncRouter
+        // );
+        // vm.stopBroadcast();
     }
 }

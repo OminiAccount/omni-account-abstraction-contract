@@ -10,15 +10,13 @@ pragma solidity >=0.7.5;
 /* solhint-disable reason-string */
 
 import "./PackedUserOperation.sol";
-import "./IAggregator.sol";
-import "./ITicketManager.sol";
+import "./IPreGasManager.sol";
 
-interface IEntryPoint is ITicketManager {
+interface IEntryPoint is IPreGasManager {
     /***
      * An event emitted after each successful request.
      * @param userOpHash    - Unique identifier for the request (hash its entire content, except signature).
      * @param sender        - The account that generates this request.
-     * @param paymaster     - If non-null, the paymaster that pays for this request.
      * @param success       - True if the sender transaction succeeded, false if reverted.
      * @param actualGasCost - Actual amount paid (by account or paymaster) for this UserOperation.
      * @param actualGasUsed - Total gas used by this UserOperation (including preVerification, creation,
@@ -27,7 +25,6 @@ interface IEntryPoint is ITicketManager {
     event UserOperationEvent(
         bytes32 indexed userOpHash,
         address indexed sender,
-        address indexed paymaster,
         bool success,
         uint256 actualGasCost,
         uint256 actualGasUsed
@@ -113,15 +110,21 @@ interface IEntryPoint is ITicketManager {
     // Return value of getSenderAddress.
     error SenderAddressResult(address sender);
 
-    struct ProofOutPut {
-        PackedUserOperation[] allUserOps;
-        bytes32 oldSmtRoot;
-        bytes32 newSmtRoot;
-        ITicketManager.Ticket[] depositTickets;
-        ITicketManager.Ticket[] withdrawTickets;
+    struct BatchData {
+        PackedUserOperation[] userOperations; // accInputHash
+        bytes32 oldStateRoot;
+        bytes32 newStateRoot;
     }
 
-    function syncBatch(bytes calldata syncInfo) external;
+    struct ChainExecuteInfo {
+        uint256 chainId;
+        uint256 chainFee;
+    }
+
+    function syncBatch(
+        BatchData[] calldata batchs,
+        bytes32[] calldata batchHashs
+    ) external;
 
     /**
      * Execute a batch of UserOperations.

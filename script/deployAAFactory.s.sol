@@ -21,15 +21,15 @@ contract DeployAAFactory is Script, Utils, AddressHelper {
         console.log("sepoliaFactory address: ", address(sepoliaFactory));
         vm.stopBroadcast();
 
-        vm.createSelectFork(arbitrumSepoliaRpc);
-        vm.startBroadcast(deployerPrivateKey);
-        SimpleAccountFactory arbitrumSepoliaFactory = new SimpleAccountFactory(
-            EntryPoint(arbitrumSepoliaEntryPoint)
-        );
-        console.log(
-            "arbitrumSepoliaFactory address: ",
-            address(arbitrumSepoliaFactory)
-        );
-        vm.stopBroadcast();
+        // vm.createSelectFork(arbitrumSepoliaRpc);
+        // vm.startBroadcast(deployerPrivateKey);
+        // SimpleAccountFactory arbitrumSepoliaFactory = new SimpleAccountFactory(
+        //     EntryPoint(arbitrumSepoliaEntryPoint)
+        // );
+        // console.log(
+        //     "arbitrumSepoliaFactory address: ",
+        //     address(arbitrumSepoliaFactory)
+        // );
+        // vm.stopBroadcast();
     }
 }

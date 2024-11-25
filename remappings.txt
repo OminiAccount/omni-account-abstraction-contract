@@ -10,4 +10,5 @@ forge-std/=lib/forge-std/src/
 @layerzerolabs/lz-evm-messagelib-v2/=node_modules/@layerzerolabs/lz-evm-messagelib-v2
 @layerzerolabs/lz-evm-v1-0.7/=node_modules/@layerzerolabs/lz-evm-v1-0.7
 @layerzerolabs/oapp-evm/=node_modules/@layerzerolabs/oapp-evm
+@vizing/contracts/=node_modules/@vizing/contracts
 solidity-bytes-utils/contracts/=node_modules/@layerzerolabs/toolbox-foundry/lib/solidity-bytes-utils
