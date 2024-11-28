@@ -114,17 +114,26 @@ interface IEntryPoint is IPreGasManager {
         PackedUserOperation[] userOperations; // accInputHash
         bytes32 oldStateRoot;
         bytes32 newStateRoot;
+        bytes32 accInputHash; // Todo: Use the poseidonHash to calculate the value
+    }
+
+    struct ChainExecuteExtra {
+        uint256 chainId;
+        uint256 chainFee;
+        uint256 chainUserOperationsNumber;
     }
 
     struct ChainExecuteInfo {
-        uint256 chainId;
-        uint256 chainFee;
+        ChainExecuteExtra extra;
+        PackedUserOperation[] userOperations;
     }
 
-    function syncBatch(
-        BatchData[] calldata batchs,
-        bytes32[] calldata batchHashs
-    ) external;
+    struct ChainsExecuteInfo {
+        ChainExecuteExtra[] chainExtra;
+        address beneficiary;
+    }
+
+    function syncBatch(PackedUserOperation[] memory userOps) external;
 
     /**
      * Execute a batch of UserOperations.

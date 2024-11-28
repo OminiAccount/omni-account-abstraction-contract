@@ -102,8 +102,15 @@ contract ExecuteTest is Utils, AddressHelper {
         // console.log("balance", address(ep1).balance);
 
         // console.log("basic fee", ep1.estimateSyncFee("", 400000));
-
-        ep.verifyBatchMock{value: 0.01 ether}(batches, payable(owner)); // 558499499735571
+        IEntryPoint.ChainsExecuteInfo memory chainsExecuteInfo;
+        chainsExecuteInfo.beneficiary = payable(owner);
+        IEntryPoint.ChainExecuteExtra[]
+            memory extras = new IEntryPoint.ChainExecuteExtra[](1);
+        extras[0].chainId = block.chainid;
+        extras[0].chainFee = 0;
+        extras[0].chainUserOperationsNumber = 64;
+        chainsExecuteInfo.chainExtra = extras;
+        ep.verifyBatch{value: 0.01 ether}("", batches, chainsExecuteInfo); // 558499499735571
         // 108633674447005
         // 148633574447005
         console.log("balance", account2Owner.balance);

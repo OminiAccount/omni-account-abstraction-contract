@@ -44,7 +44,7 @@ contract EntryPoint is
 
     function _isOwner() internal virtual override onlyOwner {}
 
-    //compensate for innerHandleOps' emit message and deposit refund.
+    // compensate for innerHandleOps' emit message and deposit refund.
     // allow some slack for future gas price changes.
     uint256 private constant INNER_GAS_OVERHEAD = 10000;
 
@@ -70,127 +70,90 @@ contract EntryPoint is
     }
 
     /**
-     * Verify a batch containing userOps,tickets and newSmtRoot
+     * Verify a batch containing userOps and newSmtRoot
      * @param proof The encoded proof.
      * @param batches The encoded public values.
      */
     function verifyBatch(
         bytes calldata proof,
         BatchData[] calldata batches,
-        // ChainExecuteInfo[] calldata executeInfos,
-        address payable beneficiary
-    ) external {
+        ChainsExecuteInfo calldata chainsExecuteInfos
+    ) external payable {
+        // First verify proof
         // IVerifyManager(verifier).verifyProof(publicValues, proof);
+
+        ChainExecuteInfo[] memory chainExecuteInfos = new ChainExecuteInfo[](
+            chainsExecuteInfos.chainExtra.length
+        );
+
         bytes32[] memory batchHashs = new bytes32[](batches.length);
+
         unchecked {
-            for (uint256 i = 0; i < batches.length; ) {
-                batchHashs[i] = batches[i].userOperations.calculateHash();
+            for (uint256 i = 0; i < chainsExecuteInfos.chainExtra.length; ) {
+                ChainExecuteExtra memory extra = chainsExecuteInfos.chainExtra[
+                    i
+                ];
+
+                PackedUserOperation[]
+                    memory chainUserOps = new PackedUserOperation[](
+                        extra.chainUserOperationsNumber
+                    );
+
+                uint256 userOpsIndex;
+
+                for (uint256 j = 0; j < batches.length; ) {
+                    // batchHashs[j] = batches[j].userOperations.calculateHash();
+                    PackedUserOperation[] memory userOps = batches[j]
+                        .userOperations
+                        .filterByChainId(extra.chainId);
+
+                    chainUserOps.append(userOps, userOpsIndex);
+
+                    userOpsIndex += userOps.length;
+
+                    // update stateRoot
+                    // updateSmtRoot(
+                    //     batches[j].oldStateRoot,
+                    //     batches[j].newStateRoot
+                    // );
+
+                    ++j;
+                }
+
+                chainExecuteInfos[i].extra = extra;
+                chainExecuteInfos[i].userOperations = chainUserOps;
+
                 ++i;
             }
         }
 
         uint256 startGas = gasleft();
-        processBatch(batches, batchHashs, beneficiary, false);
+        processBatchs(
+            chainExecuteInfos[0].userOperations,
+            payable(chainsExecuteInfos.beneficiary),
+            false
+        );
         uint256 gasUsed = startGas - gasleft();
 
         bytes memory message = abi.encode(batches, batchHashs);
-
-        // // sync other chains
-        // bytes memory _extraSendOptions = OptionsBuilder
-        //     .newOptions()
-        //     .addExecutorLzReceiveOption(
-        //         uint128(gasUsed * dstCoeffGas + dstConGas),
-        //         0
-        //     );
-
-        // // cal gas
-        // MessagingFee memory fee = ISyncRouter(syncRouter).quote(
-        //     dstEids,
-        //     message,
-        //     _extraSendOptions,
-        //     false
-        // );
-        // ISyncRouter(syncRouter).send{value: fee.nativeFee * 2}(
-        //     dstEids,
-        //     message,
-        //     _extraSendOptions,
-        //     beneficiary
-        // );
-    }
-
-    function verifyBatchMock(
-        BatchData[] calldata batches,
-        address payable beneficiary
-    ) external payable {
-        // cal hash
-        bytes32[] memory batchHashs = new bytes32[](batches.length);
-        unchecked {
-            for (uint256 i = 0; i < batches.length; ) {
-                batchHashs[i] = batches[i].userOperations.calculateHash();
-                ++i;
-            }
-        }
-
-        uint256 startGas = gasleft();
-        processBatch(batches, batchHashs, beneficiary, false);
-        uint256 gasUsed = startGas - gasleft();
-
-        // bytes memory message = abi.encode(publicValues, beneficiary);
-
-        // sync other chains
-        // bytes memory _extraSendOptions = OptionsBuilder
-        //     .newOptions()
-        //     .addExecutorLzReceiveOption(
-        //         uint128(gasUsed * dstCoeffGas + dstConGas),
-        //         0
-        //     );
-
-        // cal gas
-        // MessagingFee memory fee = ISyncRouter(syncRouter).quote(
-        //     dstEids,
-        //     message,
-        //     _extraSendOptions,
-        //     false
-        // );
-        // ISyncRouter(syncRouter).send{value: fee.nativeFee}(
-        //     dstEids,
-        //     message,
-        //     _extraSendOptions,
-        //     beneficiary
-        // );
     }
 
     function syncBatch(
-        BatchData[] calldata batches,
-        bytes32[] calldata batchHashs
+        PackedUserOperation[] memory userOps
     ) external isSyncRouter {
         // Todo: remove beneficiary address(0x01), because the synchronization module does not need
-        processBatch(batches, batchHashs, payable(address(0x01)), true);
+        processBatchs(userOps, payable(address(0x01)), true);
     }
 
-    function processBatch(
-        BatchData[] calldata batches,
-        bytes32[] memory batchHashs,
+    function processBatchs(
+        PackedUserOperation[] memory userOps,
         address payable beneficiary,
         bool isSync
     ) internal {
-        unchecked {
-            for (uint256 i = 0; i < batches.length; ) {
-                PackedUserOperation[] memory userOps = batches[i]
-                    .userOperations
-                    .filterByChainId(block.chainid);
-
-                // execute userOps
-                // Todo: change handleOps from public to internal, or modify about logic
-                // But keep ops is calldata
-                this.handleOps(userOps, beneficiary, isSync);
-
-                // update stateRoot
-                updateSmtRoot(batches[i].oldStateRoot, batches[i].newStateRoot);
-
-                ++i;
-            }
-        }
+        // execute userOps
+        // Todo: change handleOps from public to internal, or modify about logic
+        // But keep ops is calldata
+        this.handleOps(userOps, beneficiary, isSync);
     }
 
     /**
@@ -413,7 +376,7 @@ contract EntryPoint is
         require(msg.sender == address(this), "AA92 internal call only");
         MemoryUserOp memory mUserOp = opInfo.mUserOp;
 
-        uint256 callGasLimit = mUserOp.mainChainGasLimit * 200;
+        uint256 callGasLimit = mUserOp.mainChainGasLimit * 100;
         // unchecked {
         //     // handleOps was called with gas limit too low. abort entire bundle.
         //     if (

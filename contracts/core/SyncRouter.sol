@@ -5,6 +5,7 @@ import {VizingOmni} from "@vizing/contracts/VizingOmni.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import "../interfaces/IEntryPoint.sol";
+import "../interfaces/PackedUserOperation.sol";
 
 contract SyncRouter is VizingOmni, Ownable {
     error InvalidData();
@@ -114,14 +115,11 @@ contract SyncRouter is VizingOmni, Ownable {
         }
         bytes memory batchsMessage = abi.decode(message, (bytes));
 
-        (
-            IEntryPoint.BatchData[] memory batches,
-            bytes32[] memory batchHashs
-        ) = abi.decode(batchsMessage, (IEntryPoint.BatchData[], bytes32[]));
-
-        IEntryPoint(mirrorEntryPoint[uint64(block.chainid)]).syncBatch(
-            batches,
-            batchHashs
+        PackedUserOperation[] memory userOps = abi.decode(
+            batchsMessage,
+            (PackedUserOperation[])
         );
+
+        IEntryPoint(mirrorEntryPoint[uint64(block.chainid)]).syncBatch(userOps);
     }
 }

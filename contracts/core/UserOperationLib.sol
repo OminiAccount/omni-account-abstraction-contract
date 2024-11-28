@@ -309,4 +309,19 @@ library UserOperationsLib {
         uint256[4] memory outputs = Poseidon.hashMessage(encodeBytes);
         return Poseidon.mergeUint64ToBytes32(outputs);
     }
+
+    function append(
+        PackedUserOperation[] memory target,
+        PackedUserOperation[] memory source,
+        uint256 startIndex
+    ) internal pure {
+        require(
+            target.length >= startIndex + source.length,
+            "Target array too small"
+        );
+
+        for (uint256 i = 0; i < source.length; i++) {
+            target[startIndex + i] = source[i];
+        }
+    }
 }
