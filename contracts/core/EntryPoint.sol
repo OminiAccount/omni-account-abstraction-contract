@@ -7,8 +7,8 @@ import "../interfaces/IAccount.sol";
 import "../interfaces/IAccountExecute.sol";
 import "../interfaces/IPaymaster.sol";
 import "../interfaces/IEntryPoint.sol";
-import "../interfaces/IVerifyManager.sol";
 import "../interfaces/ISyncRouter.sol";
+import "../interfaces/IVerifier.sol";
 
 import "../utils/Exec.sol";
 import "./SmtManager.sol";
@@ -80,7 +80,8 @@ contract EntryPoint is
         ChainsExecuteInfo calldata chainsExecuteInfos
     ) external payable {
         // First verify proof
-        // IVerifyManager(verifier).verifyProof(publicValues, proof);
+        // Todo:Input format needs to be updated
+        // IVerifier(verifier).verifyProof(publicValues, proof);
 
         ChainExecuteInfo[] memory chainExecuteInfos = new ChainExecuteInfo[](
             chainsExecuteInfos.chainExtra.length
