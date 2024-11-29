@@ -20,14 +20,17 @@ contract PreGasManager is IPreGasManager {
     /**
      * Submit a user deposit operation and redeem deposit to SMT
      */
-    function submitDepositOperation(uint256 amount) external payable {
+    function submitDepositOperation(
+        uint256 amount,
+        uint256 nonce
+    ) external payable {
         if (msg.value != amount) {
             revert ValueNotEqual();
         }
 
         preGasBalance[msg.sender] += amount;
 
-        redeemGasOperation(amount);
+        redeemGasOperation(amount, nonce);
     }
 
     /**
@@ -75,10 +78,17 @@ contract PreGasManager is IPreGasManager {
     /**
      * Redeem gasBalance to SMT
      */
-    function redeemGasOperation(uint256 amount) public {
+    function redeemGasOperation(uint256 amount, uint256 nonce) public {
         if (preGasBalance[msg.sender] < amount) {
             revert InsufficientBalance();
         }
-        emit DepositTicketAdded(msg.sender, amount, block.timestamp);
+        emit DepositTicketAdded(
+            keccak256(
+                abi.encodePacked(msg.sender, block.chainid, nonce, amount)
+            ),
+            msg.sender,
+            amount,
+            block.timestamp
+        );
     }
 }

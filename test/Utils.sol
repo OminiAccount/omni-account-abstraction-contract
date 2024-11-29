@@ -59,7 +59,7 @@ contract Utils is Test {
         vm.recordLogs();
         vm.startPrank(_owner);
         uint256 beforePreGasBalance = SimpleAccount(account).getPreGasBalance();
-        SimpleAccount(account).depositGas{value: _depositValue}();
+        SimpleAccount(account).depositGas{value: _depositValue}(1);
         uint256 afterPreGasBalance = SimpleAccount(account).getPreGasBalance();
         assert(afterPreGasBalance == beforePreGasBalance + _depositValue);
         vm.stopPrank();

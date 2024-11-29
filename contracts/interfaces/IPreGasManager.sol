@@ -12,6 +12,7 @@ interface IPreGasManager {
     error CallFailed();
 
     event DepositTicketAdded(
+        bytes32 indexed did,
         address indexed account,
         uint256 amount,
         uint256 timestamp
@@ -41,11 +42,14 @@ interface IPreGasManager {
     //     // uint256 notConfirmedDeposit;
     // }
 
-    function submitDepositOperation(uint256 amount) external payable;
+    function submitDepositOperation(
+        uint256 amount,
+        uint256 nonce
+    ) external payable;
 
     function submitWithdrawOperation(uint256 amount) external;
 
-    function redeemGasOperation(uint256 amount) external;
+    function redeemGasOperation(uint256 amount, uint256 nonce) external;
 
     // /**
     //  * Get deposit info.

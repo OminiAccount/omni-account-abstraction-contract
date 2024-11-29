@@ -137,6 +137,8 @@ contract EntryPoint is
         uint256 gasUsed = startGas - gasleft();
 
         bytes memory message = abi.encode(batches, batchHashs);
+
+        // sync stateRoot and destUserOperations to other chain
     }
 
     function syncBatch(

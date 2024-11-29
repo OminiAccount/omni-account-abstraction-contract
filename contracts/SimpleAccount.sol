@@ -155,8 +155,8 @@ contract SimpleAccount is
     /**
      * deposit more funds for this account in the entryPoint
      */
-    function depositGas() public payable {
-        entryPoint().submitDepositOperation{value: msg.value}(msg.value);
+    function depositGas(uint256 nonce) public payable {
+        entryPoint().submitDepositOperation{value: msg.value}(msg.value, nonce);
     }
 
     /**
@@ -169,8 +169,8 @@ contract SimpleAccount is
         entryPoint().submitWithdrawOperation(amount);
     }
 
-    function redeemGas(uint256 amount) public onlyOwner {
-        entryPoint().redeemGasOperation(amount);
+    function redeemGas(uint256 amount, uint256 nonce) public onlyOwner {
+        entryPoint().redeemGasOperation(amount, nonce);
     }
 
     function withdraw(uint256 amount) external onlyOwner {
