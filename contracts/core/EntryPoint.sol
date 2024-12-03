@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
 
-import "../interfaces/IAccount.sol";
-import "../interfaces/IAccountExecute.sol";
-import "../interfaces/IPaymaster.sol";
-import "../interfaces/IEntryPoint.sol";
-import "../interfaces/ISyncRouter.sol";
-import "../interfaces/IVerifier.sol";
+import "../../interfaces/zkaa/IAccount.sol";
+import "../../interfaces/zkaa/IAccountExecute.sol";
+import "../../interfaces/zkaa/IPaymaster.sol";
+import "../../interfaces/zkaa/IEntryPoint.sol";
+import "../../interfaces/zkaa/IVerifyManager.sol";
+import "../../interfaces/zkaa/ISyncRouter.sol";
+import "../../interfaces/IZKVizingAAStruct.sol";
 
 import "../utils/Exec.sol";
 import "./SmtManager.sol";
@@ -21,7 +22,6 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import "forge-std/console.sol";
 /*
  * Account-Abstraction (EIP-4337) singleton EntryPoint implementation.
  * Only one instance required on each chain.
@@ -30,6 +30,7 @@ import "forge-std/console.sol";
 /// @custom:security-contact https://bounty.ethereum.org
 contract EntryPoint is
     IEntryPoint,
+    IZKVizingAAStruct,
     SmtManager,
     PreGasManager,
     ConfigManager,
@@ -48,12 +49,14 @@ contract EntryPoint is
     // allow some slack for future gas price changes.
     uint256 private constant INNER_GAS_OVERHEAD = 10000;
 
+    
+    uint8 private constant PENALTY_PERCENT = 10;
+    uint16 private constant REVERT_REASON_MAX_LEN = 2048;
+    
     // Marker for inner call revert on out of gas
     bytes32 private constant INNER_OUT_OF_GAS = hex"deaddead";
     bytes32 private constant INNER_REVERT_LOW_PREFUND = hex"deadaa51";
-
-    uint256 private constant REVERT_REASON_MAX_LEN = 2048;
-    uint256 private constant PENALTY_PERCENT = 10;
+    
 
     /// @inheritdoc IERC165
     function supportsInterface(
@@ -137,8 +140,6 @@ contract EntryPoint is
         uint256 gasUsed = startGas - gasleft();
 
         bytes memory message = abi.encode(batches, batchHashs);
-
-        // sync stateRoot and destUserOperations to other chain
     }
 
     function syncBatch(
@@ -245,7 +246,6 @@ contract EntryPoint is
                 // innerCall reverted on prefund too low. treat entire prefund as "gas cost"
                 uint256 actualGas = preGas - gasleft() + opInfo.preOpGas;
                 uint256 actualGasCost = opInfo.prefund;
-                emitPrefundTooLow(opInfo);
                 emitUserOperationEvent(opInfo, false, actualGasCost, actualGas);
                 collected = actualGasCost;
             } else {
@@ -278,13 +278,6 @@ contract EntryPoint is
             success,
             actualGasCost,
             actualGas
-        );
-    }
-
-    function emitPrefundTooLow(UserOpInfo memory opInfo) internal virtual {
-        emit UserOperationPrefundTooLow(
-            opInfo.userOpHash,
-            opInfo.mUserOp.sender
         );
     }
 
@@ -337,29 +330,6 @@ contract EntryPoint is
                 _compensate(beneficiary, collected);
             }
         }
-    }
-
-    /**
-     * A memory copy of UserOp static fields only.
-     * Excluding: userAddr, chainId, callData. Replacing paymasterAndData with paymaster.
-     */
-    struct MemoryUserOp {
-        address sender;
-        uint256 chainId;
-        uint256 operationValue;
-        uint256 zkVerificationGasLimit;
-        uint256 mainChainGasLimit;
-        uint256 destChainGasLimit;
-        uint256 mainChainGasPrice;
-        uint256 destChainGasPrice;
-    }
-
-    struct UserOpInfo {
-        MemoryUserOp mUserOp;
-        bytes32 userOpHash;
-        uint256 prefund;
-        uint256 contextOffset;
-        uint256 preOpGas;
     }
 
     /**
@@ -481,17 +451,14 @@ contract EntryPoint is
 
         // Validate all numeric values in userOp are well below 128 bit, so they can safely be added
         // and multiplied without causing overflow.
-        uint256 zkVerificationGasLimit = mUserOp.zkVerificationGasLimit;
-        uint256 maxGasValues = mUserOp.mainChainGasLimit |
+        // uint64 zkVerificationGasLimit = mUserOp.zkVerificationGasLimit;
+        uint128 maxGasValues = mUserOp.mainChainGasLimit |
             mUserOp.zkVerificationGasLimit |
             mUserOp.destChainGasLimit |
             mUserOp.mainChainGasPrice |
             mUserOp.destChainGasPrice;
-        require(maxGasValues <= type(uint120).max, "AA94 gas values overflow");
-        require(
-            mUserOp.operationValue <= type(uint248).max,
-            "AA94 operation value overflow"
-        );
+        require(maxGasValues <= type(uint128).max);
+        require(mUserOp.operationValue <= type(uint248).max);
 
         uint256 requiredPreFund = _getRequiredPrefund(mUserOp);
 
@@ -576,7 +543,6 @@ contract EntryPoint is
             if (prefund < actualGasCost) {
                 if (mode == IPaymaster.PostOpMode.postOpReverted) {
                     actualGasCost = prefund;
-                    emitPrefundTooLow(opInfo);
                     emitUserOperationEvent(
                         opInfo,
                         false,

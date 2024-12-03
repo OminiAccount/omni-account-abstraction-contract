@@ -1,0 +1,46 @@
+{
+  "Vizing-sepolia": {
+    "ChainId": 28516,
+    "EntryPoint": "0xD4B426f113a858cD1521A8868d67D5407B3EdE5A",
+    "ZKVizingAccountFactory": "0x75F82B744b3bD8b4A26AaECfB8157D996C7D1E95",
+    "WETH": "0x0E8a436671c0d635587548C94b2d9bfb4c66025C",
+    "SyncRouter": "0xaAB80c905B5cd654132D3aC86b3922bA2F662d5F",
+    "CreatedZKVizingAccount": {
+      "UserAddress": "<SignerWithAddress 0x68f0e14430a6697D379928E37F1fB186Ea4e7644>",
+      "UserZKAccount": "0x34BF793008Fa4B15ebf3b1E9Ce3aB492c796c18D"
+    }
+  },
+  "Base-sepolia": {
+    "ChainId": 84532,
+    "EntryPoint": "0x364f0A74c02f8143B9bcaBbad308c99956d66550",
+    "ZKVizingAccountFactory": "0x97B3ca1Ed361eDD280C5391D3F3116A996c4FE91",
+    "WETH": "0x81eafbc3F481ED41C0be22fbad054e0Ed7Ba9936",
+    "SyncRouter": "0xf4174D79aF04dA164C689400D1783734567e002F",
+    "CreatedZKVizingAccount": {
+      "UserAddress": "<SignerWithAddress 0x68f0e14430a6697D379928E37F1fB186Ea4e7644>",
+      "UserZKAccount": "0x7565dB985CdC976f068018e1bA41f089D7234aB4"
+    }
+  },
+  "Arbitrum-sepolia": {
+    "ChainId": 421614,
+    "EntryPoint": "0xCD5F93F142323dA16d71c6309d854852Fe3eE3D3",
+    "ZKVizingAccountFactory": "0x7348254D7E4a460742778D5B45C30F0049739a3A",
+    "WETH": "0xd8337e5E64705c30b6156fD2d85cE6F6e93b47Ed",
+    "SyncRouter": "0x7A06fbDbCCA09791b88C65d2aAAF2b0C815Ac980",
+    "CreatedZKVizingAccount": {
+      "UserAddress": "<SignerWithAddress 0x68f0e14430a6697D379928E37F1fB186Ea4e7644>",
+      "UserZKAccount": "0x7fA16c9A8345671De696dc2b00530893Fda83885"
+    }
+  },
+  "Optimism-sepolia": {
+    "ChainId": 11155420,
+    "EntryPoint": "0x3998821e35B4b192B35B82420FCc099FdF6c908e",
+    "ZKVizingAccountFactory": "0xa97452d1eFa81035150242CFbC032944209c3106",
+    "WETH": "0x9467a150930DA47f24Af3D8A6B0be5eA98dC1909",
+    "SyncRouter": "0xE37beCFA90Cb8EaD715A39693e22ceD824410D6C",
+    "CreatedZKVizingAccount": {
+      "UserAddress": "<SignerWithAddress 0x68f0e14430a6697D379928E37F1fB186Ea4e7644>",
+      "UserZKAccount": "0x9cFa5DB8134450FA8ee295944aDF59e43Eb805b9"
+    }
+  }
+}

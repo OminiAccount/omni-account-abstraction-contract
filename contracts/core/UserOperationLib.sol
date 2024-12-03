@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 
 /* solhint-disable no-inline-assembly */
 
-import "../interfaces/PackedUserOperation.sol";
+import "../../interfaces/zkaa/PackedUserOperation.sol";
 import {calldataKeccak, min} from "./Helpers.sol";
 import "../utils/Poseidon.sol";
 

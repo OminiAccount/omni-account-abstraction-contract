@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-empty-blocks */
 
-import "../interfaces/IAccount.sol";
-import "../interfaces/IEntryPoint.sol";
+import "../../interfaces/zkaa/IAccount.sol";
+import "../../interfaces/zkaa/IEntryPoint.sol";
 import "./UserOperationLib.sol";
 
 /**

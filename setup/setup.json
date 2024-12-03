@@ -1,0 +1,180 @@
+{
+    "VizingPad-MainNet": [
+        {
+            "Name": "Ethereum",
+            "ChainId": 1,
+            "Address": "0x5D77b0c9855F44a8fbEf34E670e243E988682a82"
+        },
+        {
+            "Name": "vizing",
+            "ChainId": 28518,
+            "Address": "0x5D77b0c9855F44a8fbEf34E670e243E988682a82"
+        },
+        {
+            "Name": "Base",
+            "ChainId": 8453,
+            "Address": "0x5D77b0c9855F44a8fbEf34E670e243E988682a82"
+        },
+        {
+            "Name": "Arbitrum-one",
+            "ChainId": 42161,
+            "Address": "0xD725Bc299a232201984FEcb4FF106d84E894193f"
+        },
+        {
+            "Name": "Bob",
+            "ChainId": 60808,
+            "Address": "0x5D77b0c9855F44a8fbEf34E670e243E988682a82"
+        },
+        {
+            "Name": "PolygonzkEVM",
+            "ChainId": 1101,
+            "Address": "0x5D77b0c9855F44a8fbEf34E670e243E988682a82"
+        },
+        {
+            "Name": "Linea",
+            "ChainId": 59144,
+            "Address": "0x5D77b0c9855F44a8fbEf34E670e243E988682a82"
+        },
+        {
+            "Name": "Taiko",
+            "ChainId": 167000,
+            "Address": "0x176BAa4c563985209c159F3ecC7D9F09d3914dE0"
+        },
+        {
+            "Name": "Blast",
+            "ChainId": 81457,
+            "Address": "0x176BAa4c563985209c159F3ecC7D9F09d3914dE0"
+        },
+        {
+            "Name": "Optimism",
+            "ChainId": 10,
+            "Address": "0x523D8B6893D2D0Ce2B48E7964432ce19A2C641F2"
+        },
+        {
+            "Name": "Scroll",
+            "ChainId": 534352,
+            "Address": "0x523D8B6893D2D0Ce2B48E7964432ce19A2C641F2"
+        },
+        {
+            "Name": "BSC",
+            "ChainId": 56,
+            "Address": "0x5D77b0c9855F44a8fbEf34E670e243E988682a82"
+        }
+    ],
+    "VizingPad-TestNet": [
+        {
+            "Name": "Sepolia",
+            "ChainId": 11155111,
+            "Address": "0x0B5a8E5494DDE7039781af500A49E7971AE07a6b"
+        },
+        {
+            "Name": "Vizing-testnet",
+            "ChainId": 28516,
+            "Address": "0x0B5a8E5494DDE7039781af500A49E7971AE07a6b"
+        },
+        {
+            "Name": "Base-sepolia",
+            "ChainId": 84532,
+            "Address": "0x0B5a8E5494DDE7039781af500A49E7971AE07a6b"
+        },
+        {
+            "Name": "Arbitrum-sepolia",
+            "ChainId": 421614,
+            "Address": "0x0B5a8E5494DDE7039781af500A49E7971AE07a6b"
+        },
+        {
+            "Name": "Bob-testnet",
+            "ChainId": 808813,
+            "Address": "0x0B5a8E5494DDE7039781af500A49E7971AE07a6b"
+        },
+        {
+            "Name": "PolygonzkEVM-Cardona",
+            "ChainId": 2442,
+            "Address": "0x0B5a8E5494DDE7039781af500A49E7971AE07a6b"
+        },
+        {
+            "Name": "XLayer-testnet",
+            "ChainId": 195,
+            "Address": "0x0B5a8E5494DDE7039781af500A49E7971AE07a6b"
+        },
+        {
+            "Name": "Optimism-sepolia",
+            "ChainId": 11155420,
+            "Address": "0x4577A9D09AE42913fC7c4e0fFD87E3C60CE3bb1b"
+        },
+        {
+            "Name": "Blast-testnet",
+            "ChainId": 23888,
+            "Address": "0xc6a122D5a915617D463E8FD12534f25f7bE2e228"
+        },
+        {
+            "Name": "Scroll-sepolia",
+            "ChainId": 534351,
+            "Address": "0x6c6014784cCa1C197E96301f3f6999154ceE9136"
+        },
+        {
+            "Name": "zkSync-sepolia",
+            "ChainId": 300,
+            "Address": "0xD213487317f445e9690D4e3DF51D7C65Bca813C1"
+        },
+        {
+            "Name": "Taiko-hekla",
+            "ChainId": 167009,
+            "Address": "0x669a5E47dc1f41db1e4385FeDDb46C1fA0A63b52"
+        }
+    ],
+    "UniswapV3-Router-Mainnet": [
+        {
+            "Name": "Ethereum",
+            "ChainId": 1,
+            "Address": "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45"
+        },
+        {
+            "Name": "Base",
+            "ChainId": 8453,
+            "Address": "0x2626664c2603336E57B271c5C0b26F421741e481"
+        },
+        {
+            "Name": "Arbitrum-one",
+            "ChainId": 42161,
+            "Address": "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45"
+        },
+        {
+            "Name": "Blast",
+            "ChainId": 81457,
+            "Address": "0x549FEB8c9bd4c12Ad2AB27022dA12492aC452B66"
+        },
+        {
+            "Name": "Optimism",
+            "ChainId": 10,
+            "Address": "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45"
+        },
+        {
+            "Name": "BSC",
+            "ChainId": 56,
+            "Address": "0xB971eF87ede563556b2ED4b1C0b0019111Dd85d2"
+        }
+    ],
+    "UniswapV3-Router-Testnet": [
+        {
+            "Name": "Sepolia",
+            "ChainId": 11155111,
+            "Address": "0x3bFA4769FB09eefC5a80d6E87c3B9C650f7Ae48E"
+        },
+        {
+            "Name": "Base-sepolia",
+            "ChainId": 84532,
+            "Address": "0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4"
+        },
+        {
+            "Name": "Arbitrum-sepolia",
+            "ChainId": 421614,
+            "Address": "0x101F443B4d1b059569D643917553c771E1b9663E"
+        },
+        {
+            "Name": "Optimism-sepolia",
+            "ChainId": 11155420,
+            "Address": "0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4"
+        }
+    ]
+}

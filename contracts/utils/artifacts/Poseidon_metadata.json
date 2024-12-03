@@ -1,0 +1,92 @@
+{
+	"compiler": {
+		"version": "0.8.24+commit.e11b9ed9"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [
+					{
+						"internalType": "bytes",
+						"name": "bytecode",
+						"type": "bytes"
+					}
+				],
+				"name": "hashMessage",
+				"outputs": [
+					{
+						"internalType": "uint256[4]",
+						"name": "",
+						"type": "uint256[4]"
+					}
+				],
+				"stateMutability": "pure",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256[4]",
+						"name": "parts",
+						"type": "uint256[4]"
+					}
+				],
+				"name": "mergeUint64ToBytes32",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "pure",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"contracts/utils/Poseidon.sol": "Poseidon"
+		},
+		"evmVersion": "shanghai",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"contracts/library/GoldilocksPoseidon.sol": {
+			"keccak256": "0xe73f0ae8995d581765ca7f4122dc2e6be388d72da435516d5b1be903f56c3a57",
+			"license": "UNLICENSE",
+			"urls": [
+				"bzz-raw://73c3b97141dfe90aba86e9eb6be36d3931b86d8a3bb814cc79b87a90b714ecf4",
+				"dweb:/ipfs/QmaFo1mqyZkhUa4NRPo5Emq2nJY4oUGAEe7D8cfmGCEGHC"
+			]
+		},
+		"contracts/utils/Poseidon.sol": {
+			"keccak256": "0x25d001519684eb6b8a660ae6830c9b7ea73aac03571c06d9fcf93bbad5a484eb",
+			"license": "GPL-3.0",
+			"urls": [
+				"bzz-raw://b30f5950bfeec0cb38eebde439007515d8af767c290c4d8e92c626a2d524a133",
+				"dweb:/ipfs/QmZ8WEzk5uJjZ57YukFUeJLeZSphqWqo2i3vWpscHyaCpb"
+			]
+		}
+	},
+	"version": 1
+}
