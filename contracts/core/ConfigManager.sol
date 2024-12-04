@@ -2,13 +2,15 @@
 pragma solidity ^0.8.23;
 
 contract ConfigManager {
+    struct Config {
+        address entryPoint;
+    }
+    error NumberIsNotEqual();
+
     address public syncRouter;
     address public verifier;
 
-    uint32[] public dstEids;
-
-    uint256 internal dstCoeffGas;
-    uint256 internal dstConGas;
+    mapping(uint64 => Config) public chainConfigs;
 
     modifier isOwner() {
         _isOwner();
@@ -30,15 +32,18 @@ contract ConfigManager {
         verifier = _verifier;
     }
 
-    function updateDstEids(uint32[] calldata _dstEids) external isOwner {
-        dstEids = _dstEids;
-    }
-
-    function updateDstCoeffGas(uint256 _dstCoeffGas) external isOwner {
-        dstCoeffGas = _dstCoeffGas;
-    }
-
-    function updateDstConGas(uint256 _dstConGas) external isOwner {
-        dstConGas = _dstConGas;
+    function updateChainConfigs(
+        uint64[] calldata _chainIds,
+        Config[] calldata _config
+    ) external isOwner {
+        if (_chainIds.length != _config.length) {
+            revert NumberIsNotEqual();
+        }
+        unchecked {
+            for (uint256 i = 0; i < _chainIds.length; ) {
+                chainConfigs[_chainIds[i]] = _config[i];
+                ++i;
+            }
+        }
     }
 }

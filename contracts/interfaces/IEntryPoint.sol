@@ -110,17 +110,22 @@ interface IEntryPoint is IPreGasManager {
     // Return value of getSenderAddress.
     error SenderAddressResult(address sender);
 
+    error NotSupportChainId();
+
+    error OldAccInputHashDoesNotExist();
+    error NewAccInputHashDoesNotExist();
+    error NewStateRootNotInsidePrime();
+    error InvalidProof();
+
     struct BatchData {
         PackedUserOperation[] userOperations; // accInputHash
-        bytes32 oldStateRoot;
-        bytes32 newStateRoot;
         bytes32 accInputHash; // Todo: Use the poseidonHash to calculate the value
     }
 
     struct ChainExecuteExtra {
-        uint256 chainId;
-        uint256 chainFee;
-        uint256 chainUserOperationsNumber;
+        uint64 chainId;
+        uint64 chainFee;
+        uint64 chainUserOperationsNumber;
     }
 
     struct ChainExecuteInfo {
@@ -130,6 +135,7 @@ interface IEntryPoint is IPreGasManager {
 
     struct ChainsExecuteInfo {
         ChainExecuteExtra[] chainExtra;
+        bytes32 newStateRoot;
         address beneficiary;
     }
 

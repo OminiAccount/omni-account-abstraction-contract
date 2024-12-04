@@ -18,9 +18,9 @@ contract SetupEntryPoint is Script, AddressHelper {
         vm.startBroadcast(deployerPrivateKey);
         EntryPoint(sepoliaEntryPoint).updateVerifier(verifier);
         EntryPoint(sepoliaEntryPoint).updateSyncRouter(sepoliaSyncRouter);
-        EntryPoint(sepoliaEntryPoint).updateDstEids(sepoliaDstEids);
-        EntryPoint(sepoliaEntryPoint).updateDstCoeffGas(dstCoeffGas);
-        EntryPoint(sepoliaEntryPoint).updateDstConGas(dstConGas);
+        // EntryPoint(sepoliaEntryPoint).updateDstEids(sepoliaDstEids);
+        // EntryPoint(sepoliaEntryPoint).updateDstCoeffGas(dstCoeffGas);
+        // EntryPoint(sepoliaEntryPoint).updateDstConGas(dstConGas);
         vm.stopBroadcast();
 
         // config SyncRouter

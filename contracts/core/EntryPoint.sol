@@ -11,7 +11,7 @@ import "../interfaces/ISyncRouter.sol";
 import "../interfaces/IVerifier.sol";
 
 import "../utils/Exec.sol";
-import "./SmtManager.sol";
+import "./StateManager.sol";
 import "./Helpers.sol";
 import "./PreGasManager.sol";
 import "./ConfigManager.sol";
@@ -30,7 +30,7 @@ import "forge-std/console.sol";
 /// @custom:security-contact https://bounty.ethereum.org
 contract EntryPoint is
     IEntryPoint,
-    SmtManager,
+    StateManager,
     PreGasManager,
     ConfigManager,
     ReentrancyGuard,
@@ -55,6 +55,16 @@ contract EntryPoint is
     uint256 private constant REVERT_REASON_MAX_LEN = 2048;
     uint256 private constant PENALTY_PERCENT = 10;
 
+    // Modulus zkSNARK
+    uint256 internal constant _RFIELD =
+        21888242871839275222246405745257275088548364400416034343698204186575808495617;
+
+    // L2 chain identifier
+    // uint64 public constant chainID = 1;
+
+    // L2 chain identifier
+    uint64 public constant FORK_ID = 1;
+
     /// @inheritdoc IERC165
     function supportsInterface(
         bytes4 interfaceId
@@ -74,26 +84,52 @@ contract EntryPoint is
      * @param proof The encoded proof.
      * @param batches The encoded public values.
      */
-    function verifyBatch(
+    function verifyBatches(
         bytes calldata proof,
         BatchData[] calldata batches,
         ChainsExecuteInfo calldata chainsExecuteInfos
     ) external payable {
         // First verify proof
-        // Todo:Input format needs to be updated
-        // IVerifier(verifier).verifyProof(publicValues, proof);
+        (uint[2] memory pA, uint[2][2] memory pB, uint[2] memory pC) = abi
+            .decode(proof, (uint[2], uint[2][2], uint[2]));
+
+        uint64 batchLength = uint64(batches.length);
+        uint64 finalNewBatch = lastVerifiedBatch + batchLength;
+
+        // Get snark bytes
+        bytes memory snarkHashBytes = getInputSnarkBytes(
+            lastVerifiedBatch,
+            finalNewBatch,
+            batchNumToState[lastVerifiedBatch].accInputRoot,
+            batches[batchLength - 1].accInputHash,
+            batchNumToState[lastVerifiedBatch].stateRoot,
+            chainsExecuteInfos.newStateRoot
+        );
+
+        // Calulate the snark input
+        uint256 inputSnark = uint256(sha256(snarkHashBytes)) % _RFIELD;
+        if (!IVerifier(verifier).verifyProof(pA, pB, pC, [inputSnark])) {
+            revert InvalidProof();
+        }
 
         ChainExecuteInfo[] memory chainExecuteInfos = new ChainExecuteInfo[](
             chainsExecuteInfos.chainExtra.length
         );
 
-        bytes32[] memory batchHashs = new bytes32[](batches.length);
+        bytes32[] memory batchHashs = new bytes32[](batchLength);
 
         unchecked {
             for (uint256 i = 0; i < chainsExecuteInfos.chainExtra.length; ) {
                 ChainExecuteExtra memory extra = chainsExecuteInfos.chainExtra[
                     i
                 ];
+
+                if (
+                    extra.chainId != block.chainid &&
+                    chainConfigs[extra.chainId].entryPoint == address(0)
+                ) {
+                    revert NotSupportChainId();
+                }
 
                 PackedUserOperation[]
                     memory chainUserOps = new PackedUserOperation[](
@@ -102,7 +138,7 @@ contract EntryPoint is
 
                 uint256 userOpsIndex;
 
-                for (uint256 j = 0; j < batches.length; ) {
+                for (uint256 j = 0; j < batchLength; ) {
                     // batchHashs[j] = batches[j].userOperations.calculateHash();
                     PackedUserOperation[] memory userOps = batches[j]
                         .userOperations
@@ -111,12 +147,6 @@ contract EntryPoint is
                     chainUserOps.append(userOps, userOpsIndex);
 
                     userOpsIndex += userOps.length;
-
-                    // update stateRoot
-                    // updateSmtRoot(
-                    //     batches[j].oldStateRoot,
-                    //     batches[j].newStateRoot
-                    // );
 
                     ++j;
                 }
@@ -128,6 +158,15 @@ contract EntryPoint is
             }
         }
 
+        // Update State
+        updateState(
+            finalNewBatch,
+            chainsExecuteInfos.newStateRoot,
+            batches[batchLength - 1].accInputHash
+        );
+        updateLastVerifiedBatch(batchLength);
+
+        // Execute vizing userOperations
         uint256 startGas = gasleft();
         processBatchs(
             chainExecuteInfos[0].userOperations,
@@ -136,9 +175,40 @@ contract EntryPoint is
         );
         uint256 gasUsed = startGas - gasleft();
 
-        bytes memory message = abi.encode(batches, batchHashs);
+        // Sync stateRoot and destUserOperations to other chain
+        // Todo: If there is no transaction, is the synchronization state root required?
+        // Currently no state root is used on other chains
+        unchecked {
+            for (uint256 i = 1; i < chainExecuteInfos.length; i++) {
+                ChainExecuteInfo memory chainExecuteInfo = chainExecuteInfos[i];
 
-        // sync stateRoot and destUserOperations to other chain
+                address destEntryPoint = chainConfigs[
+                    chainExecuteInfo.extra.chainId
+                ].entryPoint;
+
+                uint256 crossFee = ISyncRouter(syncRouter).fetchOmniMessageFee(
+                    chainExecuteInfo.extra.chainId,
+                    destEntryPoint,
+                    chainExecuteInfo.extra.chainFee,
+                    chainExecuteInfo.userOperations
+                );
+
+                require(
+                    address(this).balance >=
+                        crossFee + chainExecuteInfo.extra.chainFee,
+                    "Insufficient balance"
+                );
+
+                ISyncRouter(syncRouter).sendOmniMessage{
+                    value: crossFee + chainExecuteInfo.extra.chainFee
+                }(
+                    chainExecuteInfo.extra.chainId,
+                    destEntryPoint,
+                    chainExecuteInfo.extra.chainFee,
+                    chainExecuteInfo.userOperations
+                );
+            }
+        }
     }
 
     function syncBatch(
@@ -615,6 +685,51 @@ contract EntryPoint is
                     ? mUserOp.mainChainGasPrice
                     : mUserOp.destChainGasPrice;
         }
+    }
+
+    /**
+     * @notice Function to calculate the input snark bytes
+     * @param initNumBatch Batch which the aggregator starts the verification
+     * @param finalNewBatch Last batch aggregator intends to verify
+     * @param oldStateRoot State root before batch is processed
+     * @param newStateRoot New State root once the batch is processed
+     */
+    function getInputSnarkBytes(
+        uint64 initNumBatch,
+        uint64 finalNewBatch,
+        bytes32 oldAccInputHash,
+        bytes32 newAccInputHash,
+        bytes32 oldStateRoot,
+        bytes32 newStateRoot
+    ) public view returns (bytes memory) {
+        // sanity checks
+
+        if (initNumBatch != 0 && oldAccInputHash == bytes32(0)) {
+            revert OldAccInputHashDoesNotExist();
+        }
+
+        if (newAccInputHash == bytes32(0)) {
+            revert NewAccInputHashDoesNotExist();
+        }
+
+        // Check that new state root is inside goldilocks field
+        // if (!checkStateRootInsidePrime(uint256(newStateRoot))) {
+        //     revert NewStateRootNotInsidePrime();
+        // }
+
+        return
+            abi.encodePacked(
+                0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266,
+                oldStateRoot,
+                oldAccInputHash,
+                initNumBatch,
+                uint64(1),
+                FORK_ID,
+                newStateRoot,
+                newAccInputHash,
+                bytes32(0),
+                finalNewBatch
+            );
     }
 
     /**

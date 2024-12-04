@@ -45,15 +45,15 @@ contract SyncRouter is VizingOmni, Ownable {
         uint64 destChainId,
         address destContract,
         uint256 destChainUsedFee,
-        bytes memory batchsMessage
+        PackedUserOperation[] calldata userOperations
     ) public view virtual returns (uint256) {
-        bytes memory message = abi.encode(batchsMessage);
+        bytes memory userOperationsMessage = abi.encode(userOperations);
         bytes memory encodedMessage = _packetMessage(
             BRIDGE_SEND_MODE,
             destContract,
             defaultGaslimit,
             defaultGasPrice,
-            message
+            userOperationsMessage
         );
 
         return
@@ -68,27 +68,27 @@ contract SyncRouter is VizingOmni, Ownable {
     function sendOmniMessage(
         uint64 destChainId,
         address destContract,
-        uint256 destChainUsedFee, // Amount that the target chain needs to spend to execute userop
-        bytes memory batchsMessage
+        uint256 destChainExecuteUsedFee, // Amount that the target chain needs to spend to execute userop
+        PackedUserOperation[] calldata userOperations
     ) external payable onlyEntryPoint(uint64(block.chainid)) {
-        bytes memory message = abi.encode(batchsMessage);
+        bytes memory userOperationsMessage = abi.encode(userOperations);
 
         bytes memory encodedMessage = _packetMessage(
             BRIDGE_SEND_MODE,
             destContract,
             defaultGaslimit,
             defaultGasPrice,
-            message
+            userOperationsMessage
         );
 
         uint256 gasFee = fetchOmniMessageFee(
             destChainId,
             destContract,
-            destChainUsedFee,
-            batchsMessage
+            destChainExecuteUsedFee,
+            userOperations
         );
 
-        require(msg.value >= gasFee + destChainUsedFee);
+        require(msg.value >= gasFee + destChainExecuteUsedFee);
 
         // step 4: send Omni-Message 2 Vizing Launch Pad
         LaunchPad.Launch{value: msg.value}(
@@ -96,7 +96,7 @@ contract SyncRouter is VizingOmni, Ownable {
             maxArrivalTime,
             selectedRelayer,
             msg.sender,
-            destChainUsedFee,
+            destChainExecuteUsedFee,
             destChainId,
             additionParams,
             encodedMessage
@@ -113,10 +113,9 @@ contract SyncRouter is VizingOmni, Ownable {
         if (mirrorEntryPoint[srcChainId] != address(uint160(srcContract))) {
             revert InvalidData();
         }
-        bytes memory batchsMessage = abi.decode(message, (bytes));
 
         PackedUserOperation[] memory userOps = abi.decode(
-            batchsMessage,
+            message,
             (PackedUserOperation[])
         );
 
