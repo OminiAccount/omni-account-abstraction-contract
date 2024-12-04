@@ -104,7 +104,7 @@
         },
         {
             "Name": "Blast-testnet",
-            "ChainId": 23888,
+            "ChainId": 168587773,
             "Address": "0xc6a122D5a915617D463E8FD12534f25f7bE2e228"
         },
         {
@@ -175,6 +175,45 @@
             "Name": "Optimism-sepolia",
             "ChainId": 11155420,
             "Address": "0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4"
+        }
+    ],
+    "UniswapV2-Router-Mainnet": [
+        {
+            "Name": "Ethereum",
+            "ChainId": 1,
+            "Address": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
+        },
+        {
+            "Name": "Base",
+            "ChainId": 8453,
+            "Address": "0x4752ba5dbc23f44d87826276bf6fd6b1c372ad24"
+        },
+        {
+            "Name": "Arbitrum-one",
+            "ChainId": 42161,
+            "Address": "0x4752ba5dbc23f44d87826276bf6fd6b1c372ad24"
+        },
+        {
+            "Name": "Blast",
+            "ChainId": 81457,
+            "Address": "0xBB66Eb1c5e875933D44DAe661dbD80e5D9B03035"
+        },
+        {
+            "Name": "Optimism",
+            "ChainId": 10,
+            "Address": "0x4A7b5Da61326A6379179b40d00F57E5bbDC962c2"
+        },
+        {
+            "Name": "BSC",
+            "ChainId": 56,
+            "Address": "0x4752ba5dbc23f44d87826276bf6fd6b1c372ad24"
+        }
+    ],
+    "UniswapV2-Router-Testnet": [
+        {
+            "Name": "Sepolia",
+            "ChainId": 11155111,
+            "Address": "0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3"
         }
     ]
 }

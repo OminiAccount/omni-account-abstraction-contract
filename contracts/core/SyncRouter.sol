@@ -24,24 +24,20 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, IZKVizingAAStruct, 
     /**
      * @dev Constructs a new BatchSend contract instance.
      * @param _vizingPad The VizingPad for this contract to interact with.
-     * @param _owner The owner address that will be set as the owner of the contract.
-     * @param _routers Routers[0]=uniswap v3 router, Routers[1]=uniswap v2 router
+     * @param _WETH The owner address that will be set as the owner of the contract.
      */
     constructor(
         address _vizingPad,
-        address _owner,
-        address[] memory _routers
-    ) VizingOmni(_vizingPad) Ownable(_owner) {
-        for(uint256 i; i<_routers.length; i++){
-            routers.push(_routers[i]);
-        }
+        address _WETH
+    ) VizingOmni(_vizingPad) Ownable(msg.sender) {
+        WETH=_WETH;
     }
 
-    mapping(uint64 => address) public mirrorEntryPoint;
+    mapping(uint64 => address) public MirrorEntryPoint;
     mapping(uint256 => bytes1) public LockWay;
 
     modifier onlyEntryPoint(uint64 chainId) {
-        require(msg.sender == mirrorEntryPoint[chainId], "MEP");
+        require(msg.sender == MirrorEntryPoint[chainId], "MEP");
         _;
     }
 
@@ -56,7 +52,7 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, IZKVizingAAStruct, 
         uint64 chainId,
         address entryPoint
     ) external onlyOwner {
-        mirrorEntryPoint[chainId] = entryPoint;
+        MirrorEntryPoint[chainId] = entryPoint;
     }
 
     /**
@@ -211,14 +207,14 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, IZKVizingAAStruct, 
         uint256 srcContract,
         bytes calldata message
     ) internal virtual override {
-        require(mirrorEntryPoint[srcChainId] == address(uint160(srcContract)),"Invalid contract");
+        require(MirrorEntryPoint[srcChainId] == address(uint160(srcContract)),"Invalid contract");
         (bytes memory batchsMessage, bytes memory packCrossMessage, uint8 way) = abi.decode(message, (bytes, bytes, uint8));
         PackedUserOperation[] memory userOps = abi.decode(
             batchsMessage,
             (PackedUserOperation[])
         );
         
-        IEntryPoint(mirrorEntryPoint[uint64(block.chainid)]).syncBatch(userOps);
+        IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]).syncBatch(userOps);
         uint256 amountOut;
         if(way == 0){
         

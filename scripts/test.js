@@ -37,28 +37,34 @@ async function main() {
 
     //Not deploy
     let EntryPoint;
-    // let ZKVizingAccountFactory;
+    let ZKVizingAccountFactory;
     let SyncRouter;
     let WETH;
+    let SenderCreator;
+    let VerifyManager;
+    let ZKVizingAAEncode;
 
-    let EntryPointAddress;
-    // let ZKVizingAccountFactoryAddress;
-    let WETHAddress;
+    let EntryPointAddress=ADDRESS_ZERO;
+    let ZKVizingAccountFactoryAddress=ADDRESS_ZERO;
+    let WETHAddress=ADDRESS_ZERO;
     let SyncRouterAddress=ADDRESS_ZERO;
+    let SenderCreatorAddress=ADDRESS_ZERO;
+    let VerifyManagerAddress=ADDRESS_ZERO;
+    let ZKVizingAAEncodeAddress=ADDRESS_ZERO;
 
     //Already deploy
     // let EntryPointAddress="0x5FbDB2315678afecb367f032d93F642f64180aa3";
-    let ZKVizingAccountFactoryAddress="0x7348254D7E4a460742778D5B45C30F0049739a3A";
+    // let ZKVizingAccountFactoryAddress="0x7348254D7E4a460742778D5B45C30F0049739a3A";
     // let WETHAddress="0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
     // let SyncRouterAddress="0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
 
     // let EntryPoint=new ethers.Contract(EntryPointAddress, EntryPointABI.abi, owner);
-    let ZKVizingAccountFactory=new ethers.Contract(ZKVizingAccountFactoryAddress, ZKVizingAccountFactoryABI.abi, owner);
+    // let ZKVizingAccountFactory=new ethers.Contract(ZKVizingAccountFactoryAddress, ZKVizingAccountFactoryABI.abi, owner);
     // let SyncRouter=new ethers.Contract(SyncRouterAddress, SyncRouterABI.abi, owner);
     // let WETH=new ethers.Contract(WETHAddress, WETHABI.abi, owner);
 
 
-
+/*********************************************Deploy********************************************************** */
     async function DeployEntryPoint() {
         const [owner, otherAccount] = await ethers.getSigners();
         const entryPoint = await ethers.getContractFactory("EntryPoint");
@@ -68,9 +74,9 @@ async function main() {
         return { EntryPoint };
     }
 
-    async function DeploySyncRouter(vizingPad, swapRouter) {
+    async function DeploySyncRouter(vizingPad, weth) {
         const syncRouter = await ethers.getContractFactory("SyncRouter");
-        SyncRouter = await syncRouter.deploy(vizingPad, owner.address, swapRouter);
+        SyncRouter = await syncRouter.deploy(vizingPad, weth);
         SyncRouterAddress = SyncRouter.target;
         console.log("SyncRouter:", SyncRouterAddress);
         return { SyncRouter };
@@ -91,6 +97,32 @@ async function main() {
         console.log("ZKVizingAccountFactory:", ZKVizingAccountFactoryAddress);
         return { ZKVizingAccountFactory };
     }
+
+    async function DeploySenderCreator() {
+        const senderCreator = await ethers.getContractFactory("SenderCreator");
+        SenderCreator = await senderCreator.deploy();
+        SenderCreatorAddress = SenderCreator.target;
+        console.log("SenderCreator:", SenderCreatorAddress);
+        return { SenderCreator };
+    }
+
+    //????
+    async function DeployVerifyManager() {
+        const verifyManager = await ethers.getContractFactory("VerifyManager");
+        VerifyManager = await verifyManager.deploy();
+        VerifyManagerAddress = VerifyManager.target;
+        console.log("VerifyManager:", VerifyManagerAddress);
+        return { VerifyManager };
+    }
+
+    async function DeployZKVizingAAEncode() {
+        const zkVizingAAEncode = await ethers.getContractFactory("ZKVizingAAEncode");
+        ZKVizingAAEncode = await zkVizingAAEncode.deploy();
+        ZKVizingAAEncodeAddress = ZKVizingAAEncode.target;
+        console.log("ZKVizingAAEncode:", ZKVizingAAEncodeAddress);
+        return { ZKVizingAAEncode };
+    }
+
 
     async function CreateAccount(userAddress) {
         try {
@@ -121,16 +153,21 @@ async function main() {
         } catch (e) {
             console.log("No existing file found, creating a new one.");
         }
+
         addresses[networkName] = {
             ChainId: chainId,
             EntryPoint: EntryPointAddress,
             ZKVizingAccountFactory: ZKVizingAccountFactoryAddress,
             WETH: WETHAddress,
             SyncRouter: SyncRouterAddress,
+            SenderCreator: SenderCreatorAddress,
+            VerifyManager: VerifyManagerAddress,
+            ZKVizingAAEncode: ZKVizingAAEncodeAddress,
             CreatedZKVizingAccount:{
                 UserAddress: userAddress,
                 UserZKAccount: userZKAccount
-            }
+            },
+
         };
 
         fs.writeFileSync("deployedAddresses.json", JSON.stringify(addresses, null, 2)); 
@@ -143,32 +180,31 @@ async function main() {
             let currentSetChainId=BigInt(setup["VizingPad-TestNet"][i].ChainId);
             console.log("currentSetChainId:", currentSetChainId);
             if(currentSetChainId === currentChainId){
-                // await DeployEntryPoint();
-                // await DeployZKVizingAccountFactory(EntryPointAddress);
-                // await DeployWETH();
-                for(let j=0; j<setup["UniswapV3-Router-Testnet"].length; j++){
-                    let currentSetUniswapChainId=BigInt(setup["UniswapV3-Router-Testnet"][j].ChainId);
-                    if(currentSetUniswapChainId === currentChainId){
-                        await DeploySyncRouter(setup["VizingPad-TestNet"][i].Address, setup["UniswapV3-Router-Testnet"][j].Address);
-                    }
-                }
+                await DeployEntryPoint();
+                await DeployZKVizingAccountFactory(EntryPointAddress);
+                await DeployWETH();
+                await DeploySyncRouter(setup["VizingPad-TestNet"][i].Address, WETH);
+                await DeploySenderCreator();
+                // await DeployVerifyManager();
+                await DeployZKVizingAAEncode();
+
                 //create zkaa account
-                let createdZKAccount=await CreateAccount(testUser.address);
+                let createdZKAccount=ADDRESS_ZERO;
+                createdZKAccount=await CreateAccount(testUser.address);
                 
                 //fs write json
-                await SaveAddressesToFile(setup["VizingPad-TestNet"][i].Name, setup["VizingPad-TestNet"][i].ChainId, testUser, createdZKAccount);
+                await SaveAddressesToFile(
+                    setup["VizingPad-TestNet"][i].Name, 
+                    setup["VizingPad-TestNet"][i].ChainId, 
+                    testUser, 
+                    createdZKAccount
+                );
             }else{
                 console.log("Not network");
             }
 
             
         }
-        // await DeployEntryPoint();
-        // await DeployZKVizingAccountFactory(EntryPointAddress);
-        // await DeployWETH();
-        // const base_vizingPad = "0x0B5a8E5494DDE7039781af500A49E7971AE07a6b";
-        // const base_router = "0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4";
-        // await DeploySyncRouter(base_vizingPad, base_router);
 
         
     }

@@ -33,11 +33,13 @@ const {
         const [owner, otherAccount] = await ethers.getSigners();
         const base_vizingPad="0x0B5a8E5494DDE7039781af500A49E7971AE07a6b";
         const base_router="0x94cC0AaC535CCDB3C01d6787D6413C739ae12bc4";
-        const routers=[base_router, base_router];
+        const weth=await ethers.getContractFactory("WETH9");
+        const WETH=await weth.deploy();
+        console.log("WETH:",WETH.target);
         const syncRouter = await ethers.getContractFactory("SyncRouter");
-        const SyncRouter = await syncRouter.deploy(base_vizingPad, owner, routers);
+        const SyncRouter = await syncRouter.deploy(base_vizingPad, WETH);
         console.log("SyncRouter:",SyncRouter.target);
-        return { SyncRouter };
+        return { SyncRouter, WETH };
     }
 
     async function DeployWETH(){
@@ -61,13 +63,12 @@ const {
     let ZKVizingAAEncode;
   
     describe("Deploy", function () {
-      it("EntryPoint and Factory and WETH", async function () {
+      it("EntryPoint and Factory", async function () {
         ({ EntryPoint, ZKVizingAccountFactory } = await loadFixture(DeployEntryPointAndFactory));
-        WETH = await DeployWETH();
       });
 
-      it("SyncRouter", async function () {
-        SyncRouter = await DeploySyncRouter();
+      it("SyncRouter and WETH", async function () {
+        ({ SyncRouter, WETH } = await loadFixture(DeploySyncRouter));
       });
 
       it("ZKVizingAAEncode", async function () {
