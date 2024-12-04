@@ -211,7 +211,7 @@ contract EntryPoint is
         }
     }
 
-    function syncBatch(
+    function syncBatches(
         PackedUserOperation[] memory userOps
     ) external isSyncRouter {
         // Todo: remove beneficiary address(0x01), because the synchronization module does not need

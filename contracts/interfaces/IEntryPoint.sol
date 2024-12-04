@@ -139,7 +139,7 @@ interface IEntryPoint is IPreGasManager {
         address beneficiary;
     }
 
-    function syncBatch(PackedUserOperation[] memory userOps) external;
+    function syncBatches(PackedUserOperation[] memory userOps) external;
 
     /**
      * Execute a batch of UserOperations.

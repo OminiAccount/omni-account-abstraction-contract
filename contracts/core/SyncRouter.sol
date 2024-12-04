@@ -119,6 +119,8 @@ contract SyncRouter is VizingOmni, Ownable {
             (PackedUserOperation[])
         );
 
-        IEntryPoint(mirrorEntryPoint[uint64(block.chainid)]).syncBatch(userOps);
+        IEntryPoint(mirrorEntryPoint[uint64(block.chainid)]).syncBatches(
+            userOps
+        );
     }
 }
