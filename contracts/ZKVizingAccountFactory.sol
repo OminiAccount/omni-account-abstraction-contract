@@ -22,40 +22,25 @@ contract ZKVizingAccountFactory {
         accountImplementation = new ZKVizingAccount(_entryPoint);
     }
 
-    struct UserZKVizingAccountInfo{
-        uint256 userId;
-        bytes1 state; 
-        address zkVizingAccount;
-    }
-    mapping(address => UserZKVizingAccountInfo)private _UserZKVizingAccountInfo;
-
-    /**
-     * create an account, and return its address.
-     * returns the address even if the account is already deployed.
-     * Note that during UserOperation execution, this method is called only if the account is not deployed.
-     * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
-     */
     function createAccount(
-        address owner
+        address owner,
+        uint256 salt
     ) public returns (ZKVizingAccount ret) {
-        require(_UserZKVizingAccountInfo[owner].state != 0x01,"Already create");
+        address addr = getAccountAddress(owner, salt);
+        uint256 codeSize = addr.code.length;
+        if (codeSize > 0) {
+            return ZKVizingAccount(payable(addr));
+        }
         ret = ZKVizingAccount(
             payable(
-                new ERC1967Proxy{salt: bytes32(UserId)}(
+                new ERC1967Proxy{salt: bytes32(salt)}(
                     address(accountImplementation),
                     abi.encodeCall(ZKVizingAccount.initialize, (owner))
                 )
             )
         );
-        address zkVizingAccountAddress=address(ret);
-        require(zkVizingAccountAddress!=address(0));
-        _UserZKVizingAccountInfo[owner]=UserZKVizingAccountInfo({
-            userId: UserId,
-            state: 0x01,
-            zkVizingAccount: zkVizingAccountAddress
-        });
-        UserId++;
-        emit AccountCreated(zkVizingAccountAddress, owner);
+
+        emit AccountCreated(addr, owner);
     }
 
     /**
@@ -63,11 +48,11 @@ contract ZKVizingAccountFactory {
      */
     function getAccountAddress(
         address owner,
-        uint256 _userId
+        uint256 salt
     ) public view returns (address) {
         return
             Create2.computeAddress(
-                bytes32(_userId),
+                bytes32(salt),
                 keccak256(
                     abi.encodePacked(
                         type(ERC1967Proxy).creationCode,
@@ -80,7 +65,4 @@ contract ZKVizingAccountFactory {
             );
     }
 
-    function getUserAccountInfo(address _owner)external view returns(UserZKVizingAccountInfo memory){
-        return _UserZKVizingAccountInfo[_owner];
-    }
 }

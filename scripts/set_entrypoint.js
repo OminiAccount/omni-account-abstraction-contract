@@ -43,9 +43,9 @@ async function main() {
         networkName="XLayer-testnet";
     }else if(currentChainId===11155420n){
         networkName="Optimism-sepolia";
-    }else if(currentChainId===23888n){
-        networkName="Blast-testnet";
     }else if(currentChainId===168587773n){
+        networkName="Blast-testnet";
+    }else if(currentChainId===534351n){
         networkName="Scroll-sepolia";
     }else if(currentChainId===300n){
         networkName="zkSync-sepolia";
@@ -63,27 +63,27 @@ async function main() {
         owner
     );
 
-    /** add routers */
-    for(let i=0;i<setup["UniswapV3-Router-Testnet"].length;i++){
-        let currentSetUniV3ChainId=BigInt(setup["UniswapV3-Router-Testnet"][i].ChainId);
-        if(currentChainId===currentSetUniV3ChainId){
-            const addUniV3Router=await SyncRouter.addRouter(setup["UniswapV3-Router-Testnet"][i].Address);
-            await addUniV3Router.wait();
-            console.log(`addUniV3Router in ${setup["UniswapV3-Router-Testnet"][i].Name} success`);
+    //setMirrorEntryPoint
+    async function SetMirrorEntryPoint(chainId, contractAddress){
+        try{
+            const setMirrorEntryPoint=await SyncRouter.setMirrorEntryPoint(chainId, contractAddress);
+            await setMirrorEntryPoint.wait();
+            console.log("SetMirrorEntryPoint success");
+        }catch(e){
+            console.log("SetMirrorEntryPoint fail:",e);
         }
     }
-    for(let j=0;j<setup["UniswapV2-Router-Testnet"].length;j++){
-        let currentSetUniV2ChainId=BigInt(setup["UniswapV2-Router-Testnet"][j].ChainId);
-        if(currentChainId===currentSetUniV2ChainId){
-            const addUniV3Router=await SyncRouter.addRouter(setup["UniswapV2-Router-Testnet"][j].Address);
-            await addUniV3Router.wait();
-            console.log(`addUniV2Router in ${setup["UniswapV2-Router-Testnet"][j].Name} success`);
-        }
+
+    {
+        await SetMirrorEntryPoint(deployedAddresses["Arbitrum-sepolia"].ChainId, deployedAddresses["Arbitrum-sepolia"].EntryPoint);
+        await SetMirrorEntryPoint(deployedAddresses["Blast-testnet"].ChainId, deployedAddresses["Blast-testnet"].EntryPoint);
+        await SetMirrorEntryPoint(deployedAddresses["Optimism-sepolia"].ChainId, deployedAddresses["Optimism-sepolia"].EntryPoint);
+        await SetMirrorEntryPoint(deployedAddresses["Sepolia"].ChainId, deployedAddresses["Sepolia"].EntryPoint);
+        await SetMirrorEntryPoint(deployedAddresses["Vizing-testnet"].ChainId, deployedAddresses["Vizing-testnet"].EntryPoint);
     }
-        
-    
 
 }
+
 main().catch((error) => {
     console.error(error);
     process.exitCode = 1;

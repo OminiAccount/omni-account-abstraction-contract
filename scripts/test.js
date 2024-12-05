@@ -1,5 +1,3 @@
-
-
 const hre = require("hardhat");
 const fs = require("fs");
 
@@ -13,16 +11,23 @@ const setup = require("../setup/setup.json");
 const { Network } = require("inspector");
 
 async function main() {
-    const [owner, testUser] = await hre.ethers.getSigners();
+    const [deployer, testUser, owner] = await hre.ethers.getSigners();
     console.log("owner:", owner.address);
     console.log("testUser:",testUser.address);
     const provider = ethers.provider;
     const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
 
-    const ownerETHBalance = await provider.getBalance(owner.address);
-    console.log("ownerETHBalance:", ownerETHBalance);
+    const ownerETHBalance1 = await GetETHBalance(owner.address);
+    console.log("ownerETHBalance before:", ownerETHBalance1);
+    // SendEther
+    {   
+        const sendAmount=ethers.parseEther("0.025");
+        await SendEther(owner, deployer.address, sendAmount);
+    }
+    const ownerETHBalance2 = await GetETHBalance(owner.address);
+    console.log("ownerETHBalance after:", ownerETHBalance2);
 
-    const testUserETHBalance = await provider.getBalance(testUser.address);
+    const testUserETHBalance = await GetETHBalance(testUser.address);
     console.log("testUserETHBalance:", testUserETHBalance);
 
     if(testUserETHBalance<=ethers.parseEther("0.01")){
@@ -32,8 +37,6 @@ async function main() {
     const network = await provider.getNetwork();
     const currentChainId = network.chainId; 
     console.log("currentChainId:", currentChainId); 
-
-    
 
     //Not deploy
     let EntryPoint;
@@ -46,11 +49,19 @@ async function main() {
 
     let EntryPointAddress=ADDRESS_ZERO;
     let ZKVizingAccountFactoryAddress=ADDRESS_ZERO;
-    let WETHAddress=ADDRESS_ZERO;
+    let WETHAddress="0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482";
     let SyncRouterAddress=ADDRESS_ZERO;
     let SenderCreatorAddress=ADDRESS_ZERO;
     let VerifyManagerAddress=ADDRESS_ZERO;
-    let ZKVizingAAEncodeAddress=ADDRESS_ZERO;
+    let ZKVizingAAEncodeAddress="0xF9Ca62E37F561F2d26F41f4fE27c4FcBF2d6be7B";
+
+    // let EntryPointAddress="0x7b418afBbCf67F62511D01d7d76FaCBDEC38d1Ca";
+    // let ZKVizingAccountFactoryAddress="0xFC6c648230C5372596ed05d33170e59755734861";
+    // let WETHAddress="0x3C01F3f35cAf11bdb7BBc9b2E050b132b1aF98F3";
+    // let SyncRouterAddress="0xe5FEd6669695757AB25E0FfEEe4CE0545EfC5F71";
+    // let SenderCreatorAddress="0xB8A0649CB93209a2c22D2D8d14a02B6019349117";
+    // let VerifyManagerAddress=ADDRESS_ZERO;
+    // let ZKVizingAAEncodeAddress="0xfcE16F53E4483Cc62Ee3440C44E71C43Db4DB2C8";
 
     //Already deploy
     // let EntryPointAddress="0x5FbDB2315678afecb367f032d93F642f64180aa3";
@@ -62,6 +73,36 @@ async function main() {
     // let ZKVizingAccountFactory=new ethers.Contract(ZKVizingAccountFactoryAddress, ZKVizingAccountFactoryABI.abi, owner);
     // let SyncRouter=new ethers.Contract(SyncRouterAddress, SyncRouterABI.abi, owner);
     // let WETH=new ethers.Contract(WETHAddress, WETHABI.abi, owner);
+
+    async function GetETHBalance(account){
+        try{
+            const accountETHBalance = await provider.getBalance(account);
+            console.log("accountETHBalance:", accountETHBalance);
+            return accountETHBalance;
+        }catch(e){
+            console.log("Get eth balance error:",e);
+        }
+    }
+
+    async function SendEther(senderWallet, recipientAddress, ethAmount) {
+        try {
+            // Send the transaction
+            const transactionResponse = await senderWallet.sendTransaction({
+                to: recipientAddress,
+                value: ethAmount,
+              });
+            // Wait for the transaction to be mined
+            const receipt = await transactionResponse.wait();
+            if(receipt.status===1){
+                console.log("Transaction mined:", receipt.hash);
+            }else{
+                console.log("Receipt fail");
+            }
+        } catch (error) {
+            console.error("Error sending transaction:", error);
+        }
+    }
+    
 
 
 /*********************************************Deploy********************************************************** */
@@ -123,23 +164,14 @@ async function main() {
         return { ZKVizingAAEncode };
     }
 
-
-    async function CreateAccount(userAddress) {
+    async function CreateAccount(userAddress, saltNum) {
         try {
-            const userInfo = await ZKVizingAccountFactory.getUserAccountInfo(userAddress);
-            const state = await userInfo.state;
-            if (state != 0x01) {
-                const createAccount = await ZKVizingAccountFactory.createAccount(userAddress);
-                await createAccount.wait();
-                console.log("Create Account success");
-                const afterUserInfo = await ZKVizingAccountFactory.getUserAccountInfo(userAddress);
-                const zkVizingAccount = await afterUserInfo.zkVizingAccount;
-                console.log("zkVizingAccount:", zkVizingAccount);
-                return zkVizingAccount;
-            } else {
-                const zkVizingAccount = await userInfo.zkVizingAccount;
-                console.log("zkVizingAccount:", zkVizingAccount);
-            }
+            const createAccount = await ZKVizingAccountFactory.createAccount(userAddress,saltNum);
+            await createAccount.wait();
+            console.log("Create Account success");
+            const thisZKVizingAccount=await ZKVizingAccountFactory.getAccountAddress(userAddress,saltNum);
+            console.log("thisZKVizingAccount:",thisZKVizingAccount);
+            return thisZKVizingAccount;
         } catch (e) {
             console.log("Create Account fial:", e);
         }
@@ -174,6 +206,8 @@ async function main() {
         console.log("Contract address saved to deployedAddresses.json");
     }
 
+    
+
     // deploy
     {   
         for(let i=0; i<setup["VizingPad-TestNet"].length; i++){
@@ -182,15 +216,16 @@ async function main() {
             if(currentSetChainId === currentChainId){
                 await DeployEntryPoint();
                 await DeployZKVizingAccountFactory(EntryPointAddress);
-                await DeployWETH();
+                // await DeployWETH();
                 await DeploySyncRouter(setup["VizingPad-TestNet"][i].Address, WETH);
                 await DeploySenderCreator();
                 // await DeployVerifyManager();
-                await DeployZKVizingAAEncode();
+                // await DeployZKVizingAAEncode();
 
                 //create zkaa account
                 let createdZKAccount=ADDRESS_ZERO;
-                createdZKAccount=await CreateAccount(testUser.address);
+                const salt=1;
+                createdZKAccount=await CreateAccount(testUser.address, salt);
                 
                 //fs write json
                 await SaveAddressesToFile(
@@ -202,16 +237,9 @@ async function main() {
             }else{
                 console.log("Not network");
             }
-
-            
         }
-
         
-    }
-
-    
-
-    
+    }    
 
 }
 main().catch((error) => {

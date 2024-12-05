@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
-import "../../libraries/GoldilocksPoseidon.sol";
+import "../libraries/GoldilocksPoseidon.sol";
 
 library Poseidon {
     uint256 constant BYTECODE_ELEMENTS_HASH = 8;

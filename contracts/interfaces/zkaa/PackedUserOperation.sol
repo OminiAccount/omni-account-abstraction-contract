@@ -15,16 +15,16 @@ pragma solidity >=0.7.5;
  * @param owner                 - Owner of the account that generated this request.
  */
 struct PackedUserOperation {
-    uint8 operationType; // 0 user; 1 deposit,2 withdraw system
-    uint256 operationValue;
-    address sender;
+    uint8 operationType; // 0 user; 1 deposit,2 withdraw systemPackedUserOperation
     uint64 nonce; // only used for batchdata
     uint64 chainId;
-    bytes callData;
     uint64 mainChainGasLimit;
     uint64 destChainGasLimit;
     uint64 zkVerificationGasLimit;
-    uint128 mainChainGasPrice;
-    uint128 destChainGasPrice;
+    uint64 mainChainGasPrice;
+    uint64 destChainGasPrice;
+    address sender;
     address owner;
+    uint256 operationValue;
+    bytes callData;
 }

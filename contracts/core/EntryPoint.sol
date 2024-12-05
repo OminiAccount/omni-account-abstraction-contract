@@ -3,20 +3,22 @@ pragma solidity ^0.8.24;
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
 
-import "../../interfaces/zkaa/IAccount.sol";
-import "../../interfaces/zkaa/IAccountExecute.sol";
-import "../../interfaces/zkaa/IPaymaster.sol";
-import "../../interfaces/zkaa/IEntryPoint.sol";
-import "../../interfaces/zkaa/IVerifyManager.sol";
-import "../../interfaces/zkaa/ISyncRouter.sol";
-import "../../interfaces/IZKVizingAAStruct.sol";
+import "../interfaces/zkaa/IAccount.sol";
+import "../interfaces/zkaa/IAccountExecute.sol";
+import "../interfaces/zkaa/IPaymaster.sol";
+import "../interfaces/zkaa/IEntryPoint.sol";
+import "../interfaces/zkaa/ISyncRouter.sol";
+import "../interfaces/zkaa/IVerifier.sol";
 
 import "../utils/Exec.sol";
-import "./SmtManager.sol";
-import "./Helpers.sol";
+import "./StateManager.sol";
 import "./PreGasManager.sol";
 import "./ConfigManager.sol";
-import "./UserOperationLib.sol";
+
+import "../libraries/Helpers.sol";
+import "../libraries/UserOperationLib.sol";
+import "../libraries/Error.sol";
+
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -26,15 +28,13 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
  * Account-Abstraction (EIP-4337) singleton EntryPoint implementation.
  * Only one instance required on each chain.
  */
-
 /// @custom:security-contact https://bounty.ethereum.org
 contract EntryPoint is
-    IEntryPoint,
-    IZKVizingAAStruct,
-    SmtManager,
     PreGasManager,
+    StateManager,
     ConfigManager,
     ReentrancyGuard,
+    IEntryPoint,
     Ownable,
     ERC165
 {
@@ -47,16 +47,24 @@ contract EntryPoint is
 
     // compensate for innerHandleOps' emit message and deposit refund.
     // allow some slack for future gas price changes.
-    uint256 private constant INNER_GAS_OVERHEAD = 10000;
+    uint256 private constant INNER_GAS_OVERHEAD = 10_000;
 
-    
-    uint8 private constant PENALTY_PERCENT = 10;
-    uint16 private constant REVERT_REASON_MAX_LEN = 2048;
-    
     // Marker for inner call revert on out of gas
     bytes32 private constant INNER_OUT_OF_GAS = hex"deaddead";
     bytes32 private constant INNER_REVERT_LOW_PREFUND = hex"deadaa51";
-    
+
+    uint256 private constant REVERT_REASON_MAX_LEN = 2048;
+    uint256 private constant PENALTY_PERCENT = 10;
+
+    // Modulus zkSNARK
+    uint256 internal constant _RFIELD =
+        21_888_242_871_839_275_222_246_405_745_257_275_088_548_364_400_416_034_343_698_204_186_575_808_495_617;
+
+    // L2 chain identifier
+    // uint64 public constant chainID = 1;
+
+    // L2 chain identifier
+    uint64 public constant FORK_ID = 1;
 
     /// @inheritdoc IERC165
     function supportsInterface(
@@ -77,26 +85,55 @@ contract EntryPoint is
      * @param proof The encoded proof.
      * @param batches The encoded public values.
      */
-    function verifyBatch(
+    function verifyBatches(
         bytes calldata proof,
         BatchData[] calldata batches,
         ChainsExecuteInfo calldata chainsExecuteInfos
     ) external payable {
         // First verify proof
-        // Todo:Input format needs to be updated
-        // IVerifier(verifier).verifyProof(publicValues, proof);
+        (
+            uint256[2] memory pA,
+            uint256[2][2] memory pB,
+            uint256[2] memory pC
+        ) = abi.decode(proof, (uint256[2], uint256[2][2], uint256[2]));
+
+        // uint64 batchLength = uint64(batches.length);
+        // uint64 finalNewBatch = lastVerifiedBatch + batchLength;
+
+        // Get snark bytes
+        bytes memory snarkHashBytes = getInputSnarkBytes(
+            lastVerifiedBatch,
+            lastVerifiedBatch + uint64(batches.length),
+            batchNumToState[lastVerifiedBatch].accInputRoot,
+            batches[uint64(batches.length) - 1].accInputHash,
+            batchNumToState[lastVerifiedBatch].stateRoot,
+            chainsExecuteInfos.newStateRoot
+        );
+
+        // Calulate the snark input
+        // uint256 inputSnark = uint256(sha256(snarkHashBytes)) % _RFIELD;
+        if (!IVerifier(verifier).verifyProof(pA, pB, pC, [uint256(sha256(snarkHashBytes)) % _RFIELD])) {
+            revert InvalidProof();
+        }
 
         ChainExecuteInfo[] memory chainExecuteInfos = new ChainExecuteInfo[](
             chainsExecuteInfos.chainExtra.length
         );
 
-        bytes32[] memory batchHashs = new bytes32[](batches.length);
+        // bytes32[] memory batchHashs = new bytes32[](uint64(batches.length));
 
         unchecked {
             for (uint256 i = 0; i < chainsExecuteInfos.chainExtra.length; ) {
                 ChainExecuteExtra memory extra = chainsExecuteInfos.chainExtra[
                     i
                 ];
+
+                if (
+                    extra.chainId != block.chainid &&
+                    chainConfigs[extra.chainId].entryPoint == address(0)
+                ) {
+                    revert NotSupportChainId();
+                }
 
                 PackedUserOperation[]
                     memory chainUserOps = new PackedUserOperation[](
@@ -105,7 +142,7 @@ contract EntryPoint is
 
                 uint256 userOpsIndex;
 
-                for (uint256 j = 0; j < batches.length; ) {
+                for (uint256 j = 0; j < uint64(batches.length); ) {
                     // batchHashs[j] = batches[j].userOperations.calculateHash();
                     PackedUserOperation[] memory userOps = batches[j]
                         .userOperations
@@ -114,12 +151,6 @@ contract EntryPoint is
                     chainUserOps.append(userOps, userOpsIndex);
 
                     userOpsIndex += userOps.length;
-
-                    // update stateRoot
-                    // updateSmtRoot(
-                    //     batches[j].oldStateRoot,
-                    //     batches[j].newStateRoot
-                    // );
 
                     ++j;
                 }
@@ -131,18 +162,61 @@ contract EntryPoint is
             }
         }
 
-        uint256 startGas = gasleft();
+        // Update State
+        updateState(
+            lastVerifiedBatch + uint64(batches.length),
+            chainsExecuteInfos.newStateRoot,
+            batches[uint64(batches.length) - 1].accInputHash
+        );
+        updateLastVerifiedBatch(uint64(batches.length));
+
+        // Execute vizing userOperations
+        // uint256 startGas = gasleft();
         processBatchs(
             chainExecuteInfos[0].userOperations,
             payable(chainsExecuteInfos.beneficiary),
             false
         );
-        uint256 gasUsed = startGas - gasleft();
+        // uint256 gasUsed = startGas - gasleft();
 
-        bytes memory message = abi.encode(batches, batchHashs);
+        // Sync stateRoot and destUserOperations to other chain
+        // Todo: If there is no transaction, is the synchronization state root required?
+        // Currently no state root is used on other chains
+        unchecked {
+            for (uint256 i = 1; i < chainExecuteInfos.length; i++) {
+                ChainExecuteInfo memory chainExecuteInfo = chainExecuteInfos[i];
+
+                address destEntryPoint = chainConfigs[
+                    chainExecuteInfo.extra.chainId
+                ].entryPoint;
+
+                // uint256 crossFee = ISyncRouter(syncRouter).fetchOmniMessageFee(
+                //     chainExecuteInfo.extra.chainId,
+                //     destEntryPoint,
+                //     chainExecuteInfo.extra.chainFee,
+                //     chainExecuteInfo.userOperations
+                // );
+
+                // if (
+                //     address(this).balance <
+                //     crossFee + chainExecuteInfo.extra.chainFee
+                // ) {
+                //     revert InsufficientBalance();
+                // }
+
+                // ISyncRouter(syncRouter).crossMessage{
+                //     value: crossFee + chainExecuteInfo.extra.chainFee
+                // }(
+                //     chainExecuteInfo.extra.chainId,
+                //     destEntryPoint,
+                //     chainExecuteInfo.extra.chainFee,
+                //     chainExecuteInfo.userOperations
+                // );
+            }
+        }
     }
 
-    function syncBatch(
+    function syncBatches(
         PackedUserOperation[] memory userOps
     ) external isSyncRouter {
         // Todo: remove beneficiary address(0x01), because the synchronization module does not need
@@ -246,6 +320,7 @@ contract EntryPoint is
                 // innerCall reverted on prefund too low. treat entire prefund as "gas cost"
                 uint256 actualGas = preGas - gasleft() + opInfo.preOpGas;
                 uint256 actualGasCost = opInfo.prefund;
+                emitPrefundTooLow(opInfo);
                 emitUserOperationEvent(opInfo, false, actualGasCost, actualGas);
                 collected = actualGasCost;
             } else {
@@ -278,6 +353,13 @@ contract EntryPoint is
             success,
             actualGasCost,
             actualGas
+        );
+    }
+
+    function emitPrefundTooLow(UserOpInfo memory opInfo) internal virtual {
+        emit UserOperationPrefundTooLow(
+            opInfo.userOpHash,
+            opInfo.mUserOp.sender
         );
     }
 
@@ -390,7 +472,7 @@ contract EntryPoint is
     /// @inheritdoc IEntryPoint
     function getUserOpHash(
         PackedUserOperation calldata userOp
-    ) public view returns (bytes32) {
+    ) public pure returns (bytes32) {
         return keccak256(userOp.encode());
     }
 
@@ -451,14 +533,17 @@ contract EntryPoint is
 
         // Validate all numeric values in userOp are well below 128 bit, so they can safely be added
         // and multiplied without causing overflow.
-        // uint64 zkVerificationGasLimit = mUserOp.zkVerificationGasLimit;
-        uint128 maxGasValues = mUserOp.mainChainGasLimit |
+        uint256 zkVerificationGasLimit = mUserOp.zkVerificationGasLimit;
+        uint256 maxGasValues = mUserOp.mainChainGasLimit |
             mUserOp.zkVerificationGasLimit |
             mUserOp.destChainGasLimit |
             mUserOp.mainChainGasPrice |
             mUserOp.destChainGasPrice;
-        require(maxGasValues <= type(uint128).max);
-        require(mUserOp.operationValue <= type(uint248).max);
+        require(maxGasValues <= type(uint120).max, "AA94 gas values overflow");
+        require(
+            mUserOp.operationValue <= type(uint248).max,
+            "AA94 operation value overflow"
+        );
 
         uint256 requiredPreFund = _getRequiredPrefund(mUserOp);
 
@@ -543,6 +628,7 @@ contract EntryPoint is
             if (prefund < actualGasCost) {
                 if (mode == IPaymaster.PostOpMode.postOpReverted) {
                     actualGasCost = prefund;
+                    emitPrefundTooLow(opInfo);
                     emitUserOperationEvent(
                         opInfo,
                         false,
@@ -581,6 +667,51 @@ contract EntryPoint is
                     ? mUserOp.mainChainGasPrice
                     : mUserOp.destChainGasPrice;
         }
+    }
+
+    /**
+     * @notice Function to calculate the input snark bytes
+     * @param initNumBatch Batch which the aggregator starts the verification
+     * @param finalNewBatch Last batch aggregator intends to verify
+     * @param oldStateRoot State root before batch is processed
+     * @param newStateRoot New State root once the batch is processed
+     */
+    function getInputSnarkBytes(
+        uint64 initNumBatch,
+        uint64 finalNewBatch,
+        bytes32 oldAccInputHash,
+        bytes32 newAccInputHash,
+        bytes32 oldStateRoot,
+        bytes32 newStateRoot
+    ) public pure returns (bytes memory) {
+        // sanity checks
+
+        if (initNumBatch != 0 && oldAccInputHash == bytes32(0)) {
+            revert OldAccInputHashDoesNotExist();
+        }
+
+        if (newAccInputHash == bytes32(0)) {
+            revert NewAccInputHashDoesNotExist();
+        }
+
+        // Check that new state root is inside goldilocks field
+        // if (!checkStateRootInsidePrime(uint256(newStateRoot))) {
+        //     revert NewStateRootNotInsidePrime();
+        // }
+
+        return
+            abi.encodePacked(
+                0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266,
+                oldStateRoot,
+                oldAccInputHash,
+                initNumBatch,
+                uint64(1),
+                FORK_ID,
+                newStateRoot,
+                newAccInputHash,
+                bytes32(0),
+                finalNewBatch
+            );
     }
 
     /**

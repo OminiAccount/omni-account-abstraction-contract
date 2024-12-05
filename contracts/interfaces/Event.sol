@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.23;
 
-interface IZKVizingAAEvent{
+interface Event {
     /************************************************SyncRouter*********************************************************** */
 
     /**
-     * Touch uniswap hook to swap  
+     * Touch uniswap hook to swap
      * @param sender      - Touch swap sender.
      * @param tokenIn     - Touch swap input token(tokenIn==address(0)=>eth)
      * @param tokenOut    - Touch swap output token(tokenOut==address(0)=>eth)
@@ -109,6 +109,4 @@ interface IZKVizingAAEvent{
      * Any event emitted before this event, is part of the validation.
      */
     event BeforeExecution();
-
-
 }

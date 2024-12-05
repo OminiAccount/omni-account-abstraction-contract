@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 
-import "../../interfaces/zkaa/IPreGasManager.sol";
-import "../../interfaces/IZKVizingAAError.sol";
-import "../../interfaces/IZKVizingAAEvent.sol";
-import "./UserOperationLib.sol";
+import "../interfaces/zkaa/IPreGasManager.sol";
+import "../libraries/Error.sol";
+import "../libraries/UserOperationLib.sol";
 
-contract PreGasManager is IPreGasManager, IZKVizingAAError, IZKVizingAAEvent {
+contract PreGasManager is IPreGasManager {
     using UserOperationLib for PackedUserOperation;
 
     mapping(address account => uint256 amount) public preGasBalance;
@@ -21,14 +20,17 @@ contract PreGasManager is IPreGasManager, IZKVizingAAError, IZKVizingAAEvent {
     /**
      * Submit a user deposit operation and redeem deposit to SMT
      */
-    function submitDepositOperation(uint256 amount) external payable {
+    function submitDepositOperation(
+        uint256 amount,
+        uint256 nonce
+    ) external payable {
         if (msg.value != amount) {
             revert ValueNotEqual();
         }
 
         preGasBalance[msg.sender] += amount;
 
-        redeemGasOperation(amount);
+        redeemGasOperation(amount, nonce);
     }
 
     /**
@@ -76,10 +78,17 @@ contract PreGasManager is IPreGasManager, IZKVizingAAError, IZKVizingAAEvent {
     /**
      * Redeem gasBalance to SMT
      */
-    function redeemGasOperation(uint256 amount) public {
+    function redeemGasOperation(uint256 amount, uint256 nonce) public {
         if (preGasBalance[msg.sender] < amount) {
             revert InsufficientBalance();
         }
-        emit DepositTicketAdded(msg.sender, amount, block.timestamp);
+        emit DepositTicketAdded(
+            keccak256(
+                abi.encodePacked(msg.sender, block.chainid, nonce, amount)
+            ),
+            msg.sender,
+            amount,
+            block.timestamp
+        );
     }
 }

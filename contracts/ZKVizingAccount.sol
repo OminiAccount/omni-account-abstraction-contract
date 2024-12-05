@@ -1,22 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.23;
 
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
 /* solhint-disable reason-string */
 
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "./core/BaseAccount.sol";
-import "./core/Helpers.sol";
+import "./libraries/Helpers.sol";
 import "./TokenCallbackHandler.sol";
-import "../interfaces/IZKVizingAAError.sol";
+import "./libraries/Error.sol";
 
 /**
- * minimal account.
- *  this is sample minimal account.
+ * ZK vizing account.
+ *  this is vizing account.
  *  has execute, eth handling methods
  *  has a single signer that can send requests through the entryPoint.
  */
@@ -24,8 +22,7 @@ contract ZKVizingAccount is
     BaseAccount,
     TokenCallbackHandler,
     UUPSUpgradeable,
-    Initializable,
-    IZKVizingAAError
+    Initializable
 {
     address public owner;
 
@@ -108,7 +105,7 @@ contract ZKVizingAccount is
 
     /**
      * @dev The _entryPoint member is immutable, to reduce gas consumption.  To upgrade EntryPoint,
-     * a new implementation of ZKVizingAccountInitialized must be deployed with the new EntryPoint address, then upgrading
+     * a new implementation of ZKVizingAccount must be deployed with the new EntryPoint address, then upgrading
      * the implementation by calling `upgradeTo()`
      * @param anOwner the owner (signer) of this account
      */
@@ -155,8 +152,8 @@ contract ZKVizingAccount is
     /**
      * deposit more funds for this account in the entryPoint
      */
-    function depositGas() public payable {
-        entryPoint().submitDepositOperation{value: msg.value}(msg.value);
+    function depositGas(uint256 nonce) public payable {
+        entryPoint().submitDepositOperation{value: msg.value}(msg.value, nonce);
     }
 
     /**
@@ -169,8 +166,8 @@ contract ZKVizingAccount is
         entryPoint().submitWithdrawOperation(amount);
     }
 
-    function redeemGas(uint256 amount) public onlyOwner {
-        entryPoint().redeemGasOperation(amount);
+    function redeemGas(uint256 amount, uint256 nonce) public onlyOwner {
+        entryPoint().redeemGasOperation(amount, nonce);
     }
 
     function withdraw(uint256 amount) external onlyOwner {

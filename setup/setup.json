@@ -215,5 +215,129 @@
             "ChainId": 11155111,
             "Address": "0xeE567Fe1712Faf6149d80dA1E6934E354124CfE3"
         }
+    ],
+    "WETH-Mainnet": [
+        {
+            "Name": "Ethereum",
+            "ChainId": 1,
+            "Address": ""
+        },
+        {
+            "Name": "vizing",
+            "ChainId": 28518,
+            "Address": ""
+        },
+        {
+            "Name": "Base",
+            "ChainId": 8453,
+            "Address": ""
+        },
+        {
+            "Name": "Arbitrum-one",
+            "ChainId": 42161,
+            "Address": ""
+        },
+        {
+            "Name": "Bob",
+            "ChainId": 60808,
+            "Address": ""
+        },
+        {
+            "Name": "PolygonzkEVM",
+            "ChainId": 1101,
+            "Address": ""
+        },
+        {
+            "Name": "Linea",
+            "ChainId": 59144,
+            "Address": ""
+        },
+        {
+            "Name": "Taiko",
+            "ChainId": 167000,
+            "Address": ""
+        },
+        {
+            "Name": "Blast",
+            "ChainId": 81457,
+            "Address": ""
+        },
+        {
+            "Name": "Optimism",
+            "ChainId": 10,
+            "Address": ""
+        },
+        {
+            "Name": "Scroll",
+            "ChainId": 534352,
+            "Address": ""
+        },
+        {
+            "Name": "BSC",
+            "ChainId": 56,
+            "Address": ""
+        }
+    ],
+    "WETH-Testnet": [
+        {
+            "Name": "Sepolia",
+            "ChainId": 11155111,
+            "Address": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482"
+        },
+        {
+            "Name": "Vizing-testnet",
+            "ChainId": 28516,
+            "Address": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482"
+        },
+        {
+            "Name": "Base-sepolia",
+            "ChainId": 84532,
+            "Address": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482"
+        },
+        {
+            "Name": "Arbitrum-sepolia",
+            "ChainId": 421614,
+            "Address": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482"
+        },
+        {
+            "Name": "Bob-testnet",
+            "ChainId": 808813,
+            "Address": ""
+        },
+        {
+            "Name": "PolygonzkEVM-Cardona",
+            "ChainId": 2442,
+            "Address": ""
+        },
+        {
+            "Name": "XLayer-testnet",
+            "ChainId": 195,
+            "Address": ""
+        },
+        {
+            "Name": "Optimism-sepolia",
+            "ChainId": 11155420,
+            "Address": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482"
+        },
+        {
+            "Name": "Blast-testnet",
+            "ChainId": 168587773,
+            "Address": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482"
+        },
+        {
+            "Name": "Scroll-sepolia",
+            "ChainId": 534351,
+            "Address": ""
+        },
+        {
+            "Name": "zkSync-sepolia",
+            "ChainId": 300,
+            "Address": ""
+        },
+        {
+            "Name": "Taiko-hekla",
+            "ChainId": 167009,
+            "Address": ""
+        }
     ]
 }

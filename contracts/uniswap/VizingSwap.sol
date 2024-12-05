@@ -1,17 +1,17 @@
 //SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 
-import {IUniswapV3Factory} from "../../interfaces/uniswapv3/IUniswapFactory.sol";
-import {ISwapRouter02, IV2SwapRouter, IV3SwapRouter} from "../../interfaces/uniswapv3/ISwapRouter02.sol";
-import {IVizingSwap} from "../../interfaces/IVizingSwap.sol";
-import {IWETH9} from "../../interfaces/IWETH9.sol";
-import {IZKVizingAAEvent} from "../../interfaces/IZKVizingAAEvent.sol";
-import {IUniswapV2Router02} from "../../interfaces/uniswapv2/IUniswapV2Router02.sol";
+import {IUniswapV3Factory} from "../interfaces/uniswapv3/IUniswapFactory.sol";
+import {ISwapRouter02, IV2SwapRouter, IV3SwapRouter} from "../interfaces/uniswapv3/ISwapRouter02.sol";
+import {BaseStruct} from "../interfaces/BaseStruct.sol";
+import {IWETH9} from "../interfaces/IWETH9.sol";
+import {Event} from "../interfaces/Event.sol";
+import {IUniswapV2Router02} from "../interfaces/uniswapv2/IUniswapV2Router02.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract VizingSwap is Ownable, ReentrancyGuard, IVizingSwap, IZKVizingAAEvent{
+contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event{
     using SafeERC20 for IERC20;
 
     address private weth;

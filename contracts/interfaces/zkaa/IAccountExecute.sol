@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.5;
 
-import "./PackedUserOperation.sol";
+import "../BaseStruct.sol";
 
-interface IAccountExecute {
+interface IAccountExecute is BaseStruct {
     /**
      * Account may implement this execute method.
      * passing this methodSig at the beginning of callData will cause the entryPoint to pass the full UserOp (and hash)

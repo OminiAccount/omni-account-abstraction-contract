@@ -1,12 +1,31 @@
+
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >=0.7.5;
 
-import "./PackedUserOperation.sol";
+import "../BaseStruct.sol";
 /**
  * Ticket to manage deposit and withdraw.
  * Deposit is just a balance used to pay for UserOperations (either by a paymaster or an account).
  */
-interface IPreGasManager {
+
+interface IPreGasManager is BaseStruct {
+    error ValueNotEqual();
+    error CallFailed();
+
+    event DepositTicketAdded(
+        bytes32 indexed did,
+        address indexed account,
+        uint256 amount,
+        uint256 timestamp
+    );
+    event WithdrawTicketAdded(
+        address indexed account,
+        uint256 amount,
+        uint256 timestamp
+    );
+    event DepositTicketDeleted(address indexed account, uint256 amount);
+    event WithdrawTicketDeleted(address indexed account, uint256 amount);
+
     /**
      * Get preGasBalance info.
      * @param account - The account to query.
@@ -24,11 +43,14 @@ interface IPreGasManager {
     //     // uint256 notConfirmedDeposit;
     // }
 
-    function submitDepositOperation(uint256 amount) external payable;
+    function submitDepositOperation(
+        uint256 amount,
+        uint256 nonce
+    ) external payable;
 
     function submitWithdrawOperation(uint256 amount) external;
 
-    function redeemGasOperation(uint256 amount) external;
+    function redeemGasOperation(uint256 amount, uint256 nonce) external;
 
     // /**
     //  * Get deposit info.

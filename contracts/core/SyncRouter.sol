@@ -3,22 +3,29 @@ pragma solidity ^0.8.24;
 
 import {VizingOmni} from "@vizing/contracts/VizingOmni.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {IWETH9} from "../../interfaces/IWETH9.sol";
-import {ISwapRouter02, IV3SwapRouter} from "../../interfaces/uniswapv3/ISwapRouter02.sol";
-import {IEntryPoint, PackedUserOperation} from "../../interfaces/zkaa/IEntryPoint.sol";
-import {IZKVizingAAEvent} from "../../interfaces/IZKVizingAAEvent.sol";
-import {IZKVizingAAError} from "../../interfaces/IZKVizingAAError.sol";
-import {IZKVizingAAStruct} from "../../interfaces/IZKVizingAAStruct.sol";
-import {IUniswapV2Router02} from "../../interfaces/uniswapv2/IUniswapV2Router02.sol";
+import {IWETH9} from "../interfaces/IWETH9.sol";
+import {ISwapRouter02, IV3SwapRouter} from "../interfaces/uniswapv3/ISwapRouter02.sol";
+import {IEntryPoint} from "../interfaces/zkaa/IEntryPoint.sol";
+import {Event} from "../interfaces/Event.sol";
+import {BaseStruct} from "../interfaces/BaseStruct.sol";
+import {IUniswapV2Router02} from "../interfaces/uniswapv2/IUniswapV2Router02.sol";
+import "../libraries/Error.sol";
+import "../hook/HookSelecter.sol";
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, IZKVizingAAStruct, IZKVizingAAEvent, IZKVizingAAError{
+contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, BaseStruct, Event{
     using SafeERC20 for IERC20;
 
     address public WETH;
     bytes1 private mode = 0x01;
+    // uint24 public defaultGasLimit = 50000;
+    // uint64 public defaultGasPrice = 1;
+    bytes private additionParams = new bytes(0);
+    // uint64 private minArrivalTime;
+    // uint64 private maxArrivalTime;
+    // address private selectedRelayer;
     address[] private routers;
 
     /**
@@ -80,30 +87,66 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, IZKVizingAAStruct, 
         delete routers[_indexOldRouter];
     }
 
-    function crossMessage(
-        CrossParams calldata params
+    function changeDefaultGas(uint24 gasLimit, uint64 gasPrice) external onlyOwner{
+        defaultGasLimit = gasLimit;
+        defaultGasPrice = gasPrice;
+    }
+
+    function sendOmniMessage(
+        CrossMessageParams calldata params
     ) public payable nonReentrant lock(0) {
-        bytes memory message = abi.encode(params.batchsMessage, params.packCrossMessage, params.way);
+        uint256 sendETHAmount;
+
+        if(params._packedUserOperation.callData==getV2SwapSelector()){
+            V2SwapParams memory v2=abi.decode(params._hookMessageParams.packCrossMessage,(V2SwapParams));
+            if(v2.path[0]==address(0)){
+                sendETHAmount=v2.amountIn;
+            }else{
+                //change path for to eth cross 
+                v2.path[v2.path.length-1]=address(0);
+                sendETHAmount=v2Swap(v2);
+            }
+        }else if(params._packedUserOperation.callData==getV3SwapSelector()){
+            V3SwapParams memory v3=abi.decode(params._hookMessageParams.packCrossMessage,(V3SwapParams));
+            if(v3.tokenIn!=address(0)){
+                sendETHAmount=v3.amountIn;
+            }else{
+                v3.tokenOut=address(0);
+                sendETHAmount=v3Swap(v3);
+            }
+        //such as send eth
+        }else{
+
+        }
+
         bytes memory encodedMessage = _packetMessage(
             mode,
-            params.destContract,
-            params.gasLimit,
-            params.gasPrice,
-            message
+            params._hookMessageParams.destContract,
+            params._hookMessageParams.gasLimit,
+            params._hookMessageParams.gasPrice,
+            abi.encode(params)
         );
 
-        uint256 gasFee = fetchOmniMessageFee(params);
-
-        require(msg.value >= gasFee + params.destChainUsedFee);
+        uint256 gasFee = LaunchPad.estimateGas(
+                params._hookMessageParams.destChainExecuteUsedFee,
+                params._hookMessageParams.destChainId,
+                additionParams,
+                encodedMessage
+        );
+        
+        //check 
+        if(msg.value < gasFee + params._hookMessageParams.destChainExecuteUsedFee + sendETHAmount){
+            revert InsufficientBalance();
+        }
 
         LaunchPad.Launch{value: msg.value}(
-            params.minArrivalTime,
-            params.maxArrivalTime,
-            params.selectedRelayer,
+            params._hookMessageParams.minArrivalTime,
+            params._hookMessageParams.maxArrivalTime,
+            params._hookMessageParams.selectedRelayer,
             msg.sender,
-            params.destChainUsedFee,
-            params.destChainId,
-            new bytes(0),
+            params._hookMessageParams.destChainExecuteUsedFee,
+            params._hookMessageParams.destChainId,
+            additionParams,
             encodedMessage
         );
     }
@@ -201,6 +244,45 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, IZKVizingAAStruct, 
         return outputData[1];
     }
 
+    function doHook(bytes memory packCrossMessage, uint256 receiveETHAmount)internal {
+       if(params._packedUserOperation.callData==getV2SwapSelector()){
+            V2SwapParams memory v2SwapParams = abi.decode(packCrossMessage, (V2SwapParams));
+            //source other token => target eth
+            if(v2SwapParams.path[v2SwapParams.path.length-1]==address(0)){
+                if(receiveETHAmount>0){
+                    (bool suc,)=v2SwapParams.to.call{value: receiveETHAmount}("");
+                    require(suc,"Recieve eth fail");
+                }
+            }else{
+                v2SwapParams.path[0]=address(0);
+                try this.v2Swap(v2SwapParams) returns (uint256 result){
+                    amountOut = result;
+                }catch {
+                    amountOut = 0;
+                }
+            }
+        //v3 swap
+        }else if(params._packedUserOperation.callData==getV3SwapSelector()){
+            V3SwapParams memory v3SwapParams = abi.decode(packCrossMessage, (V3SwapParams));
+            //source other token => target eth
+            if(v3SwapParams.tokenOut==address(0)){
+                if(receiveETHAmount>0){
+                    (bool suc,)=v3SwapParams.recipient.call{value: receiveETHAmount}("");
+                    require(suc,"Recieve eth fail");
+                }
+            }else{
+                v2SwapParams.path[0]=address(0);
+                try this.v3Swap(v3SwapParams) returns (uint256 result){
+                    amountOut = result;
+                }catch {
+                    amountOut = 0;
+                }
+            }
+        }else{
+            
+        }
+    }
+
     function _receiveMessage(
         bytes32 messageId,
         uint64 srcChainId,
@@ -208,56 +290,34 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, IZKVizingAAStruct, 
         bytes calldata message
     ) internal virtual override {
         require(MirrorEntryPoint[srcChainId] == address(uint160(srcContract)),"Invalid contract");
-        (bytes memory batchsMessage, bytes memory packCrossMessage, uint8 way) = abi.decode(message, (bytes, bytes, uint8));
+        (bytes memory batchsMessage) = abi.decode(message, (bytes));
         PackedUserOperation[] memory userOps = abi.decode(
             batchsMessage,
             (PackedUserOperation[])
         );
         
-        IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]).syncBatch(userOps);
-        uint256 amountOut;
-        if(way == 0){
+        IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]).syncBatches(userOps);
         
-        //v2 swap
-        }else if(way == 1){
-            V2SwapParams memory v2SwapParams = abi.decode(packCrossMessage, (V2SwapParams));
-            try this.v2Swap(v2SwapParams) returns (uint256 result){
-                amountOut = result;
-            }catch {
-                amountOut = 0;
-            }
-        //v3 swap
-        }else if(way ==2){
-            V3SwapParams memory v3SwapParams = abi.decode(packCrossMessage, (V3SwapParams));
-            try this.v3Swap(v3SwapParams) returns (uint256 result){
-                amountOut = result;
-            }catch {
-                amountOut = 0;
-            }
-        }else{
-            revert InvalidWay();
-        }
 
     }
 
-    function fetchOmniMessageFee(
-        CrossParams calldata params
-    ) public view returns (uint256) {
-        bytes memory message = abi.encode(params.batchsMessage, params.packCrossMessage);
+    function fetchOmniMessageFee(CrossMessageParams calldata params) external view virtual returns (uint256 _gasFee) {
+        bytes memory CrossMessage=abi.encode(params);
+
         bytes memory encodedMessage = _packetMessage(
             mode,
-            params.destContract,
-            params.gasLimit,
-            params.gasPrice,
-            message
+            params._hookMessageParams.destContract,
+            params._hookMessageParams.gasLimit,
+            params._hookMessageParams.gasPrice,
+            CrossMessage
         );
-        return
-            LaunchPad.estimateGas(
-                params.destChainUsedFee,
-                params.destChainId,
-                new bytes(0),
+
+        _gasFee = LaunchPad.estimateGas(
+                params._hookMessageParams.destChainExecuteUsedFee,
+                params._hookMessageParams.destChainId,
+                additionParams,
                 encodedMessage
-            );
+        );
     }
 
     function _getTokenBalance(

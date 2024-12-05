@@ -1,8 +1,22 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {IZKVizingAAStruct} from "../../interfaces/IZKVizingAAStruct.sol";
+import {BaseStruct} from "../interfaces/BaseStruct.sol";
+abstract contract HookSelecter is BaseStruct{
+    function getV2SwapSelector() internal pure returns (bytes4) {
+        return bytes4(keccak256("v2Swap((uint8,uint256,uint256,address[],address,uint256))"));
+    }
 
-contract ZKVizingAAEncode is IZKVizingAAStruct{
+    function getV3SwapSelector() internal pure returns (bytes4) {
+        return bytes4(keccak256("v3Swap((uint8,uint24,uint160,address,address,address,uint256,uint256))"));
+    }
+
+    function decodeCrossV2SwapMessage(bytes memory crossMessage)public view returns(V2SwapParams memory params){
+        (params)=abi.decode(crossMessage,(V2SwapParams));
+    }
+
+    function decodeCrossV3SwapMessage(bytes memory crossMessage)public view returns(V3SwapParams memory params){
+        (params)=abi.decode(crossMessage,(V3SwapParams));
+    }
     
     function encodeV2SwapParams(
         V2SwapParams calldata params
