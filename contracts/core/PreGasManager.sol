@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.23;
 
-import "../interfaces/IPreGasManager.sol";
-
-import "./UserOperationLib.sol";
+import "../libraries/Error.sol";
+import "../libraries/UserOperationLib.sol";
+import "../interfaces/core/IPreGasManager.sol";
 
 contract PreGasManager is IPreGasManager {
     using UserOperationLib for PackedUserOperation;

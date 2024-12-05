@@ -3,19 +3,21 @@ pragma solidity ^0.8.23;
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
 
-import "../interfaces/IAccount.sol";
-import "../interfaces/IAccountExecute.sol";
-import "../interfaces/IPaymaster.sol";
-import "../interfaces/IEntryPoint.sol";
-import "../interfaces/ISyncRouter.sol";
-import "../interfaces/IVerifier.sol";
+import "../interfaces/core/IAccount.sol";
+import "../interfaces/core/IAccountExecute.sol";
+import "../interfaces/core/IPaymaster.sol";
+import "../interfaces/core/IEntryPoint.sol";
+import "../interfaces/core/ISyncRouter.sol";
+import "../interfaces/core/IVerifier.sol";
 
 import "../utils/Exec.sol";
 import "./StateManager.sol";
-import "./Helpers.sol";
+
 import "./PreGasManager.sol";
 import "./ConfigManager.sol";
-import "./UserOperationLib.sol";
+import "../libraries/Error.sol";
+import "../libraries/Helpers.sol";
+import "../libraries/UserOperationLib.sol";
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -46,7 +48,7 @@ contract EntryPoint is
 
     // compensate for innerHandleOps' emit message and deposit refund.
     // allow some slack for future gas price changes.
-    uint256 private constant INNER_GAS_OVERHEAD = 10000;
+    uint256 private constant INNER_GAS_OVERHEAD = 10_000;
 
     // Marker for inner call revert on out of gas
     bytes32 private constant INNER_OUT_OF_GAS = hex"deaddead";
@@ -57,7 +59,7 @@ contract EntryPoint is
 
     // Modulus zkSNARK
     uint256 internal constant _RFIELD =
-        21888242871839275222246405745257275088548364400416034343698204186575808495617;
+        21_888_242_871_839_275_222_246_405_745_257_275_088_548_364_400_416_034_343_698_204_186_575_808_495_617;
 
     // L2 chain identifier
     // uint64 public constant chainID = 1;
@@ -90,8 +92,11 @@ contract EntryPoint is
         ChainsExecuteInfo calldata chainsExecuteInfos
     ) external payable {
         // First verify proof
-        (uint[2] memory pA, uint[2][2] memory pB, uint[2] memory pC) = abi
-            .decode(proof, (uint[2], uint[2][2], uint[2]));
+        (
+            uint256[2] memory pA,
+            uint256[2][2] memory pB,
+            uint256[2] memory pC
+        ) = abi.decode(proof, (uint256[2], uint256[2][2], uint256[2]));
 
         uint64 batchLength = uint64(batches.length);
         uint64 finalNewBatch = lastVerifiedBatch + batchLength;
@@ -186,27 +191,28 @@ contract EntryPoint is
                     chainExecuteInfo.extra.chainId
                 ].entryPoint;
 
-                uint256 crossFee = ISyncRouter(syncRouter).fetchOmniMessageFee(
-                    chainExecuteInfo.extra.chainId,
-                    destEntryPoint,
-                    chainExecuteInfo.extra.chainFee,
-                    chainExecuteInfo.userOperations
-                );
+                // uint256 crossFee = ISyncRouter(syncRouter).fetchOmniMessageFee(
+                //     chainExecuteInfo.extra.chainId,
+                //     destEntryPoint,
+                //     chainExecuteInfo.extra.chainFee,
+                //     chainExecuteInfo.userOperations
+                // );
 
-                require(
-                    address(this).balance >=
-                        crossFee + chainExecuteInfo.extra.chainFee,
-                    "Insufficient balance"
-                );
+                // if (
+                //     address(this).balance <
+                //     crossFee + chainExecuteInfo.extra.chainFee
+                // ) {
+                //     revert InsufficientBalance();
+                // }
 
-                ISyncRouter(syncRouter).sendOmniMessage{
-                    value: crossFee + chainExecuteInfo.extra.chainFee
-                }(
-                    chainExecuteInfo.extra.chainId,
-                    destEntryPoint,
-                    chainExecuteInfo.extra.chainFee,
-                    chainExecuteInfo.userOperations
-                );
+                // ISyncRouter(syncRouter).crossMessage{
+                //     value: crossFee + chainExecuteInfo.extra.chainFee
+                // }(
+                //     chainExecuteInfo.extra.chainId,
+                //     destEntryPoint,
+                //     chainExecuteInfo.extra.chainFee,
+                //     chainExecuteInfo.userOperations
+                // );
             }
         }
     }
@@ -410,29 +416,6 @@ contract EntryPoint is
     }
 
     /**
-     * A memory copy of UserOp static fields only.
-     * Excluding: userAddr, chainId, callData. Replacing paymasterAndData with paymaster.
-     */
-    struct MemoryUserOp {
-        address sender;
-        uint256 chainId;
-        uint256 operationValue;
-        uint256 zkVerificationGasLimit;
-        uint256 mainChainGasLimit;
-        uint256 destChainGasLimit;
-        uint256 mainChainGasPrice;
-        uint256 destChainGasPrice;
-    }
-
-    struct UserOpInfo {
-        MemoryUserOp mUserOp;
-        bytes32 userOpHash;
-        uint256 prefund;
-        uint256 contextOffset;
-        uint256 preOpGas;
-    }
-
-    /**
      * Inner function to handle a UserOperation.
      * Must be declared "external" to open a call context, but it can only be called by handleOps.
      * @param callData - The callData to execute.
@@ -490,7 +473,7 @@ contract EntryPoint is
     /// @inheritdoc IEntryPoint
     function getUserOpHash(
         PackedUserOperation calldata userOp
-    ) public view returns (bytes32) {
+    ) public pure returns (bytes32) {
         return keccak256(userOp.encode());
     }
 
@@ -701,7 +684,7 @@ contract EntryPoint is
         bytes32 newAccInputHash,
         bytes32 oldStateRoot,
         bytes32 newStateRoot
-    ) public view returns (bytes memory) {
+    ) public pure returns (bytes memory) {
         // sanity checks
 
         if (initNumBatch != 0 && oldAccInputHash == bytes32(0)) {

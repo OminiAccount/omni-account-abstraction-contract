@@ -3,21 +3,20 @@ pragma solidity ^0.8.23;
 
 import "forge-std/console.sol";
 import "contracts/core/EntryPoint.sol";
-import "contracts/interfaces/IPreGasManager.sol";
-import "contracts/interfaces/PackedUserOperation.sol";
-import "contracts/SimpleAccount.sol";
-import "contracts/core/UserOperationLib.sol";
-import "contracts/SimpleAccountFactory.sol";
-import "contracts/core/SyncRouter.sol";
+import "contracts/interfaces/core/IPreGasManager.sol";
+import "contracts/ZKVizingAccount.sol";
+import "contracts/libraries/UserOperationLib.sol";
+import "contracts/ZKVizingAccountFactory.sol";
+import "contracts/core/SyncRouter/SyncRouter.sol";
 import "./Utils.sol";
 import "script/Address.sol";
-import "contracts/interfaces/IEntryPoint.sol";
+import "contracts/interfaces/core/IEntryPoint.sol";
 import "contracts/verifiers/Groth16Verifier.sol";
 
 contract ExecuteTest is Utils, AddressHelper {
     EntryPoint ep;
-    SimpleAccountFactory factory;
-    SimpleAccount account1;
+    ZKVizingAccountFactory factory;
+    ZKVizingAccount account1;
     Groth16Verifier gverifier;
     address deployer = owner;
     address account1Owner = address(0x96f3088fC6E3e4C4535441f5Bc4d69C4eF3FE9c5);
@@ -30,8 +29,8 @@ contract ExecuteTest is Utils, AddressHelper {
         ep = new EntryPoint();
         gverifier = new Groth16Verifier();
         ep.updateVerifier(address(gverifier));
-        factory = new SimpleAccountFactory(ep);
-        account1 = factory.createAccount(account1Owner, 0);
+        factory = new ZKVizingAccountFactory(ep);
+        account1 = factory.createAccount(account1Owner);
         address mock_address = factory.getAccountAddress(account1Owner, 0);
         console.log("get mock %s", mock_address);
         console.log("account %s", address(account1));
@@ -51,11 +50,11 @@ contract ExecuteTest is Utils, AddressHelper {
     ) public pure returns (PackedUserOperation memory) {
         bytes memory data = encodeTransferCalldata(transferTo, 0.001 ether);
         uint256 operationValue = 0;
-        uint256 mainChainGasLimit = 200000;
-        uint256 destChainGasLimit = 0;
-        uint256 zkVerificationGasLimit = 2200;
-        uint256 mainChainGasPrice = 2500000000;
-        uint256 destChainGasPrice = 0;
+        uint64 mainChainGasLimit = 200_000;
+        uint64 destChainGasLimit = 0;
+        uint64 zkVerificationGasLimit = 2200;
+        uint128 mainChainGasPrice = 2_500_000_000;
+        uint128 destChainGasPrice = 0;
         PackedUserOperation memory account1OwnerUserOp = PackedUserOperation(
             0,
             operationValue,
@@ -148,8 +147,8 @@ contract ExecuteTest is Utils, AddressHelper {
     //     address account = 0x01b7cA9d6B8Ac943185E107e4BE7430e5D90B5A5;
     //     console.log("account balance before", account.balance);
     //     EntryPoint ep1 = new EntryPoint();
-    //     factory = new SimpleAccountFactory(ep1);
-    //     SimpleAccount account11 = factory.createAccount(account, 1);
+    //     factory = new ZKVizingAccountFactory(ep1);
+    //     ZKVizingAccount account11 = factory.createAccount(account, 1);
     //     vm.deal(address(account11), 0.1 ether);
     //     ep1.updateSyncRouter(arbitrumSepoliaSyncRouter);
     //     ep1.updateSmtRoot(

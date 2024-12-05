@@ -5,21 +5,19 @@ pragma solidity ^0.8.23;
 /* solhint-disable no-inline-assembly */
 /* solhint-disable reason-string */
 
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "./core/BaseAccount.sol";
-import "./core/Helpers.sol";
+import "./libraries/Helpers.sol";
 import "./TokenCallbackHandler.sol";
 
 /**
- * minimal account.
- *  this is sample minimal account.
+ * ZK vizing account.
+ *  this is vizing account.
  *  has execute, eth handling methods
  *  has a single signer that can send requests through the entryPoint.
  */
-contract SimpleAccount is
+contract ZKVizingAccount is
     BaseAccount,
     TokenCallbackHandler,
     UUPSUpgradeable,
@@ -31,7 +29,7 @@ contract SimpleAccount is
 
     IEntryPoint private immutable _entryPoint;
 
-    event SimpleAccountInitialized(
+    event ZKVizingAccountInitialized(
         IEntryPoint indexed entryPoint,
         address indexed owner
     );
@@ -108,7 +106,7 @@ contract SimpleAccount is
 
     /**
      * @dev The _entryPoint member is immutable, to reduce gas consumption.  To upgrade EntryPoint,
-     * a new implementation of SimpleAccount must be deployed with the new EntryPoint address, then upgrading
+     * a new implementation of ZKVizingAccount must be deployed with the new EntryPoint address, then upgrading
      * the implementation by calling `upgradeTo()`
      * @param anOwner the owner (signer) of this account
      */
@@ -118,7 +116,7 @@ contract SimpleAccount is
 
     function _initialize(address anOwner) internal virtual {
         owner = anOwner;
-        emit SimpleAccountInitialized(_entryPoint, owner);
+        emit ZKVizingAccountInitialized(_entryPoint, owner);
     }
 
     // Require the function call went through EntryPoint or owner

@@ -1,7 +1,8 @@
 /**
- ** Account-Abstraction (EIP-4337) singleton EntryPoint implementation.
- ** Only one instance required on each chain.
- **/
+ * Account-Abstraction (EIP-4337) singleton EntryPoint implementation.
+ * Only one instance required on each chain.
+ *
+ */
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.5;
 
@@ -9,11 +10,13 @@ pragma solidity >=0.7.5;
 /* solhint-disable no-inline-assembly */
 /* solhint-disable reason-string */
 
-import "./PackedUserOperation.sol";
 import "./IPreGasManager.sol";
 
+// import "./BaseStruct.sol";
+
 interface IEntryPoint is IPreGasManager {
-    /***
+    /**
+     *
      * An event emitted after each successful request.
      * @param userOpHash    - Unique identifier for the request (hash its entire content, except signature).
      * @param sender        - The account that generates this request.
@@ -116,28 +119,6 @@ interface IEntryPoint is IPreGasManager {
     error NewAccInputHashDoesNotExist();
     error NewStateRootNotInsidePrime();
     error InvalidProof();
-
-    struct BatchData {
-        PackedUserOperation[] userOperations; // accInputHash
-        bytes32 accInputHash; // Todo: Use the poseidonHash to calculate the value
-    }
-
-    struct ChainExecuteExtra {
-        uint64 chainId;
-        uint64 chainFee;
-        uint64 chainUserOperationsNumber;
-    }
-
-    struct ChainExecuteInfo {
-        ChainExecuteExtra extra;
-        PackedUserOperation[] userOperations;
-    }
-
-    struct ChainsExecuteInfo {
-        ChainExecuteExtra[] chainExtra;
-        bytes32 newStateRoot;
-        address beneficiary;
-    }
 
     function syncBatches(PackedUserOperation[] memory userOps) external;
 

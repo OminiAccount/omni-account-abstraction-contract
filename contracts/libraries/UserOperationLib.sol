@@ -3,7 +3,7 @@ pragma solidity ^0.8.23;
 
 /* solhint-disable no-inline-assembly */
 
-import "../interfaces/PackedUserOperation.sol";
+import "../interfaces/core/BaseStruct.sol";
 import {calldataKeccak, min} from "./Helpers.sol";
 import "../utils/Poseidon.sol";
 
@@ -17,7 +17,7 @@ library UserOperationLib {
 
     uint256 public constant SYSTEM_OPERATION_ACCOUNT_OFFSET = 20;
 
-    uint256 public constant VALIDATE_OWNER_GAS_LIMIT = 10000;
+    uint256 public constant VALIDATE_OWNER_GAS_LIMIT = 10_000;
 
     uint256 public constant USER_OP_BYTES = 32 * 7 + 20;
 
@@ -30,7 +30,7 @@ library UserOperationLib {
      * @param userOp - The user operation data.
      */
     function getSender(
-        PackedUserOperation calldata userOp
+        BaseStruct.PackedUserOperation calldata userOp
     ) internal pure returns (address) {
         address data;
         //read sender from userOp, which is first userOp member (saves 800 gas...)
@@ -46,8 +46,8 @@ library UserOperationLib {
      * @param userOp - The user operation data.
      */
     function gasPrice(
-        PackedUserOperation calldata userOp
-    ) internal view returns (uint256) {
+        BaseStruct.PackedUserOperation calldata userOp
+    ) internal pure returns (uint256) {
         return userOp.mainChainGasPrice;
         // unchecked {
         //    return userOp.mainChainGasPrice;
@@ -63,7 +63,7 @@ library UserOperationLib {
     }
 
     function getValidateOwnerGasLimit(
-        PackedUserOperation calldata userOp
+        BaseStruct.PackedUserOperation calldata userOp
     ) internal pure returns (uint256) {
         return VALIDATE_OWNER_GAS_LIMIT;
     }
@@ -106,13 +106,13 @@ library UserOperationLib {
     // }
 
     function unpackVerificationGasLimit(
-        PackedUserOperation calldata userOp
+        BaseStruct.PackedUserOperation calldata userOp
     ) internal pure returns (uint256) {
         return userOp.zkVerificationGasLimit;
     }
 
     function unpackCallGasLimit(
-        PackedUserOperation calldata userOp
+        BaseStruct.PackedUserOperation calldata userOp
     ) internal pure returns (uint256) {
         return userOp.mainChainGasLimit;
     }
@@ -142,7 +142,7 @@ library UserOperationLib {
     // }
 
     function unpackGasOperationData(
-        PackedUserOperation calldata userOp
+        BaseStruct.PackedUserOperation calldata userOp
     ) internal pure returns (address, uint256) {
         return (
             address(bytes20(userOp.callData[:SYSTEM_OPERATION_ACCOUNT_OFFSET])),
@@ -151,7 +151,7 @@ library UserOperationLib {
     }
 
     function isGasOperation(
-        PackedUserOperation calldata userOp
+        BaseStruct.PackedUserOperation calldata userOp
     ) internal pure returns (bool) {
         return
             userOp.operationType == DEPOSIT_OPERATION ||
@@ -165,7 +165,7 @@ library UserOperationLib {
      * @param userOp - The user operation data.
      */
     function packOperation(
-        PackedUserOperation calldata userOp
+        BaseStruct.PackedUserOperation calldata userOp
     ) public pure returns (bytes32 encoded) {
         uint8 operationType = userOp.operationType;
         uint248 operationValue = uint248(userOp.operationValue);
@@ -184,7 +184,7 @@ library UserOperationLib {
      * @param userOp - The user operation data.
      */
     function packOpInfo(
-        PackedUserOperation calldata userOp
+        BaseStruct.PackedUserOperation calldata userOp
     ) public pure returns (bytes32) {
         return packUints(userOp.nonce, userOp.chainId);
     }
@@ -194,7 +194,7 @@ library UserOperationLib {
      * @param userOp - The user operation data.
      */
     function packChainGasLimit(
-        PackedUserOperation calldata userOp
+        BaseStruct.PackedUserOperation calldata userOp
     ) public pure returns (bytes32) {
         return packUints(userOp.mainChainGasLimit, userOp.destChainGasLimit);
     }
@@ -204,7 +204,7 @@ library UserOperationLib {
      * @param userOp - The user operation data.
      */
     function packChainGasPrice(
-        PackedUserOperation calldata userOp
+        BaseStruct.PackedUserOperation calldata userOp
     ) public pure returns (bytes32) {
         return packUints(userOp.mainChainGasPrice, userOp.destChainGasPrice);
     }
@@ -215,7 +215,7 @@ library UserOperationLib {
      * @param userOp - The user operation data.
      */
     function encode(
-        PackedUserOperation calldata userOp
+        BaseStruct.PackedUserOperation calldata userOp
     ) internal pure returns (bytes memory) {
         bytes memory encode = new bytes(USER_OP_BYTES);
 
@@ -245,14 +245,15 @@ library UserOperationLib {
 
 library UserOperationsLib {
     function filterByChainId(
-        PackedUserOperation[] calldata userOps,
+        BaseStruct.PackedUserOperation[] calldata userOps,
         uint256 chainId
-    ) internal pure returns (PackedUserOperation[] memory) {
+    ) internal pure returns (BaseStruct.PackedUserOperation[] memory) {
         uint256 validCount = 0;
 
-        PackedUserOperation[] memory tempArray = new PackedUserOperation[](
-            userOps.length
-        );
+        BaseStruct.PackedUserOperation[]
+            memory tempArray = new BaseStruct.PackedUserOperation[](
+                userOps.length
+            );
 
         unchecked {
             for (uint256 i = 0; i < userOps.length; ) {
@@ -264,9 +265,10 @@ library UserOperationsLib {
             }
         }
 
-        PackedUserOperation[] memory validArray = new PackedUserOperation[](
-            validCount
-        );
+        BaseStruct.PackedUserOperation[]
+            memory validArray = new BaseStruct.PackedUserOperation[](
+                validCount
+            );
 
         unchecked {
             for (uint256 j = 0; j < validCount; ) {
@@ -279,7 +281,7 @@ library UserOperationsLib {
     }
 
     function calculateHash(
-        PackedUserOperation[] calldata userOps
+        BaseStruct.PackedUserOperation[] calldata userOps
     ) internal pure returns (bytes32) {
         uint256 userOpBytes = UserOperationLib.USER_OP_BYTES;
         bytes memory encodeBytes = new bytes(userOpBytes * userOps.length);
@@ -311,8 +313,8 @@ library UserOperationsLib {
     }
 
     function append(
-        PackedUserOperation[] memory target,
-        PackedUserOperation[] memory source,
+        BaseStruct.PackedUserOperation[] memory target,
+        BaseStruct.PackedUserOperation[] memory source,
         uint256 startIndex
     ) internal pure {
         require(

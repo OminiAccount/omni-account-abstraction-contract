@@ -1,19 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.23;
-import "forge-std/Test.sol";
-import "contracts/SimpleAccount.sol";
-import "contracts/core/EntryPoint.sol";
-import "contracts/SimpleAccountFactory.sol";
-import "contracts/interfaces/PackedUserOperation.sol";
 
-contract Utils is Test {
+import "forge-std/Test.sol";
+import "contracts/ZKVizingAccount.sol";
+import "contracts/core/EntryPoint.sol";
+import "contracts/ZKVizingAccountFactory.sol";
+import "contracts/interfaces/core/BaseStruct.sol";
+
+contract Utils is BaseStruct, Test {
     function encodeTransferCalldata(
         address to,
         uint256 amount
     ) public pure returns (bytes memory data) {
         return
             abi.encodeWithSelector(
-                SimpleAccount.execute.selector,
+                ZKVizingAccount.execute.selector,
                 to,
                 amount,
                 ""
@@ -40,7 +41,7 @@ contract Utils is Test {
         address factory,
         uint256 salt
     ) public pure returns (bytes memory) {
-        bytes4 selector = SimpleAccountFactory.createAccount.selector;
+        bytes4 selector = ZKVizingAccountFactory.createAccount.selector;
 
         bytes memory encodedData = abi.encodeWithSelector(
             selector,
@@ -58,20 +59,22 @@ contract Utils is Test {
     ) public returns (PackedUserOperation memory) {
         vm.recordLogs();
         vm.startPrank(_owner);
-        uint256 beforePreGasBalance = SimpleAccount(account).getPreGasBalance();
-        SimpleAccount(account).depositGas{value: _depositValue}(1);
-        uint256 afterPreGasBalance = SimpleAccount(account).getPreGasBalance();
+        uint256 beforePreGasBalance = ZKVizingAccount(account)
+            .getPreGasBalance();
+        ZKVizingAccount(account).depositGas{value: _depositValue}(1);
+        uint256 afterPreGasBalance = ZKVizingAccount(account)
+            .getPreGasBalance();
         assert(afterPreGasBalance == beforePreGasBalance + _depositValue);
         vm.stopPrank();
         Vm.Log[] memory entries = vm.getRecordedLogs();
 
         uint256 operationValue = abi.decode(entries[0].data, (uint256));
         bytes memory data = "";
-        uint256 mainChainGasLimit = 0x30d40;
-        uint256 destChainGasLimit = 0;
-        uint256 zkVerificationGasLimit = 1700;
-        uint256 mainChainGasPrice = 2500000000;
-        uint256 destChainGasPrice = 0;
+        uint64 mainChainGasLimit = 0x30d40;
+        uint64 destChainGasLimit = 0;
+        uint64 zkVerificationGasLimit = 1700;
+        uint128 mainChainGasPrice = 2_500_000_000;
+        uint128 destChainGasPrice = 0;
         PackedUserOperation memory account1OwnerUserOp = PackedUserOperation(
             1,
             operationValue,
@@ -95,14 +98,14 @@ contract Utils is Test {
         uint256 _withdrawValue
     ) public returns (PackedUserOperation memory) {
         vm.startPrank(_owner);
-        SimpleAccount(account).withdrawGas(_withdrawValue);
+        ZKVizingAccount(account).withdrawGas(_withdrawValue);
         vm.stopPrank();
         bytes memory data = "";
-        uint256 mainChainGasLimit = 0x30d40;
-        uint256 destChainGasLimit = 0;
-        uint256 zkVerificationGasLimit = 1700;
-        uint256 mainChainGasPrice = 2500000000;
-        uint256 destChainGasPrice = 0;
+        uint64 mainChainGasLimit = 0x30d40;
+        uint64 destChainGasLimit = 0;
+        uint64 zkVerificationGasLimit = 1700;
+        uint128 mainChainGasPrice = 2_500_000_000;
+        uint128 destChainGasPrice = 0;
         PackedUserOperation memory op = PackedUserOperation(
             2,
             _withdrawValue,

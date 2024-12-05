@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity >=0.7.5;
 
-import "./PackedUserOperation.sol";
+import "./BaseStruct.sol";
 /**
  * Ticket to manage deposit and withdraw.
  * Deposit is just a balance used to pay for UserOperations (either by a paymaster or an account).
  */
-interface IPreGasManager {
-    error InsufficientBalance();
+
+interface IPreGasManager is BaseStruct {
     error ValueNotEqual();
     error CallFailed();
 

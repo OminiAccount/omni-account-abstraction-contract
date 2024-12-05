@@ -3,3 +3,5 @@ forge-std/=lib/forge-std/src/
 
 @openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
 @vizing/contracts/=node_modules/@vizing/contracts
+@uniswap/v3-periphery/contracts=node_modules/@uniswap/v3-periphery/contracts
+@uniswap/v3-core/=node_modules/@uniswap/v3-core

@@ -1,0 +1,138 @@
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.23;
+
+interface BaseStruct {
+    /**
+     * User Operation struct
+     * @param sender                - The sender account of this request.
+     * @param chainId               - ChainId.
+     * @param callData              - The method call to execute on this account.
+     * @param accountGasLimits      - Packed gas limits for validateUserOp and gas limit passed to the callData method call.
+     * @param preVerificationGas    - Gas not calculated by the handleOps method, but added to the gas paid.
+     *                                Covers batch overhead.
+     * @param gasFees               - packed gas fields maxPriorityFeePerGas and maxFeePerGas - Same as EIP-1559 gas parameters.
+     * @param paymasterAndData      - If set, this field holds the paymaster address, verification gas limit, postOp gas limit and paymaster-specific extra data
+     *                                The paymaster will pay for the transaction instead of the sender.
+     * @param owner                 - Owner of the account that generated this request.
+     */
+    struct PackedUserOperation {
+        uint8 operationType; // 0 user; 1 deposit,2 withdraw system
+        uint256 operationValue;
+        address sender;
+        uint64 nonce; // only used for batchdata
+        uint64 chainId;
+        bytes callData;
+        uint64 mainChainGasLimit;
+        uint64 destChainGasLimit;
+        uint64 zkVerificationGasLimit;
+        uint128 mainChainGasPrice;
+        uint128 destChainGasPrice;
+        address owner;
+    }
+    /**
+     * EntryPoint***********************************************************
+     */
+
+    struct BatchData {
+        PackedUserOperation[] userOperations; // accInputHash
+        bytes32 accInputHash; // Todo: Use the poseidonHash to calculate the value
+    }
+
+    struct ChainExecuteExtra {
+        uint64 chainId;
+        uint64 chainFee;
+        uint64 chainUserOperationsNumber;
+    }
+
+    struct ChainExecuteInfo {
+        ChainExecuteExtra extra;
+        PackedUserOperation[] userOperations;
+    }
+
+    struct ChainsExecuteInfo {
+        ChainExecuteExtra[] chainExtra;
+        bytes32 newStateRoot;
+        address beneficiary;
+    }
+
+    /**
+     * A memory copy of UserOp static fields only.
+     * Excluding: userAddr, chainId, callData. Replacing paymasterAndData with paymaster.
+     */
+    struct MemoryUserOp {
+        address sender;
+        uint256 chainId;
+        uint256 operationValue;
+        uint64 zkVerificationGasLimit;
+        uint64 mainChainGasLimit;
+        uint64 destChainGasLimit;
+        uint128 mainChainGasPrice;
+        uint128 destChainGasPrice;
+    }
+
+    struct UserOpInfo {
+        MemoryUserOp mUserOp;
+        bytes32 userOpHash;
+        uint256 prefund;
+        uint256 contextOffset;
+        uint256 preOpGas;
+    }
+
+    /**
+     * SyncRouter***********************************************************
+     */
+
+    /**
+     * @notice Use any uniswapV3 router for swap
+     * @param index                 - Index router
+     * @param fee                   - UniswapV3 fee(100==0.01%, 500==0.05%, 3000==0.3%, 10000==1%)
+     * @param sqrtPriceLimitX96     - Default input 0
+     * @param tokenIn               - Input swap token
+     * @param tokenOut              - Output swap token
+     * @param recipient             - Touch swap output token receiver
+     * @param amountIn              - Input token amount
+     * @param amountOutMinimum      - Output token minimum receive amount
+     */
+    struct V3SwapParams {
+        uint8 index;
+        uint24 fee;
+        uint160 sqrtPriceLimitX96;
+        address tokenIn;
+        address tokenOut;
+        address recipient;
+        uint256 amountIn;
+        uint256 amountOutMinimum;
+    }
+
+    /**
+     * @notice Use any uniswapV2 router for swap
+     * @param index                 - Index router             -
+     * @param amountIn     - Input swap token amount
+     * @param amountOutMin               - Output token minimum receive amount
+     * @param path              - Uniswapv2 tokens swap path
+     * @param to             - Touch swap output token receiver
+     * @param deadline              - Swap deadline
+     */
+    struct V2SwapParams {
+        uint8 index;
+        uint256 amountIn;
+        uint256 amountOutMin;
+        address[] path;
+        address to;
+        uint256 deadline;
+    }
+
+    struct CrossParams {
+        uint8 way;
+        uint24 gasLimit;
+        uint64 gasPrice;
+        uint64 destChainId;
+        uint64 minArrivalTime;
+        uint64 maxArrivalTime;
+        address destContract;
+        address selectedRelayer;
+        uint256 destChainExecuteUsedFee; // Amount that the target chain needs to spend to execute userop
+        bytes batchsMessage;
+        bytes packCrossMessage;
+    }
+}
