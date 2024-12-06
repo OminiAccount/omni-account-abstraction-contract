@@ -15,17 +15,12 @@ import "../hook/HookSelecter.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, BaseStruct, Event{
+contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, BaseStruct, Event, HookSelecter{
     using SafeERC20 for IERC20;
 
     address public WETH;
     bytes1 private mode = 0x01;
-    // uint24 public defaultGasLimit = 50000;
-    // uint64 public defaultGasPrice = 1;
     bytes private additionParams = new bytes(0);
-    // uint64 private minArrivalTime;
-    // uint64 private maxArrivalTime;
-    // address private selectedRelayer;
     address[] private routers;
 
     /**
@@ -87,36 +82,37 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, BaseStruct, Event{
         delete routers[_indexOldRouter];
     }
 
-    function changeDefaultGas(uint24 gasLimit, uint64 gasPrice) external onlyOwner{
-        defaultGasLimit = gasLimit;
-        defaultGasPrice = gasPrice;
-    }
-
     function sendOmniMessage(
         CrossMessageParams calldata params
     ) public payable nonReentrant lock(0) {
         uint256 sendETHAmount;
-
-        if(params._packedUserOperation.callData==getV2SwapSelector()){
-            V2SwapParams memory v2=abi.decode(params._hookMessageParams.packCrossMessage,(V2SwapParams));
-            if(v2.path[0]==address(0)){
-                sendETHAmount=v2.amountIn;
+        bytes memory payload;
+        if(toBytes4(params._packedUserOperation.callData)==getV2SwapSelector()){
+            CrossV2SwapParams memory crossV2=decodeCrossV2SwapMessage(params._hookMessageParams.packCrossMessage);
+            if(crossV2.sourcePath[0]==address(0)){
+                sendETHAmount=crossV2.amountIn;
             }else{
-                //change path for to eth cross 
-                v2.path[v2.path.length-1]=address(0);
-                sendETHAmount=v2Swap(v2);
+                V2SwapParams memory v2SwapParams=fromCrossV2ToSourceV2SwapParams(crossV2);
+                // sendETHAmount=v2Swap{value: v2SwapParams.amountIn}(v2SwapParams);
+                payload=abi.encodeWithSignature('v2Swap((uint8,uint256,uint256,address[],address,uint256))', v2SwapParams);
+                (bool success,) = address(this).call{value: v2SwapParams.amountIn}(payload);
+                require(success, "Call uniswapV2 failed");
             }
-        }else if(params._packedUserOperation.callData==getV3SwapSelector()){
-            V3SwapParams memory v3=abi.decode(params._hookMessageParams.packCrossMessage,(V3SwapParams));
-            if(v3.tokenIn!=address(0)){
-                sendETHAmount=v3.amountIn;
+        }else if(toBytes4(params._packedUserOperation.callData)==getV3SwapSelector()){
+            CrossV3SwapParams memory crossV3=decodeCrossV3SwapMessage(params._hookMessageParams.packCrossMessage);
+            if(crossV3.sourceChainTokenIn==address(0)){
+                sendETHAmount=crossV3.amountIn;
             }else{
-                v3.tokenOut=address(0);
-                sendETHAmount=v3Swap(v3);
+                V3SwapParams memory v3SwapParams=fromCrossV3ToSourceV3SwapParams(crossV3);
+                // sendETHAmount=v3Swap{value: v3SwapParams.amountIn}(v3SwapParams);
+                payload=abi.encodeWithSignature('v3Swap((uint8,uint24,uint160,address,address,address,uint256,uint256))', v3SwapParams);
+                (bool success,) = address(this).call{value: v3SwapParams.amountIn}(payload);
+                require(success, "Call uniswapV2 failed");
             }
         //such as send eth
         }else{
-
+            CrossETHParams memory crossETH=decodeCrossETHMessage(params._hookMessageParams.packCrossMessage);
+            sendETHAmount=crossETH.amount;
         }
 
         bytes memory encodedMessage = _packetMessage(
@@ -128,7 +124,7 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, BaseStruct, Event{
         );
 
         uint256 gasFee = LaunchPad.estimateGas(
-                params._hookMessageParams.destChainExecuteUsedFee,
+                params._hookMessageParams.destChainExecuteUsedFee + sendETHAmount,
                 params._hookMessageParams.destChainId,
                 additionParams,
                 encodedMessage
@@ -244,45 +240,6 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, BaseStruct, Event{
         return outputData[1];
     }
 
-    function doHook(bytes memory packCrossMessage, uint256 receiveETHAmount)internal {
-       if(params._packedUserOperation.callData==getV2SwapSelector()){
-            V2SwapParams memory v2SwapParams = abi.decode(packCrossMessage, (V2SwapParams));
-            //source other token => target eth
-            if(v2SwapParams.path[v2SwapParams.path.length-1]==address(0)){
-                if(receiveETHAmount>0){
-                    (bool suc,)=v2SwapParams.to.call{value: receiveETHAmount}("");
-                    require(suc,"Recieve eth fail");
-                }
-            }else{
-                v2SwapParams.path[0]=address(0);
-                try this.v2Swap(v2SwapParams) returns (uint256 result){
-                    amountOut = result;
-                }catch {
-                    amountOut = 0;
-                }
-            }
-        //v3 swap
-        }else if(params._packedUserOperation.callData==getV3SwapSelector()){
-            V3SwapParams memory v3SwapParams = abi.decode(packCrossMessage, (V3SwapParams));
-            //source other token => target eth
-            if(v3SwapParams.tokenOut==address(0)){
-                if(receiveETHAmount>0){
-                    (bool suc,)=v3SwapParams.recipient.call{value: receiveETHAmount}("");
-                    require(suc,"Recieve eth fail");
-                }
-            }else{
-                v2SwapParams.path[0]=address(0);
-                try this.v3Swap(v3SwapParams) returns (uint256 result){
-                    amountOut = result;
-                }catch {
-                    amountOut = 0;
-                }
-            }
-        }else{
-            
-        }
-    }
-
     function _receiveMessage(
         bytes32 messageId,
         uint64 srcChainId,
@@ -290,18 +247,26 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, BaseStruct, Event{
         bytes calldata message
     ) internal virtual override {
         require(MirrorEntryPoint[srcChainId] == address(uint160(srcContract)),"Invalid contract");
-        (bytes memory batchsMessage) = abi.decode(message, (bytes));
+        (CrossMessageParams memory _crossMessage) = abi.decode(message, (CrossMessageParams));
+        (bytes memory batchsMessage) = abi.decode(_crossMessage._hookMessageParams.batchsMessage, (bytes));
         PackedUserOperation[] memory userOps = abi.decode(
             batchsMessage,
             (PackedUserOperation[])
         );
         
         IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]).syncBatches(userOps);
+        // Do hook
+        {
+            (bool suc, bytes memory resultData)=address(this).call{value: 0}(_crossMessage._hookMessageParams.packCrossMessage);
+            //Continue execution without throwing an error
+            emit ReceiveTouchHook(suc, resultData, _crossMessage._hookMessageParams.packCrossMessage);
+            // require(suc,"Call hook fail");
+        }
         
 
     }
 
-    function fetchOmniMessageFee(CrossMessageParams calldata params) external view virtual returns (uint256 _gasFee) {
+    function fetchOmniMessageFee(CrossMessageParams calldata params, uint256 sendETHAmount) external view virtual returns (uint256 _gasFee) {
         bytes memory CrossMessage=abi.encode(params);
 
         bytes memory encodedMessage = _packetMessage(
@@ -313,7 +278,7 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, BaseStruct, Event{
         );
 
         _gasFee = LaunchPad.estimateGas(
-                params._hookMessageParams.destChainExecuteUsedFee,
+                params._hookMessageParams.destChainExecuteUsedFee + sendETHAmount,
                 params._hookMessageParams.destChainId,
                 additionParams,
                 encodedMessage

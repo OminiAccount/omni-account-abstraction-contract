@@ -22,6 +22,8 @@ interface Event {
         uint256 amountOut
     );
 
+    event ReceiveTouchHook(bool success, bytes data, bytes packHookMessage);
+
     /************************************************PreGasManager*********************************************************** */
 
     event DepositTicketAdded(

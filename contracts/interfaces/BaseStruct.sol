@@ -82,6 +82,29 @@ interface BaseStruct {
      * SyncRouter***********************************************************
      */
 
+    struct CrossETHParams {
+        uint256 amount;
+        address reciever;
+    }
+
+    /**
+     * @notice Use any uniswapV2 router for swap
+     * @param index                 - Index router             -
+     * @param amountIn     - Input swap token amount
+     * @param amountOutMin               - Output token minimum receive amount
+     * @param path              - Uniswapv2 tokens swap path
+     * @param to             - Touch swap output token receiver
+     * @param deadline              - Swap deadline
+     */
+    struct V2SwapParams {
+        uint8 index;
+        uint256 amountIn;
+        uint256 amountOutMin;
+        address[] path;
+        address to;
+        uint256 deadline;
+    }
+
     /**
      * @notice Use any uniswapV3 router for swap
      * @param index                 - Index router
@@ -104,22 +127,25 @@ interface BaseStruct {
         uint256 amountOutMinimum;
     }
 
-    /**
-     * @notice Use any uniswapV2 router for swap
-     * @param index                 - Index router             -
-     * @param amountIn     - Input swap token amount
-     * @param amountOutMin               - Output token minimum receive amount
-     * @param path              - Uniswapv2 tokens swap path
-     * @param to             - Touch swap output token receiver
-     * @param deadline              - Swap deadline
-     */
-    struct V2SwapParams {
+    struct CrossV2SwapParams {
         uint8 index;
         uint256 amountIn;
         uint256 amountOutMin;
-        address[] path;
+        address[] sourcePath;
+        address[] targetPath;
         address to;
         uint256 deadline;
+    }
+
+    struct CrossV3SwapParams {
+        uint8 index;
+        uint24 fee;
+        uint160 sqrtPriceLimitX96;
+        address sourceChainTokenIn;
+        address targetChainTokenOut;
+        address recipient;
+        uint256 amountIn;
+        uint256 amountOutMinimum;
     }
 
     struct CrossHookMessageParams {
