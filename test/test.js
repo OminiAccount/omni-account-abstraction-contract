@@ -39,7 +39,7 @@ describe("ZkAA", function () {
     const syncRouter = await ethers.getContractFactory("SyncRouter");
     const SyncRouter = await syncRouter.deploy(base_vizingPad, WETH);
     console.log("SyncRouter:", SyncRouter.target);
-    return { SyncRouter, WETH };
+    return { SyncRouter, WETH};
   }
 
   async function DeployWETH() {
@@ -49,19 +49,6 @@ describe("ZkAA", function () {
     return { WETH };
   }
 
-  async function DeployZKVizingAAEncode() {
-    const zkVizingAAEncode = await ethers.getContractFactory("ZKVizingAAEncode");
-    const ZKVizingAAEncode = await zkVizingAAEncode.deploy();
-    console.log("ZKVizingAAEncode:", ZKVizingAAEncode.target);
-    return { ZKVizingAAEncode };
-  }
-
-  async function DeployHookSelecter() {
-    const hookSelecter = await ethers.getContractFactory("HookSelecter");
-    const HookSelecter = await hookSelecter.deploy();
-    console.log("HookSelecter:", HookSelecter.target);
-    return { HookSelecter };
-  }
 
   let EntryPoint;
   let WETH;
@@ -70,17 +57,13 @@ describe("ZkAA", function () {
   let ZKVizingAAEncode;
 
   describe("Deploy", function () {
-    // it("EntryPoint and Factory", async function () {
-    //   ({ EntryPoint, ZKVizingAccountFactory } = await loadFixture(DeployEntryPointAndFactory));
-    // });
+    it("EntryPoint and Factory", async function () {
+      ({ EntryPoint, ZKVizingAccountFactory } = await loadFixture(DeployEntryPointAndFactory));
+    });
 
-    // it("SyncRouter and WETH", async function () {
-    //   ({ SyncRouter, WETH } = await loadFixture(DeploySyncRouter));
-    // });
-
-    // it("ZKVizingAAEncode", async function () {
-    //   ZKVizingAAEncode = await DeployZKVizingAAEncode();
-    // });
+    it("SyncRouter and WETH", async function () {
+      ({ SyncRouter, WETH } = await loadFixture(DeploySyncRouter));
+    });
 
 
   });

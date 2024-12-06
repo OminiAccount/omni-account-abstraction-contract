@@ -1,72 +1,62 @@
 {
   "Vizing-testnet": {
     "ChainId": 28516,
-    "EntryPoint": "0xd7c984EEd9DCAdbF3E8c6e4DF9BD287f3036f7Ff",
-    "ZKVizingAccountFactory": "0x359Bc40cFcc8Ab5088F2477FE1554b16fFfB94eD",
-    "WETH": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482",
-    "SyncRouter": "0x730EC1145862bE5a86964AAF863CbB931186a6Bb",
-    "SenderCreator": "0xEb49d65e0367fD9bf57086c1529751D97aDa0Ce6",
-    "VerifyManager": "0x0000000000000000000000000000000000000000",
-    "ZKVizingAAEncode": "0xF9Ca62E37F561F2d26F41f4fE27c4FcBF2d6be7B",
+    "EntryPoint": "0xDB4e8D5eBCfd23298ad68eC0a6247D0D2Ef20115",
+    "ZKVizingAccountFactory": "0xBC401f905E78842e29a08b2d5886E3849E0ce3F9",
+    "WETH": "0xD8EeaAD5e98c31a73c0253561b70c7a074C85Cd6",
+    "SyncRouter": "0x3A5B354976e950c093ab350e343DeD8d9Ed9C6f0",
+    "SenderCreator": "0x72A3b74a7b8410ae2fdF66B42EFB1c070CBBBB12",
     "CreatedZKVizingAccount": {
       "UserAddress": "<SignerWithAddress 0x68f0e14430a6697D379928E37F1fB186Ea4e7644>",
-      "UserZKAccount": "0xa1f9A5d0e73d7C87c5b645db04F630e43448A2c1"
+      "UserZKAccount": "0x04A9b67b8EaC392a05990a841eb3935688622a75"
     }
   },
   "Base-sepolia": {
     "ChainId": 84532,
-    "EntryPoint": "0xd7c984EEd9DCAdbF3E8c6e4DF9BD287f3036f7Ff",
-    "ZKVizingAccountFactory": "0x359Bc40cFcc8Ab5088F2477FE1554b16fFfB94eD",
-    "WETH": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482",
-    "SyncRouter": "0x730EC1145862bE5a86964AAF863CbB931186a6Bb",
-    "SenderCreator": "0xEb49d65e0367fD9bf57086c1529751D97aDa0Ce6",
-    "VerifyManager": "0x0000000000000000000000000000000000000000",
-    "ZKVizingAAEncode": "0xF9Ca62E37F561F2d26F41f4fE27c4FcBF2d6be7B",
+    "EntryPoint": "0xDB4e8D5eBCfd23298ad68eC0a6247D0D2Ef20115",
+    "ZKVizingAccountFactory": "0xBC401f905E78842e29a08b2d5886E3849E0ce3F9",
+    "WETH": "0xD8EeaAD5e98c31a73c0253561b70c7a074C85Cd6",
+    "SyncRouter": "0x3A5B354976e950c093ab350e343DeD8d9Ed9C6f0",
+    "SenderCreator": "0x72A3b74a7b8410ae2fdF66B42EFB1c070CBBBB12",
     "CreatedZKVizingAccount": {
       "UserAddress": "<SignerWithAddress 0x68f0e14430a6697D379928E37F1fB186Ea4e7644>",
-      "UserZKAccount": "0xa1f9A5d0e73d7C87c5b645db04F630e43448A2c1"
+      "UserZKAccount": "0x04A9b67b8EaC392a05990a841eb3935688622a75"
     }
   },
   "Blast-testnet": {
     "ChainId": 168587773,
-    "EntryPoint": "0xd7c984EEd9DCAdbF3E8c6e4DF9BD287f3036f7Ff",
-    "ZKVizingAccountFactory": "0x359Bc40cFcc8Ab5088F2477FE1554b16fFfB94eD",
-    "WETH": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482",
-    "SyncRouter": "0x730EC1145862bE5a86964AAF863CbB931186a6Bb",
-    "SenderCreator": "0xEb49d65e0367fD9bf57086c1529751D97aDa0Ce6",
-    "VerifyManager": "0x0000000000000000000000000000000000000000",
-    "ZKVizingAAEncode": "0xF9Ca62E37F561F2d26F41f4fE27c4FcBF2d6be7B",
+    "EntryPoint": "0xDB4e8D5eBCfd23298ad68eC0a6247D0D2Ef20115",
+    "ZKVizingAccountFactory": "0xBC401f905E78842e29a08b2d5886E3849E0ce3F9",
+    "WETH": "0xD8EeaAD5e98c31a73c0253561b70c7a074C85Cd6",
+    "SyncRouter": "0x3A5B354976e950c093ab350e343DeD8d9Ed9C6f0",
+    "SenderCreator": "0x72A3b74a7b8410ae2fdF66B42EFB1c070CBBBB12",
     "CreatedZKVizingAccount": {
       "UserAddress": "<SignerWithAddress 0x68f0e14430a6697D379928E37F1fB186Ea4e7644>",
-      "UserZKAccount": "0xa1f9A5d0e73d7C87c5b645db04F630e43448A2c1"
+      "UserZKAccount": "0x04A9b67b8EaC392a05990a841eb3935688622a75"
     }
   },
   "Arbitrum-sepolia": {
     "ChainId": 421614,
-    "EntryPoint": "0xd7c984EEd9DCAdbF3E8c6e4DF9BD287f3036f7Ff",
-    "ZKVizingAccountFactory": "0x359Bc40cFcc8Ab5088F2477FE1554b16fFfB94eD",
-    "WETH": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482",
-    "SyncRouter": "0x730EC1145862bE5a86964AAF863CbB931186a6Bb",
-    "SenderCreator": "0xEb49d65e0367fD9bf57086c1529751D97aDa0Ce6",
-    "VerifyManager": "0x0000000000000000000000000000000000000000",
-    "ZKVizingAAEncode": "0xF9Ca62E37F561F2d26F41f4fE27c4FcBF2d6be7B",
+    "EntryPoint": "0xDB4e8D5eBCfd23298ad68eC0a6247D0D2Ef20115",
+    "ZKVizingAccountFactory": "0xBC401f905E78842e29a08b2d5886E3849E0ce3F9",
+    "WETH": "0xD8EeaAD5e98c31a73c0253561b70c7a074C85Cd6",
+    "SyncRouter": "0x3A5B354976e950c093ab350e343DeD8d9Ed9C6f0",
+    "SenderCreator": "0x72A3b74a7b8410ae2fdF66B42EFB1c070CBBBB12",
     "CreatedZKVizingAccount": {
       "UserAddress": "<SignerWithAddress 0x68f0e14430a6697D379928E37F1fB186Ea4e7644>",
-      "UserZKAccount": "0xa1f9A5d0e73d7C87c5b645db04F630e43448A2c1"
+      "UserZKAccount": "0x04A9b67b8EaC392a05990a841eb3935688622a75"
     }
   },
   "Optimism-sepolia": {
     "ChainId": 11155420,
-    "EntryPoint": "0xd7c984EEd9DCAdbF3E8c6e4DF9BD287f3036f7Ff",
-    "ZKVizingAccountFactory": "0x359Bc40cFcc8Ab5088F2477FE1554b16fFfB94eD",
-    "WETH": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482",
-    "SyncRouter": "0x730EC1145862bE5a86964AAF863CbB931186a6Bb",
-    "SenderCreator": "0xEb49d65e0367fD9bf57086c1529751D97aDa0Ce6",
-    "VerifyManager": "0x0000000000000000000000000000000000000000",
-    "ZKVizingAAEncode": "0xF9Ca62E37F561F2d26F41f4fE27c4FcBF2d6be7B",
+    "EntryPoint": "0xDB4e8D5eBCfd23298ad68eC0a6247D0D2Ef20115",
+    "ZKVizingAccountFactory": "0xBC401f905E78842e29a08b2d5886E3849E0ce3F9",
+    "WETH": "0xD8EeaAD5e98c31a73c0253561b70c7a074C85Cd6",
+    "SyncRouter": "0x3A5B354976e950c093ab350e343DeD8d9Ed9C6f0",
+    "SenderCreator": "0x72A3b74a7b8410ae2fdF66B42EFB1c070CBBBB12",
     "CreatedZKVizingAccount": {
       "UserAddress": "<SignerWithAddress 0x68f0e14430a6697D379928E37F1fB186Ea4e7644>",
-      "UserZKAccount": "0xa1f9A5d0e73d7C87c5b645db04F630e43448A2c1"
+      "UserZKAccount": "0x04A9b67b8EaC392a05990a841eb3935688622a75"
     }
   }
 }

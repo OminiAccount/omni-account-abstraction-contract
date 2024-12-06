@@ -19,9 +19,9 @@ async function main() {
 
     const ownerETHBalance1 = await GetETHBalance(owner.address);
     console.log("ownerETHBalance before:", ownerETHBalance1);
-    // SendEther
+    SendEther
     {   
-        const sendAmount=ethers.parseEther("0.025");
+        const sendAmount=ethers.parseEther("0.05");
         await SendEther(owner, deployer.address, sendAmount);
     }
     const ownerETHBalance2 = await GetETHBalance(owner.address);
@@ -49,11 +49,9 @@ async function main() {
 
     let EntryPointAddress=ADDRESS_ZERO;
     let ZKVizingAccountFactoryAddress=ADDRESS_ZERO;
-    let WETHAddress="0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482";
+    let WETHAddress=ADDRESS_ZERO;
     let SyncRouterAddress=ADDRESS_ZERO;
     let SenderCreatorAddress=ADDRESS_ZERO;
-    let VerifyManagerAddress=ADDRESS_ZERO;
-    let ZKVizingAAEncodeAddress="0xF9Ca62E37F561F2d26F41f4fE27c4FcBF2d6be7B";
 
     // let EntryPointAddress="0x7b418afBbCf67F62511D01d7d76FaCBDEC38d1Ca";
     // let ZKVizingAccountFactoryAddress="0xFC6c648230C5372596ed05d33170e59755734861";
@@ -114,6 +112,14 @@ async function main() {
         console.log("EntryPoint:", EntryPointAddress);
         return { EntryPoint };
     }
+    
+    async function DeployWETH() {
+        const weth = await ethers.getContractFactory("WETH9");
+        WETH = await weth.deploy();
+        WETHAddress = WETH.target;
+        console.log("WETH:", WETHAddress);
+        return { WETH };
+    }
 
     async function DeploySyncRouter(vizingPad, weth) {
         const syncRouter = await ethers.getContractFactory("SyncRouter");
@@ -121,14 +127,6 @@ async function main() {
         SyncRouterAddress = SyncRouter.target;
         console.log("SyncRouter:", SyncRouterAddress);
         return { SyncRouter };
-    }
-
-    async function DeployWETH() {
-        const weth = await ethers.getContractFactory("WETH9");
-        WETH = await weth.deploy();
-        WETHAddress = WETH.target;
-        console.log("WETH:", WETHAddress);
-        return { WETH };
     }
 
     async function DeployZKVizingAccountFactory(thisEntryPoint) {
@@ -145,23 +143,6 @@ async function main() {
         SenderCreatorAddress = SenderCreator.target;
         console.log("SenderCreator:", SenderCreatorAddress);
         return { SenderCreator };
-    }
-
-    //????
-    async function DeployVerifyManager() {
-        const verifyManager = await ethers.getContractFactory("VerifyManager");
-        VerifyManager = await verifyManager.deploy();
-        VerifyManagerAddress = VerifyManager.target;
-        console.log("VerifyManager:", VerifyManagerAddress);
-        return { VerifyManager };
-    }
-
-    async function DeployZKVizingAAEncode() {
-        const zkVizingAAEncode = await ethers.getContractFactory("ZKVizingAAEncode");
-        ZKVizingAAEncode = await zkVizingAAEncode.deploy();
-        ZKVizingAAEncodeAddress = ZKVizingAAEncode.target;
-        console.log("ZKVizingAAEncode:", ZKVizingAAEncodeAddress);
-        return { ZKVizingAAEncode };
     }
 
     async function CreateAccount(userAddress, saltNum) {
@@ -193,8 +174,6 @@ async function main() {
             WETH: WETHAddress,
             SyncRouter: SyncRouterAddress,
             SenderCreator: SenderCreatorAddress,
-            VerifyManager: VerifyManagerAddress,
-            ZKVizingAAEncode: ZKVizingAAEncodeAddress,
             CreatedZKVizingAccount:{
                 UserAddress: userAddress,
                 UserZKAccount: userZKAccount
@@ -216,11 +195,9 @@ async function main() {
             if(currentSetChainId === currentChainId){
                 await DeployEntryPoint();
                 await DeployZKVizingAccountFactory(EntryPointAddress);
-                // await DeployWETH();
-                await DeploySyncRouter(setup["VizingPad-TestNet"][i].Address, WETH);
+                await DeployWETH();
+                await DeploySyncRouter(setup["VizingPad-TestNet"][i].Address, WETHAddress);
                 await DeploySenderCreator();
-                // await DeployVerifyManager();
-                // await DeployZKVizingAAEncode();
 
                 //create zkaa account
                 let createdZKAccount=ADDRESS_ZERO;

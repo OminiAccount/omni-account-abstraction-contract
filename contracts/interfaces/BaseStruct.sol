@@ -128,7 +128,8 @@ interface BaseStruct {
     }
 
     struct CrossV2SwapParams {
-        uint8 index;
+        uint8 sourceIndex;
+        uint8 targetIndex;
         uint256 amountIn;
         uint256 amountOutMin;
         address[] sourcePath;
@@ -138,17 +139,21 @@ interface BaseStruct {
     }
 
     struct CrossV3SwapParams {
-        uint8 index;
-        uint24 fee;
-        uint160 sqrtPriceLimitX96;
+        uint8 sourceIndex;
+        uint8 targetIndex;
+        uint24 sourceFee;
+        uint24 targetFee;
+        uint160 sourceSqrtPriceLimitX96;
+        uint160 targetSqrtPriceLimitX96;
         address sourceChainTokenIn;
         address targetChainTokenOut;
-        address recipient;
+        address recipient;  
         uint256 amountIn;
         uint256 amountOutMinimum;
     }
 
     struct CrossHookMessageParams {
+        uint8 way;
         uint24 gasLimit;
         uint64 gasPrice;
         uint64 destChainId;
@@ -158,7 +163,8 @@ interface BaseStruct {
         address selectedRelayer;
         uint256 destChainExecuteUsedFee; // Amount that the target chain needs to spend to execute userop
         bytes batchsMessage;
-        bytes packCrossMessage;
+        bytes packCrossMessage;  //The sending chain sends the instruction to the target chain after encode and executes the call
+        bytes packCrossParams;
     }
 
     struct CrossMessageParams {
