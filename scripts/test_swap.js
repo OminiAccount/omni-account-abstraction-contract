@@ -2,7 +2,7 @@ const hre = require("hardhat");
 
 const ERC20ABI=require("../artifacts/contracts/TestToken.sol/TestToken.json");
 const WETHABI=require("../artifacts/contracts/WETH.sol/WETH9.json");
-const VizingSwapABI=require("../artifacts/contracts/uniswap/VizingSwap.sol/VizingSwap.json");
+const VizingSwapABI=require("../artifacts/contracts/hook/VizingSwap.sol/VizingSwap.json");
 
 async function main() {
     const [owner] = await hre.ethers.getSigners();
@@ -62,13 +62,13 @@ async function main() {
       try{
         const v3ExactInputParams={
             index: 0, 
+            fee: 10000,
+            sqrtPriceLimitX96: 0,
             tokenIn: token0,
             tokenOut: token1,
             recipient: owner.address,
             amountIn: amountIn,
-            amountOutMinimum: 0,
-            fee: 10000,
-            sqrtPriceLimitX96: 0
+            amountOutMinimum: 0
         };
         let ethSwapAmount=0;
         if(token0 == ADDRESS_ZERO){

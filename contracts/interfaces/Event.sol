@@ -22,6 +22,12 @@ interface Event {
         uint256 amountOut
     );
 
+    /**
+     * Target chain touch hook
+     * @param success      - Touch hook if success
+     * @param data     - Touch call hook return data
+     * @param packHookMessage    - source chain hook message
+     */
     event ReceiveTouchHook(bool success, bytes data, bytes packHookMessage);
 
     /************************************************PreGasManager*********************************************************** */

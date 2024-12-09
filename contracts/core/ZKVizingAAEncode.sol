@@ -51,62 +51,6 @@ library HookLib {
         (params) = abi.decode(crossMessage, (BaseStruct.CrossV3SwapParams));
     }
 
-    function fromCrossV2ToSourceV2SwapParams(
-        BaseStruct.CrossV2SwapParams memory crossParams,
-        address receiver
-    ) internal pure returns(BaseStruct.V2SwapParams memory v2SwapParams){
-        address[] memory newPath=new address[](crossParams.sourcePath.length);
-        unchecked {
-            for(uint256 i;i<newPath.length;i++){
-                newPath[i]=crossParams.sourcePath[i];
-            }
-        }
-        v2SwapParams=BaseStruct.V2SwapParams({
-            index: crossParams.sourceIndex,
-            amountIn: crossParams.amountIn,
-            amountOutMin: crossParams.amountOutMin,
-            path: newPath,
-            to: receiver,
-            deadline: crossParams.deadline
-        });
-    }
-
-    function fromCrossV2ToTargetV2SwapParams(
-        BaseStruct.CrossV2SwapParams memory crossParams
-    ) internal pure returns(BaseStruct.V2SwapParams memory v2SwapParams){
-        address[] memory newPath=new address[](crossParams.targetPath.length);
-        unchecked {
-            for(uint256 i;i<newPath.length;i++){
-                newPath[i]=crossParams.targetPath[i];
-            }
-        }
-        newPath[0]=address(0);
-        v2SwapParams=BaseStruct.V2SwapParams({
-            index: crossParams.targetIndex,
-            amountIn: crossParams.amountIn,
-            amountOutMin: 0,
-            path: newPath,
-            to: crossParams.to,
-            deadline: crossParams.deadline
-        });
-    }
-
-    function fromCrossV3ToSourceV3SwapParams(
-        BaseStruct.CrossV3SwapParams memory crossParams,
-        address receiver
-    ) internal pure returns(BaseStruct.V3SwapParams memory v3SwapParams){
-        v3SwapParams=BaseStruct.V3SwapParams({
-            index: crossParams.sourceIndex,
-            fee: crossParams.sourceFee,
-            sqrtPriceLimitX96: crossParams.sourceSqrtPriceLimitX96,
-            tokenIn: crossParams.sourceChainTokenIn,
-            tokenOut: address(0),
-            recipient: receiver,
-            amountIn: crossParams.amountIn,
-            amountOutMinimum: crossParams.amountOutMinimum
-        });
-    }
-
     function fromCrossV3ToTargetV3SwapParams(
         BaseStruct.CrossV3SwapParams memory crossParams
     ) internal pure returns(BaseStruct.V3SwapParams memory v3SwapParams){

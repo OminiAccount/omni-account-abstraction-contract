@@ -78,7 +78,8 @@ async function main() {
         await SetMirrorEntryPoint(deployedAddresses["Arbitrum-sepolia"].ChainId, deployedAddresses["Arbitrum-sepolia"].EntryPoint);
         await SetMirrorEntryPoint(deployedAddresses["Blast-testnet"].ChainId, deployedAddresses["Blast-testnet"].EntryPoint);
         await SetMirrorEntryPoint(deployedAddresses["Optimism-sepolia"].ChainId, deployedAddresses["Optimism-sepolia"].EntryPoint);
-        await SetMirrorEntryPoint(deployedAddresses["Sepolia"].ChainId, deployedAddresses["Sepolia"].EntryPoint);
+        await SetMirrorEntryPoint(deployedAddresses["Base-sepolia"].ChainId, deployedAddresses["Base-sepolia"].EntryPoint);
+        // await SetMirrorEntryPoint(deployedAddresses["Sepolia"].ChainId, deployedAddresses["Sepolia"].EntryPoint);
         await SetMirrorEntryPoint(deployedAddresses["Vizing-testnet"].ChainId, deployedAddresses["Vizing-testnet"].EntryPoint);
     }
 

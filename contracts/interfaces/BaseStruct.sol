@@ -132,8 +132,8 @@ interface BaseStruct {
         uint8 targetIndex;
         uint256 amountIn;
         uint256 amountOutMin;
-        address[] sourcePath;
-        address[] targetPath;
+        address sourceToken;
+        address targetToken;
         address to;
         uint256 deadline;
     }

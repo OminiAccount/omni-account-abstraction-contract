@@ -16,40 +16,50 @@ async function main() {
     console.log("testUser:",testUser.address);
     const provider = ethers.provider;
     const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
-
-    const ownerETHBalance1 = await GetETHBalance(owner.address);
-    console.log("ownerETHBalance before:", ownerETHBalance1);
-    SendEther
-    {   
-        const sendAmount=ethers.parseEther("0.05");
-        await SendEther(owner, deployer.address, sendAmount);
-    }
-    const ownerETHBalance2 = await GetETHBalance(owner.address);
-    console.log("ownerETHBalance after:", ownerETHBalance2);
-
-    const testUserETHBalance = await GetETHBalance(testUser.address);
-    console.log("testUserETHBalance:", testUserETHBalance);
-
-    if(testUserETHBalance<=ethers.parseEther("0.01")){
-        throw("Test user insufficient eth");
-    }
-
+    
     const network = await provider.getNetwork();
     const currentChainId = network.chainId; 
     console.log("currentChainId:", currentChainId); 
 
+    const deployerETHBalance1 = await GetETHBalance(deployer.address);
+    console.log("deployer balance:", deployerETHBalance1);
+
+    const ownerETHBalance2 = await GetETHBalance(owner.address);
+    console.log("owner balance:", ownerETHBalance2);
+
+    const testUserETHBalance = await GetETHBalance(testUser.address);
+    console.log("testUser balance:", testUserETHBalance);
+    // SendEther
+    {   
+        let sendAmount;
+        if(deployerETHBalance1<ethers.parseEther("0.035")){
+            if(currentChainId===setup["VizingPad-TestNet"][0].ChainId){
+                sendAmount=ethers.parseEther("0.1");
+            }else{
+                sendAmount=ethers.parseEther("0.035");
+            }
+            await SendEther(owner, deployer.address, sendAmount);
+        }
+    }
+
+    if(testUserETHBalance<=ethers.parseEther("0.01")){
+        throw("Test user insufficient eth");
+    }
     //Not deploy
     let EntryPoint;
     let ZKVizingAccountFactory;
-    let SyncRouter;
     let WETH;
+    let VizingSwap;
+    let SyncRouter;
     let SenderCreator;
     let VerifyManager;
     let ZKVizingAAEncode;
+        
 
     let EntryPointAddress=ADDRESS_ZERO;
     let ZKVizingAccountFactoryAddress=ADDRESS_ZERO;
     let WETHAddress=ADDRESS_ZERO;
+    let VizingSwapAddress=ADDRESS_ZERO;
     let SyncRouterAddress=ADDRESS_ZERO;
     let SenderCreatorAddress=ADDRESS_ZERO;
 
@@ -105,7 +115,6 @@ async function main() {
 
 /*********************************************Deploy********************************************************** */
     async function DeployEntryPoint() {
-        const [owner, otherAccount] = await ethers.getSigners();
         const entryPoint = await ethers.getContractFactory("EntryPoint");
         EntryPoint = await entryPoint.deploy();
         EntryPointAddress = EntryPoint.target;
@@ -121,9 +130,17 @@ async function main() {
         return { WETH };
     }
 
-    async function DeploySyncRouter(vizingPad, weth) {
+    async function DeployVizingSwap(weth) {
+        const vizingSwap=await hre.ethers.getContractFactory("VizingSwap");
+        VizingSwap=await vizingSwap.deploy(weth);
+        VizingSwapAddress=VizingSwap.target;
+        console.log("VizingSwap Address:", VizingSwapAddress);
+        return { VizingSwap };
+    }
+
+    async function DeploySyncRouter(vizingPad, weth, hook) {
         const syncRouter = await ethers.getContractFactory("SyncRouter");
-        SyncRouter = await syncRouter.deploy(vizingPad, weth);
+        SyncRouter = await syncRouter.deploy(vizingPad, weth, hook);
         SyncRouterAddress = SyncRouter.target;
         console.log("SyncRouter:", SyncRouterAddress);
         return { SyncRouter };
@@ -172,6 +189,7 @@ async function main() {
             EntryPoint: EntryPointAddress,
             ZKVizingAccountFactory: ZKVizingAccountFactoryAddress,
             WETH: WETHAddress,
+            VizingSwap: VizingSwapAddress,
             SyncRouter: SyncRouterAddress,
             SenderCreator: SenderCreatorAddress,
             CreatedZKVizingAccount:{
@@ -196,7 +214,8 @@ async function main() {
                 await DeployEntryPoint();
                 await DeployZKVizingAccountFactory(EntryPointAddress);
                 await DeployWETH();
-                await DeploySyncRouter(setup["VizingPad-TestNet"][i].Address, WETHAddress);
+                await DeployVizingSwap(WETHAddress);
+                await DeploySyncRouter(setup["VizingPad-TestNet"][i].Address, WETHAddress, VizingSwapAddress);
                 await DeploySenderCreator();
 
                 //create zkaa account
