@@ -1,6 +1,5 @@
-// SPDX-License-Identifier: AGPL-3.0
-
-pragma solidity ^0.8.23;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.7.5;
 
 /**
  * @dev Define interface verifier

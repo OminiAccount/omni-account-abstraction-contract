@@ -158,6 +158,51 @@ contract ZKVizingAccount is
     }
 
     /**
+     * deposit Gas to vizing from other chains
+     */
+    function depositGasRemote(
+        uint256 nonce,
+        uint256 amount,
+        uint256 destChainExecuteUsedFee,
+        uint24 gasLimit,
+        uint64 gasPrice,
+        uint64 minArrivalTime,
+        uint64 maxArrivalTime,
+        address selectedRelayer
+    ) public payable {
+        // msg.value = crossFee+amount+destChainExecuteOpFee
+        require(msg.value >= amount + destChainExecuteUsedFee);
+
+        bytes memory data = abi.encodeCall(
+            entryPoint().submitDepositOperationByRemote,
+            (address(this), amount, 1)
+        );
+
+        // destChainExecuteUsedFee include amount
+        destChainExecuteUsedFee += amount;
+        CrossMessageParams memory params;
+        CrossETHParams memory crossETH;
+        crossETH.amount = amount;
+        params._hookMessageParams.way = 255;
+        params._hookMessageParams.gasLimit = gasLimit;
+        params._hookMessageParams.gasPrice = gasPrice;
+        params._hookMessageParams.destChainId = entryPoint().getMainChainId();
+        params._hookMessageParams.minArrivalTime = minArrivalTime;
+        params._hookMessageParams.maxArrivalTime = maxArrivalTime;
+        params._hookMessageParams.destContract = entryPoint()
+            .getChainConfigs(params._hookMessageParams.destChainId)
+            .router;
+        params._hookMessageParams.selectedRelayer = selectedRelayer;
+        params
+            ._hookMessageParams
+            .destChainExecuteUsedFee = destChainExecuteUsedFee;
+        params._hookMessageParams.packCrossMessage = data;
+        params._hookMessageParams.packCrossParams = abi.encode(crossETH);
+
+        entryPoint().sendDepositOperation{value: msg.value}(params);
+    }
+
+    /**
      * withdraw value from the account's deposit
      * @param amount to withdraw
      * @notice Currently, only owner's own withdrawal is supported.
@@ -167,15 +212,53 @@ contract ZKVizingAccount is
         entryPoint().submitWithdrawOperation(amount);
     }
 
-    function redeemGas(uint256 amount, uint256 nonce) public onlyOwner {
-        entryPoint().redeemGasOperation(amount, nonce);
-    }
+    // function redeemGas(uint256 amount, uint256 nonce) public onlyOwner {
+    //     entryPoint().redeemGasOperation(amount, nonce);
+    // }
 
     function withdraw(uint256 amount) external onlyOwner {
         if (amount > address(this).balance) {
             revert InsufficientBalance();
         }
         _call(msg.sender, amount, "");
+    }
+
+    /**
+     * Withdraw the balance of AA account from vizing to other chains
+     */
+    function withdrawRemote(
+        uint256 nonce,
+        uint64 destChainId,
+        uint256 amount,
+        address receiver,
+        uint256 destChainExecuteUsedFee,
+        uint24 gasLimit,
+        uint64 gasPrice,
+        uint64 minArrivalTime,
+        uint64 maxArrivalTime,
+        address selectedRelayer
+    ) external onlyOwner {
+        CrossMessageParams memory params;
+
+        // pack CrossETHParams
+        CrossETHParams memory crossETH;
+        crossETH.amount = amount;
+        crossETH.reciever = receiver;
+
+        params._hookMessageParams.way = 254;
+        params._hookMessageParams.gasLimit = gasLimit;
+        params._hookMessageParams.gasPrice = gasPrice;
+        params._hookMessageParams.destChainId = destChainId;
+        params._hookMessageParams.minArrivalTime = minArrivalTime;
+        params._hookMessageParams.maxArrivalTime = maxArrivalTime;
+        params._hookMessageParams.destContract = entryPoint()
+            .getChainConfigs(params._hookMessageParams.destChainId)
+            .router;
+        params._hookMessageParams.selectedRelayer = selectedRelayer;
+        params
+            ._hookMessageParams
+            .destChainExecuteUsedFee = destChainExecuteUsedFee;
+        params._hookMessageParams.packCrossParams = abi.encode(crossETH);
     }
 
     function _authorizeUpgrade(

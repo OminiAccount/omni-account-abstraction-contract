@@ -1,32 +1,58 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 
 import {VizingOmni} from "@vizing/contracts/VizingOmni.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IWETH9} from "../../interfaces/IWETH9.sol";
-import {IUniswapV2Router02} from "../../interfaces/uniswapv2/IUniswapV2Router02.sol";
 import {ISwapRouter02, IV3SwapRouter} from "../../interfaces/uniswapv3/ISwapRouter02.sol";
-import "../../interfaces/core/IEntryPoint.sol";
-import "../../interfaces/core/ISyncRouter.sol";
-import "../../libraries/Error.sol";
+import {IEntryPoint} from "../../interfaces/core/IEntryPoint.sol";
 import {Event} from "../../interfaces/Event.sol";
+import {IUniswapV2Router02} from "../../interfaces/uniswapv2/IUniswapV2Router02.sol";
+import {ISyncRouter} from "../../interfaces/core/ISyncRouter.sol";
+import {IVizingSwap} from "../../interfaces/hook/IVizingSwap.sol";
+import "../../libraries/Error.sol";
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
+import "forge-std/console.sol";
+
 // Todo: The cross-chain module is separated from the business module.
+
 contract SyncRouter is
-    ISyncRouter,
     VizingOmni,
     Ownable,
     ReentrancyGuard,
-    Event
+    Event,
+    ISyncRouter
 {
     using SafeERC20 for IERC20;
 
-    address public WETH;
     bytes1 private mode = 0x01;
-    address[] private routers;
+    address public WETH;
+    address public Hook;
+    bytes private additionParams = new bytes(0);
+
+    uint24 public defaultGaslimit = 50000;
+    uint64 public defaultGasPrice = 1 gwei;
+    uint64 public immutable override minArrivalTime;
+    uint64 public immutable override maxArrivalTime;
+    address public immutable override selectedRelayer;
+
+    /**
+     * @dev Constructs a new BatchSend contract instance.
+     * @param _vizingPad The VizingPad for this contract to interact with.
+     * @param _WETH The owner address that will be set as the owner of the contract.
+     * @param _Hook VizingSwap address
+     */
+    constructor(
+        address _vizingPad,
+        address _WETH,
+        address _Hook
+    ) VizingOmni(_vizingPad) Ownable(msg.sender) {
+        WETH = _WETH;
+        Hook = _Hook;
+    }
 
     mapping(uint64 => address) public MirrorEntryPoint;
     mapping(uint256 => bytes1) public LockWay;
@@ -42,18 +68,6 @@ contract SyncRouter is
     }
 
     receive() external payable {}
-
-    /**
-     * @dev Constructs a new BatchSend contract instance.
-     * @param _vizingPad The VizingPad for this contract to interact with.
-     * @param _WETH The owner address that will be set as the owner of the contract.
-     */
-    constructor(
-        address _vizingPad,
-        address _WETH
-    ) VizingOmni(_vizingPad) Ownable(msg.sender) {
-        WETH = _WETH;
-    }
 
     function setMirrorEntryPoint(
         uint64 chainId,
@@ -71,207 +85,449 @@ contract SyncRouter is
         LockWay[_way] = _lockState;
     }
 
-    /**
-     * @notice owner add new swap router
-     * @param _newRouter push new router to routers[]
-     */
-    function addRouter(address _newRouter) external onlyOwner {
-        routers.push(_newRouter);
-    }
-
-    /**
-     * @notice owner remove swap router
-     * @param _indexOldRouter index routers[]
-     */
-    function removeRouter(uint8 _indexOldRouter) external onlyOwner {
-        delete routers[_indexOldRouter];
-    }
-
-    function crossMessage(
-        CrossParams calldata params
-    ) public payable nonReentrant lock(0) {
-        bytes memory message = abi.encode(
-            params.batchsMessage,
-            params.packCrossMessage,
-            params.way
-        );
+    function sendOmniMessage(
+        uint64 destChainId,
+        address destContract,
+        uint256 destChainExecuteUsedFee, // Amount that the target chain needs to spend to execute userop
+        PackedUserOperation[] calldata userOperations
+    ) external payable onlyEntryPoint(uint64(block.chainid)) {
         bytes memory encodedMessage = _packetMessage(
             mode,
-            params.destContract,
-            params.gasLimit,
-            params.gasPrice,
-            message
+            destContract,
+            defaultGaslimit,
+            defaultGasPrice,
+            abi.encode(userOperations)
         );
 
-        uint256 gasFee = fetchOmniMessageFee(params);
+        uint256 gasFee = fetchOmniMessageFee(
+            destChainId,
+            destContract,
+            destChainExecuteUsedFee,
+            userOperations
+        );
 
-        require(msg.value >= gasFee + params.destChainExecuteUsedFee);
+        require(msg.value >= gasFee + destChainExecuteUsedFee);
 
+        // step 4: send Omni-Message 2 Vizing Launch Pad
         LaunchPad.Launch{value: msg.value}(
-            params.minArrivalTime,
-            params.maxArrivalTime,
-            params.selectedRelayer,
+            minArrivalTime,
+            maxArrivalTime,
+            selectedRelayer,
             msg.sender,
-            params.destChainExecuteUsedFee,
-            params.destChainId,
-            new bytes(0),
+            destChainExecuteUsedFee,
+            destChainId,
+            additionParams,
             encodedMessage
         );
     }
 
-    /**
-     * @notice public swap way.ETH=>Other token，params.tokenIn==address(0), Other token=>ETH, params.tokenOut=address(0)
-     * @param params user swap input V3SwapParams
-     */
-    function v3Swap(
-        V3SwapParams calldata params
-    ) public payable nonReentrant lock(1) returns (uint256) {
-        address router = routers[params.index];
-        address _tokenIn = params.tokenIn;
-        address _tokenOut = params.tokenOut;
-        address receiver = params.recipient;
-        uint256 amountOut;
-        if (params.tokenIn == address(0)) {
-            require(msg.value >= params.amountIn, "Send eth insufficient");
-            _tokenIn = WETH;
-            IWETH9(WETH).deposit{value: msg.value}();
-        } else if (params.tokenOut == address(0)) {
-            _tokenOut = WETH;
-            receiver = address(this);
-            IERC20(params.tokenIn).safeTransferFrom(
-                msg.sender,
-                address(this),
-                params.amountIn
+    function getUserOmniMessage(
+        CrossMessageParams calldata params
+    ) external returns (bytes memory) {
+        uint256 sendETHAmount;
+        bytes memory payload;
+        bytes memory newCrossParams;
+        //only transfer eth
+        if (params._hookMessageParams.way == 0) {
+            CrossETHParams memory crossETH = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossETHParams)
             );
-        } else {
-            IERC20(params.tokenIn).safeTransferFrom(
-                msg.sender,
-                address(this),
-                params.amountIn
+            sendETHAmount = crossETH.amount;
+            newCrossParams = params._hookMessageParams.packCrossParams;
+            //touch source chain uniswapV2
+        } else if (params._hookMessageParams.way == 1) {
+            CrossV2SwapParams memory crossV2 = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossV2SwapParams)
             );
-        }
-        IERC20(_tokenIn).approve(router, params.amountIn);
-
-        IV3SwapRouter.ExactInputSingleParams memory v3Params = IV3SwapRouter
-            .ExactInputSingleParams({
-                tokenIn: _tokenIn,
-                tokenOut: _tokenOut,
-                fee: params.fee,
-                recipient: receiver,
-                amountIn: params.amountIn,
-                amountOutMinimum: params.amountOutMinimum,
-                sqrtPriceLimitX96: params.sqrtPriceLimitX96
+            address[] memory newPath;
+            //target chain swap (eth>other)
+            if (crossV2.sourceToken == address(0)) {
+                sendETHAmount = crossV2.amountIn;
+                newPath[0] = address(0);
+                newPath[1] = crossV2.targetToken;
+                V2SwapParams memory newV2SwapParams = V2SwapParams({
+                    index: crossV2.targetIndex,
+                    amountIn: crossV2.amountIn,
+                    amountOutMin: 0,
+                    path: newPath,
+                    to: crossV2.to,
+                    deadline: crossV2.deadline
+                });
+                payload = abi.encodeCall(
+                    IVizingSwap(Hook).v2Swap,
+                    newV2SwapParams
+                );
+                //source chain swap (other>eth)
+            } else {
+                newPath[0] = crossV2.sourceToken;
+                newPath[1] = address(0);
+                V2SwapParams memory v2SwapParams = V2SwapParams({
+                    index: crossV2.sourceIndex,
+                    amountIn: crossV2.amountIn,
+                    amountOutMin: crossV2.amountOutMin,
+                    path: newPath,
+                    to: address(this),
+                    deadline: crossV2.deadline
+                });
+                IERC20(crossV2.sourceToken).safeTransferFrom(
+                    msg.sender,
+                    address(this),
+                    crossV2.amountIn
+                );
+                IERC20(crossV2.sourceToken).approve(Hook, crossV2.amountIn);
+                sendETHAmount = IVizingSwap(Hook).v2Swap(v2SwapParams);
+            }
+            CrossETHParams memory crossETH = CrossETHParams({
+                amount: sendETHAmount,
+                reciever: crossV2.to
             });
-        amountOut = ISwapRouter02(router).exactInputSingle(v3Params);
-        if (_tokenOut == WETH) {
-            uint256 wethBalance = IERC20(WETH).balanceOf(address(this));
-            uint256 withdrawWETHAmount = wethBalance >= amountOut
-                ? amountOut
-                : wethBalance;
-            IWETH9(WETH).withdraw(withdrawWETHAmount);
-            (bool suc, ) = params.recipient.call{value: withdrawWETHAmount}("");
-            amountOut = withdrawWETHAmount;
-            require(suc, "Withdraw eth fail");
-        }
-        emit VizingSwapEvent(
-            msg.sender,
-            params.tokenIn,
-            params.tokenOut,
-            params.recipient,
-            params.amountIn,
-            amountOut
-        );
-        return amountOut;
-    }
+            newCrossParams = abi.encode(crossETH);
+            //touch source chain uniswapV3
+        } else if (params._hookMessageParams.way == 2) {
+            CrossV3SwapParams memory crossV3 = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossV3SwapParams)
+            );
+            //target chain swap (eth>other)
+            if (crossV3.sourceChainTokenIn == address(0)) {
+                sendETHAmount = crossV3.amountIn;
+                V3SwapParams memory v3SwapParams = V3SwapParams({
+                    index: crossV3.targetIndex,
+                    fee: crossV3.targetFee,
+                    sqrtPriceLimitX96: crossV3.targetSqrtPriceLimitX96,
+                    tokenIn: address(0),
+                    tokenOut: crossV3.targetChainTokenOut,
+                    recipient: crossV3.recipient,
+                    amountIn: crossV3.amountIn,
+                    amountOutMinimum: crossV3.amountOutMinimum
+                });
+                payload = abi.encodeCall(
+                    IVizingSwap(Hook).v3Swap,
+                    v3SwapParams
+                );
 
-    function v2Swap(
-        V2SwapParams calldata params
-    ) public payable nonReentrant lock(2) returns (uint256) {
-        address router = routers[params.index];
-        address fromToken = params.path[0];
-        address toToken = params.path[params.path.length - 1];
-        uint256[] memory outputData;
-        address[] memory newPath = new address[](params.path.length);
-        for (uint256 i; i < params.path.length; i++) {
-            newPath[i] = params.path[i];
-        }
-        //other swap other
-        if (fromToken != address(0) && toToken != address(0)) {
-            IERC20(fromToken).safeTransferFrom(
-                msg.sender,
-                address(this),
-                params.amountIn
+                //source chain swap (other>eth)
+            } else {
+                V3SwapParams memory v3SwapParams = V3SwapParams({
+                    index: crossV3.sourceIndex,
+                    fee: crossV3.sourceFee,
+                    sqrtPriceLimitX96: crossV3.sourceSqrtPriceLimitX96,
+                    tokenIn: crossV3.sourceChainTokenIn,
+                    tokenOut: address(0),
+                    recipient: address(this),
+                    amountIn: crossV3.amountIn,
+                    amountOutMinimum: crossV3.amountOutMinimum
+                });
+                IERC20(v3SwapParams.tokenIn).safeTransferFrom(
+                    msg.sender,
+                    address(this),
+                    v3SwapParams.amountIn
+                );
+                IERC20(v3SwapParams.tokenIn).approve(
+                    Hook,
+                    v3SwapParams.amountIn
+                );
+                sendETHAmount = IVizingSwap(Hook).v3Swap(v3SwapParams);
+            }
+            CrossETHParams memory crossETH = CrossETHParams({
+                amount: sendETHAmount,
+                reciever: crossV3.recipient
+            });
+            newCrossParams = abi.encode(crossETH);
+        } else if (params._hookMessageParams.way == 255) {
+            // deposit gas remote
+            CrossETHParams memory crossETH = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossETHParams)
             );
-            IERC20(fromToken).approve(router, params.amountIn);
-            outputData = IUniswapV2Router02(router).swapExactTokensForTokens(
-                params.amountIn,
-                params.amountOutMin,
-                params.path,
-                params.to,
-                block.timestamp + params.deadline
-            );
-            //other swap eth
-        } else if (fromToken != address(0) && toToken == address(0)) {
-            newPath[newPath.length - 1] = WETH;
-            IERC20(fromToken).safeTransferFrom(
-                msg.sender,
-                address(this),
-                params.amountIn
-            );
-            IERC20(fromToken).approve(router, params.amountIn);
-            outputData = IUniswapV2Router02(router).swapExactTokensForETH(
-                params.amountIn,
-                params.amountOutMin,
-                params.path,
-                params.to,
-                block.timestamp + params.deadline
-            );
-            //eth swap other
-        } else if (fromToken == address(0) && toToken != address(0)) {
-            newPath[0] = WETH;
-            outputData = IUniswapV2Router02(router).swapExactETHForTokens{
-                value: msg.value
-            }(
-                params.amountOutMin,
-                params.path,
-                params.to,
-                block.timestamp + params.deadline
-            );
+            sendETHAmount = crossETH.amount;
+            newCrossParams = params._hookMessageParams.packCrossParams;
+            payload = params._hookMessageParams.packCrossMessage;
         } else {
-            revert InvalidPath();
+            revert InvalidWay();
         }
-        emit VizingSwapEvent(
-            msg.sender,
-            fromToken,
-            toToken,
-            params.to,
-            params.amountIn,
-            outputData[1]
-        );
-        return outputData[1];
+        //repack
+        CrossHookMessageParams
+            memory newCrossHookMessageParams = CrossHookMessageParams({
+                way: params._hookMessageParams.way,
+                gasLimit: params._hookMessageParams.gasLimit,
+                gasPrice: params._hookMessageParams.gasPrice,
+                destChainId: params._hookMessageParams.destChainId,
+                minArrivalTime: params._hookMessageParams.minArrivalTime,
+                maxArrivalTime: params._hookMessageParams.maxArrivalTime,
+                destContract: params._hookMessageParams.destContract,
+                selectedRelayer: params._hookMessageParams.selectedRelayer,
+                destChainExecuteUsedFee: params
+                    ._hookMessageParams
+                    .destChainExecuteUsedFee,
+                batchsMessage: params._hookMessageParams.batchsMessage,
+                packCrossMessage: payload, //The sending chain sends the instruction to the target chain after encode and executes the call
+                packCrossParams: newCrossParams
+            });
+        // CrossMessageParams memory newCrossMessageParams=CrossMessageParams({
+        //     _packedUserOperation: params._packedUserOperation,
+        //     _hookMessageParams: newCrossHookMessageParams
+        // });
+
+        return
+            abi.encode(
+                CrossMessageParams({
+                    _packedUserOperation: params._packedUserOperation,
+                    _hookMessageParams: newCrossHookMessageParams
+                })
+            );
     }
 
-    function fetchOmniMessageFee(
-        CrossParams calldata params
-    ) public view returns (uint256) {
-        bytes memory message = abi.encode(
-            params.batchsMessage,
-            params.packCrossMessage
-        );
+    function sendUserOmniMessage(
+        CrossMessageParams calldata params
+    ) external payable nonReentrant lock(0) {
+        uint256 sendETHAmount;
+        bytes memory payload;
+        bytes memory newCrossParams;
+        //only transfer eth
+        if (params._hookMessageParams.way == 0) {
+            CrossETHParams memory crossETH = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossETHParams)
+            );
+            sendETHAmount = crossETH.amount;
+            newCrossParams = params._hookMessageParams.packCrossParams;
+            //touch source chain uniswapV2
+        } else if (params._hookMessageParams.way == 1) {
+            CrossV2SwapParams memory crossV2 = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossV2SwapParams)
+            );
+            address[] memory newPath;
+            //target chain swap (eth>other)
+            if (crossV2.sourceToken == address(0)) {
+                sendETHAmount = crossV2.amountIn;
+                newPath[0] = address(0);
+                newPath[1] = crossV2.targetToken;
+                V2SwapParams memory newV2SwapParams = V2SwapParams({
+                    index: crossV2.targetIndex,
+                    amountIn: crossV2.amountIn,
+                    amountOutMin: 0,
+                    path: newPath,
+                    to: crossV2.to,
+                    deadline: crossV2.deadline
+                });
+                payload = abi.encodeCall(
+                    IVizingSwap(Hook).v2Swap,
+                    newV2SwapParams
+                );
+                //source chain swap (other>eth)
+            } else {
+                newPath[0] = crossV2.sourceToken;
+                newPath[1] = address(0);
+                V2SwapParams memory v2SwapParams = V2SwapParams({
+                    index: crossV2.sourceIndex,
+                    amountIn: crossV2.amountIn,
+                    amountOutMin: crossV2.amountOutMin,
+                    path: newPath,
+                    to: address(this),
+                    deadline: crossV2.deadline
+                });
+                IERC20(crossV2.sourceToken).safeTransferFrom(
+                    msg.sender,
+                    address(this),
+                    crossV2.amountIn
+                );
+                IERC20(crossV2.sourceToken).approve(Hook, crossV2.amountIn);
+                sendETHAmount = IVizingSwap(Hook).v2Swap(v2SwapParams);
+            }
+            CrossETHParams memory crossETH = CrossETHParams({
+                amount: sendETHAmount,
+                reciever: crossV2.to
+            });
+            newCrossParams = abi.encode(crossETH);
+            //touch source chain uniswapV3
+        } else if (params._hookMessageParams.way == 2) {
+            CrossV3SwapParams memory crossV3 = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossV3SwapParams)
+            );
+            //target chain swap (eth>other)
+            if (crossV3.sourceChainTokenIn == address(0)) {
+                sendETHAmount = crossV3.amountIn;
+                V3SwapParams memory v3SwapParams = V3SwapParams({
+                    index: crossV3.targetIndex,
+                    fee: crossV3.targetFee,
+                    sqrtPriceLimitX96: crossV3.targetSqrtPriceLimitX96,
+                    tokenIn: address(0),
+                    tokenOut: crossV3.targetChainTokenOut,
+                    recipient: crossV3.recipient,
+                    amountIn: crossV3.amountIn,
+                    amountOutMinimum: crossV3.amountOutMinimum
+                });
+                payload = abi.encodeCall(
+                    IVizingSwap(Hook).v3Swap,
+                    v3SwapParams
+                );
+
+                //source chain swap (other>eth)
+            } else {
+                V3SwapParams memory v3SwapParams = V3SwapParams({
+                    index: crossV3.sourceIndex,
+                    fee: crossV3.sourceFee,
+                    sqrtPriceLimitX96: crossV3.sourceSqrtPriceLimitX96,
+                    tokenIn: crossV3.sourceChainTokenIn,
+                    tokenOut: address(0),
+                    recipient: address(this),
+                    amountIn: crossV3.amountIn,
+                    amountOutMinimum: crossV3.amountOutMinimum
+                });
+                IERC20(v3SwapParams.tokenIn).safeTransferFrom(
+                    msg.sender,
+                    address(this),
+                    v3SwapParams.amountIn
+                );
+                IERC20(v3SwapParams.tokenIn).approve(
+                    Hook,
+                    v3SwapParams.amountIn
+                );
+                sendETHAmount = IVizingSwap(Hook).v3Swap(v3SwapParams);
+            }
+            CrossETHParams memory crossETH = CrossETHParams({
+                amount: sendETHAmount,
+                reciever: crossV3.recipient
+            });
+            newCrossParams = abi.encode(crossETH);
+        } else if (params._hookMessageParams.way == 255) {
+            // deposit gas remote
+            CrossETHParams memory crossETH = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossETHParams)
+            );
+            sendETHAmount = crossETH.amount;
+            newCrossParams = params._hookMessageParams.packCrossParams;
+        } else {
+            revert InvalidWay();
+        }
+        //repack
+        CrossHookMessageParams
+            memory newCrossHookMessageParams = CrossHookMessageParams({
+                way: params._hookMessageParams.way,
+                gasLimit: params._hookMessageParams.gasLimit,
+                gasPrice: params._hookMessageParams.gasPrice,
+                destChainId: params._hookMessageParams.destChainId,
+                minArrivalTime: params._hookMessageParams.minArrivalTime,
+                maxArrivalTime: params._hookMessageParams.maxArrivalTime,
+                destContract: params._hookMessageParams.destContract,
+                selectedRelayer: params._hookMessageParams.selectedRelayer,
+                destChainExecuteUsedFee: params
+                    ._hookMessageParams
+                    .destChainExecuteUsedFee,
+                batchsMessage: params._hookMessageParams.batchsMessage,
+                packCrossMessage: payload, //The sending chain sends the instruction to the target chain after encode and executes the call
+                packCrossParams: newCrossParams
+            });
+        // CrossMessageParams memory newCrossMessageParams=CrossMessageParams({
+        //     _packedUserOperation: params._packedUserOperation,
+        //     _hookMessageParams: newCrossHookMessageParams
+        // });
+
         bytes memory encodedMessage = _packetMessage(
             mode,
-            params.destContract,
-            params.gasLimit,
-            params.gasPrice,
-            message
+            params._hookMessageParams.destContract,
+            params._hookMessageParams.gasLimit,
+            params._hookMessageParams.gasPrice,
+            // abi.encode(newCrossMessageParams)
+            abi.encode(
+                CrossMessageParams({
+                    _packedUserOperation: params._packedUserOperation,
+                    _hookMessageParams: newCrossHookMessageParams
+                })
+            )
         );
-        return
-            LaunchPad.estimateGas(
-                params.destChainExecuteUsedFee,
-                params.destChainId,
-                new bytes(0),
-                encodedMessage
+
+        //vizing fee
+        uint256 gasFee = LaunchPad.estimateGas(
+            params._hookMessageParams.destChainExecuteUsedFee + sendETHAmount,
+            params._hookMessageParams.destChainId,
+            additionParams,
+            encodedMessage
+        );
+
+        //check
+        if (
+            msg.value <
+            gasFee +
+                params._hookMessageParams.destChainExecuteUsedFee +
+                sendETHAmount
+        ) {
+            revert InsufficientBalance();
+        }
+
+        LaunchPad.Launch{value: msg.value}(
+            params._hookMessageParams.minArrivalTime,
+            params._hookMessageParams.maxArrivalTime,
+            params._hookMessageParams.selectedRelayer,
+            msg.sender,
+            params._hookMessageParams.destChainExecuteUsedFee,
+            params._hookMessageParams.destChainId,
+            additionParams,
+            encodedMessage
+        );
+    }
+
+    function testReceiveMessage(bytes calldata message) external payable {
+        IEntryPoint ep = IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]);
+        CrossMessageParams memory _crossMessage = abi.decode(
+            message,
+            (CrossMessageParams)
+        );
+        if (ep.getMainChainId() != uint64(block.chainid)) {
+            bytes memory batchsMessage = abi.decode(
+                _crossMessage._hookMessageParams.batchsMessage,
+                (bytes)
             );
+            PackedUserOperation[] memory userOps = abi.decode(
+                batchsMessage,
+                (PackedUserOperation[])
+            );
+            if (userOps.length != 0) {
+                ep.syncBatches(userOps);
+            }
+        }
+
+        bool suc;
+        bytes memory resultData;
+        CrossETHParams memory crossETHParams = abi.decode(
+            _crossMessage._hookMessageParams.packCrossParams,
+            (CrossETHParams)
+        );
+
+        // deposit Gas remote
+        if (_crossMessage._hookMessageParams.way == 255) {
+            (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
+                value: crossETHParams.amount
+            }(_crossMessage._hookMessageParams.packCrossMessage);
+        } else {
+            //receive eth
+            if (_crossMessage._hookMessageParams.packCrossMessage.length == 0) {
+                (suc, resultData) = crossETHParams.reciever.call{
+                    value: crossETHParams.amount
+                }("");
+                //Continue execution without throwing an error
+                // require(suc, "Receive eth fail");
+            } else {
+                // Do hook
+                (suc, resultData) = address(this).call{
+                    value: crossETHParams.amount
+                }(_crossMessage._hookMessageParams.packCrossMessage);
+                //Continue execution without throwing an error
+                // require(suc,"Call hook fail");
+            }
+        }
+
+        emit ReceiveTouchHook(
+            suc,
+            resultData,
+            _crossMessage._hookMessageParams.packCrossMessage
+        );
     }
 
     function _receiveMessage(
@@ -284,67 +540,126 @@ contract SyncRouter is
             MirrorEntryPoint[srcChainId] == address(uint160(srcContract)),
             "Invalid contract"
         );
-        (
-            bytes memory batchsMessage,
-            bytes memory packCrossMessage,
-            uint8 way
-        ) = abi.decode(message, (bytes, bytes, uint8));
+        CrossMessageParams memory _crossMessage = abi.decode(
+            message,
+            (CrossMessageParams)
+        );
+        bytes memory batchsMessage = abi.decode(
+            _crossMessage._hookMessageParams.batchsMessage,
+            (bytes)
+        );
         PackedUserOperation[] memory userOps = abi.decode(
             batchsMessage,
             (PackedUserOperation[])
         );
 
-        IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]).syncBatches(
-            userOps
+        if (userOps.length != 0) {
+            IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]).syncBatches(
+                userOps
+            );
+        }
+
+        bool suc;
+        bytes memory resultData;
+        CrossETHParams memory crossETHParams = abi.decode(
+            _crossMessage._hookMessageParams.packCrossParams,
+            (CrossETHParams)
         );
-        uint256 amountOut;
-        if (way == 0) {
-            //v2 swap
-        } else if (way == 1) {
-            V2SwapParams memory v2SwapParams = abi.decode(
-                packCrossMessage,
-                (V2SwapParams)
+        //receive eth
+        if (_crossMessage._hookMessageParams.packCrossMessage.length == 0) {
+            (suc, resultData) = crossETHParams.reciever.call{
+                value: crossETHParams.amount
+            }("");
+            //Continue execution without throwing an error
+            // require(suc, "Receive eth fail");
+        } else {
+            // Do hook
+            (suc, resultData) = address(this).call{
+                value: crossETHParams.amount
+            }(_crossMessage._hookMessageParams.packCrossMessage);
+            //Continue execution without throwing an error
+            // require(suc,"Call hook fail");
+        }
+        emit ReceiveTouchHook(
+            suc,
+            resultData,
+            _crossMessage._hookMessageParams.packCrossMessage
+        );
+    }
+
+    function fetchUserOmniMessageFee(
+        CrossMessageParams calldata params
+    ) external view virtual returns (uint256 _gasFee) {
+        bytes memory CrossMessage = abi.encode(params);
+        uint256 sendETHAmount;
+
+        if (params._hookMessageParams.way == 0) {
+            CrossETHParams memory crossETH = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossETHParams)
             );
-            try this.v2Swap(v2SwapParams) returns (uint256 result) {
-                amountOut = result;
-            } catch {
-                amountOut = 0;
+            sendETHAmount = crossETH.amount;
+            //touch source chain uniswapV2
+        } else if (params._hookMessageParams.way == 1) {
+            CrossV2SwapParams memory crossV2 = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossV2SwapParams)
+            );
+            //target chain swap (eth>other)
+            if (crossV2.sourceToken == address(0)) {
+                sendETHAmount = crossV2.amountIn;
             }
-            //v3 swap
-        } else if (way == 2) {
-            V3SwapParams memory v3SwapParams = abi.decode(
-                packCrossMessage,
-                (V3SwapParams)
+            //touch source chain uniswapV3
+        } else if (params._hookMessageParams.way == 2) {
+            CrossV3SwapParams memory crossV3 = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossV3SwapParams)
             );
-            try this.v3Swap(v3SwapParams) returns (uint256 result) {
-                amountOut = result;
-            } catch {
-                amountOut = 0;
+            //target chain swap (eth>other)
+            if (crossV3.sourceChainTokenIn == address(0)) {
+                sendETHAmount = crossV3.amountIn;
             }
         } else {
             revert InvalidWay();
         }
+
+        bytes memory encodedMessage = _packetMessage(
+            mode,
+            params._hookMessageParams.destContract,
+            params._hookMessageParams.gasLimit,
+            params._hookMessageParams.gasPrice,
+            CrossMessage
+        );
+
+        _gasFee = LaunchPad.estimateGas(
+            params._hookMessageParams.destChainExecuteUsedFee + sendETHAmount,
+            params._hookMessageParams.destChainId,
+            additionParams,
+            encodedMessage
+        );
     }
 
-    function _getTokenBalance(
-        address _token,
-        address _user
-    ) private view returns (uint256 _balance) {
-        _balance = IERC20(_token).balanceOf(_user);
-    }
+    function fetchOmniMessageFee(
+        uint64 destChainId,
+        address destContract,
+        uint256 destChainUsedFee,
+        PackedUserOperation[] calldata userOperations
+    ) public view virtual returns (uint256) {
+        bytes memory userOperationsMessage = abi.encode(userOperations);
+        bytes memory encodedMessage = _packetMessage(
+            mode,
+            destContract,
+            defaultGaslimit,
+            defaultGasPrice,
+            userOperationsMessage
+        );
 
-    function getTokenBalance(
-        address token,
-        address user
-    ) external view returns (uint256) {
-        return _getTokenBalance(token, user);
-    }
-
-    function routerLength() external view returns (uint256) {
-        return routers.length;
-    }
-
-    function indexRouter(uint8 index) public view returns (address) {
-        return routers[index];
+        return
+            LaunchPad.estimateGas(
+                destChainUsedFee,
+                destChainId,
+                additionParams,
+                encodedMessage
+            );
     }
 }

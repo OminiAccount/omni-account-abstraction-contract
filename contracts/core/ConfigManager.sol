@@ -1,31 +1,38 @@
 // SPDX-License-Identifier: GPL-3.0-only
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 
-contract ConfigManager {
-    struct Config {
-        address entryPoint;
-    }
+import "../interfaces/core/IConfigManager.sol";
+
+contract ConfigManager is IConfigManager {
     error NumberIsNotEqual();
+
+    uint64 internal constant MAIN_CHAINID = 31337;
 
     address public syncRouter;
     address public verifier;
 
-    mapping(uint64 => Config) public chainConfigs;
+    mapping(uint64 => Config) internal chainConfigs;
 
     modifier isOwner() {
         _isOwner();
         _;
     }
 
-    modifier isSyncRouter() {
-        require(msg.sender == syncRouter, "NEQSRR");
+    modifier isSyncRouter(uint64 chainId) {
+        require(msg.sender == chainConfigs[chainId].router, "NEQSR");
         _;
     }
 
     function _isOwner() internal virtual {}
 
-    function updateSyncRouter(address _syncRouter) external isOwner {
-        syncRouter = _syncRouter;
+    function getMainChainId() public pure returns (uint64) {
+        return MAIN_CHAINID;
+    }
+
+    function getChainConfigs(
+        uint64 chainId
+    ) public view returns (Config memory) {
+        return chainConfigs[chainId];
     }
 
     function updateVerifier(address _verifier) external isOwner {

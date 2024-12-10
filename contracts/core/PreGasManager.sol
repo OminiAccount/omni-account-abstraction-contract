@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 
 import "../libraries/Error.sol";
 import "../libraries/UserOperationLib.sol";
@@ -30,7 +30,21 @@ contract PreGasManager is IPreGasManager {
 
         preGasBalance[msg.sender] += amount;
 
-        redeemGasOperation(amount, nonce);
+        redeemGasOperation(msg.sender, amount, nonce);
+    }
+
+    function _submitDepositOperationRemote(
+        address sender,
+        uint256 amount,
+        uint256 nonce
+    ) internal {
+        if (msg.value != amount) {
+            revert ValueNotEqual();
+        }
+
+        preGasBalance[sender] += amount;
+
+        redeemGasOperation(sender, amount, nonce);
     }
 
     /**
@@ -78,15 +92,17 @@ contract PreGasManager is IPreGasManager {
     /**
      * Redeem gasBalance to SMT
      */
-    function redeemGasOperation(uint256 amount, uint256 nonce) public {
-        if (preGasBalance[msg.sender] < amount) {
+    function redeemGasOperation(
+        address sender,
+        uint256 amount,
+        uint256 nonce
+    ) internal {
+        if (preGasBalance[sender] < amount) {
             revert InsufficientBalance();
         }
         emit DepositTicketAdded(
-            keccak256(
-                abi.encodePacked(msg.sender, block.chainid, nonce, amount)
-            ),
-            msg.sender,
+            keccak256(abi.encodePacked(sender, block.chainid, nonce, amount)),
+            sender,
             amount,
             block.timestamp
         );

@@ -18,6 +18,7 @@ contract ExecuteTest is Utils, AddressHelper {
     ZKVizingAccountFactory factory;
     ZKVizingAccount account1;
     Groth16Verifier gverifier;
+    SyncRouter router;
     address deployer = owner;
     address account1Owner = address(0x96f3088fC6E3e4C4535441f5Bc4d69C4eF3FE9c5);
     address account2Owner = address(0xe25A045cBC0407DB4743c9c5B8dcbdDE2021e3Aa);
@@ -25,14 +26,16 @@ contract ExecuteTest is Utils, AddressHelper {
     function setUp() public {
         vm.deal(deployer, 100 ether);
         vm.deal(account1Owner, 20 ether);
+        // vm.deal(router, 2 ether);
         vm.startPrank(deployer);
         ep = new EntryPoint();
+        router = new SyncRouter(address(0), address(0), address(0));
         gverifier = new Groth16Verifier();
         ep.updateVerifier(address(gverifier));
+        // ep.updateSyncRouter(address(router));
+        router.setMirrorEntryPoint(uint64(block.chainid), address(ep));
         factory = new ZKVizingAccountFactory(ep);
         account1 = factory.createAccount(account1Owner);
-        address mock_address = factory.getAccountAddress(account1Owner, 0);
-        console.log("get mock %s", mock_address);
         console.log("account %s", address(account1));
         vm.stopPrank();
         vm.deal(address(account1), 1 ether);
@@ -53,8 +56,8 @@ contract ExecuteTest is Utils, AddressHelper {
         uint64 mainChainGasLimit = 200_000;
         uint64 destChainGasLimit = 0;
         uint64 zkVerificationGasLimit = 2200;
-        uint128 mainChainGasPrice = 2_500_000_000;
-        uint128 destChainGasPrice = 0;
+        uint64 mainChainGasPrice = 2_500_000_000;
+        uint64 destChainGasPrice = 0;
         PackedUserOperation memory account1OwnerUserOp = PackedUserOperation(
             0,
             operationValue,
@@ -139,6 +142,28 @@ contract ExecuteTest is Utils, AddressHelper {
         ep.verifyBatches{value: 0.01 ether}(proof, batches, chainsExecuteInfo);
         console.log("balance", account2Owner.balance);
         vm.stopPrank();
+    }
+
+    function test_depositGasRemote() public {
+        console.log("account1 balance pre", account1.getPreGasBalance());
+
+        bytes memory data = abi.encodeCall(
+            EntryPoint.submitDepositOperationByRemote,
+            (address(account1), 1 ether, 1)
+        );
+
+        CrossMessageParams memory params;
+        CrossETHParams memory crossETH;
+        crossETH.amount = 1 ether;
+        // crossETH.reciever = address(ep);
+        params._hookMessageParams.way = 255;
+        params._hookMessageParams.packCrossMessage = data;
+        params._hookMessageParams.packCrossParams = abi.encode(crossETH);
+        params._hookMessageParams.destChainExecuteUsedFee = 5000;
+        bytes memory paramsData = router.getUserOmniMessage(params);
+        router.testReceiveMessage{value: 3 ether}(paramsData);
+
+        console.log("account1 balance after", account1.getPreGasBalance());
     }
 
     // function test_syncBatch() public {

@@ -30,7 +30,61 @@
   {
     "type": "function",
     "name": "depositGas",
-    "inputs": [],
+    "inputs": [
+      {
+        "name": "nonce",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "depositGasRemote",
+    "inputs": [
+      {
+        "name": "nonce",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "destChainExecuteUsedFee",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "gasLimit",
+        "type": "uint24",
+        "internalType": "uint24"
+      },
+      {
+        "name": "gasPrice",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "minArrivalTime",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "maxArrivalTime",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "selectedRelayer",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
     "outputs": [],
     "stateMutability": "payable"
   },
@@ -259,19 +313,6 @@
   },
   {
     "type": "function",
-    "name": "redeemGas",
-    "inputs": [
-      {
-        "name": "amount",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
     "name": "supportsInterface",
     "inputs": [
       {
@@ -353,6 +394,64 @@
     "stateMutability": "nonpayable"
   },
   {
+    "type": "function",
+    "name": "withdrawRemote",
+    "inputs": [
+      {
+        "name": "nonce",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "destChainId",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "receiver",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "destChainExecuteUsedFee",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "gasLimit",
+        "type": "uint24",
+        "internalType": "uint24"
+      },
+      {
+        "name": "gasPrice",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "minArrivalTime",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "maxArrivalTime",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "selectedRelayer",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
     "type": "event",
     "name": "Initialized",
     "inputs": [
@@ -367,16 +466,10 @@
   },
   {
     "type": "event",
-    "name": "SimpleAccountInitialized",
+    "name": "Upgraded",
     "inputs": [
       {
-        "name": "entryPoint",
-        "type": "address",
-        "indexed": true,
-        "internalType": "contract IEntryPoint"
-      },
-      {
-        "name": "owner",
+        "name": "implementation",
         "type": "address",
         "indexed": true,
         "internalType": "address"
@@ -386,10 +479,16 @@
   },
   {
     "type": "event",
-    "name": "Upgraded",
+    "name": "ZKVizingAccountInitialized",
     "inputs": [
       {
-        "name": "implementation",
+        "name": "entryPoint",
+        "type": "address",
+        "indexed": true,
+        "internalType": "contract IEntryPoint"
+      },
+      {
+        "name": "owner",
         "type": "address",
         "indexed": true,
         "internalType": "address"

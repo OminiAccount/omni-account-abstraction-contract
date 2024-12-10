@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-only
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.5;
 
 import "./BaseStruct.sol";
@@ -49,7 +49,7 @@ interface IPreGasManager is BaseStruct {
 
     function submitWithdrawOperation(uint256 amount) external;
 
-    function redeemGasOperation(uint256 amount, uint256 nonce) external;
+    // function redeemGasOperation(uint256 amount, uint256 nonce) external;
 
     // /**
     //  * Get deposit info.

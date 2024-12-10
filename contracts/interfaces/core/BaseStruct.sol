@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.23;
+pragma solidity >=0.7.5;
 
 interface BaseStruct {
     /**
@@ -25,8 +25,8 @@ interface BaseStruct {
         uint64 mainChainGasLimit;
         uint64 destChainGasLimit;
         uint64 zkVerificationGasLimit;
-        uint128 mainChainGasPrice;
-        uint128 destChainGasPrice;
+        uint64 mainChainGasPrice;
+        uint64 destChainGasPrice;
         address owner;
     }
     /**
@@ -82,6 +82,29 @@ interface BaseStruct {
      * SyncRouter***********************************************************
      */
 
+    struct CrossETHParams {
+        uint256 amount;
+        address reciever;
+    }
+
+    /**
+     * @notice Use any uniswapV2 router for swap
+     * @param index                 - Index router             -
+     * @param amountIn     - Input swap token amount
+     * @param amountOutMin               - Output token minimum receive amount
+     * @param path              - Uniswapv2 tokens swap path
+     * @param to             - Touch swap output token receiver
+     * @param deadline              - Swap deadline
+     */
+    struct V2SwapParams {
+        uint8 index;
+        uint256 amountIn;
+        uint256 amountOutMin;
+        address[] path;
+        address to;
+        uint256 deadline;
+    }
+
     /**
      * @notice Use any uniswapV3 router for swap
      * @param index                 - Index router
@@ -104,25 +127,32 @@ interface BaseStruct {
         uint256 amountOutMinimum;
     }
 
-    /**
-     * @notice Use any uniswapV2 router for swap
-     * @param index                 - Index router             -
-     * @param amountIn     - Input swap token amount
-     * @param amountOutMin               - Output token minimum receive amount
-     * @param path              - Uniswapv2 tokens swap path
-     * @param to             - Touch swap output token receiver
-     * @param deadline              - Swap deadline
-     */
-    struct V2SwapParams {
-        uint8 index;
+    struct CrossV2SwapParams {
+        uint8 sourceIndex;
+        uint8 targetIndex;
         uint256 amountIn;
         uint256 amountOutMin;
-        address[] path;
+        address sourceToken;
+        address targetToken;
         address to;
         uint256 deadline;
     }
 
-    struct CrossParams {
+    struct CrossV3SwapParams {
+        uint8 sourceIndex;
+        uint8 targetIndex;
+        uint24 sourceFee;
+        uint24 targetFee;
+        uint160 sourceSqrtPriceLimitX96;
+        uint160 targetSqrtPriceLimitX96;
+        address sourceChainTokenIn;
+        address targetChainTokenOut;
+        address recipient;
+        uint256 amountIn;
+        uint256 amountOutMinimum;
+    }
+
+    struct CrossHookMessageParams {
         uint8 way;
         uint24 gasLimit;
         uint64 gasPrice;
@@ -133,6 +163,12 @@ interface BaseStruct {
         address selectedRelayer;
         uint256 destChainExecuteUsedFee; // Amount that the target chain needs to spend to execute userop
         bytes batchsMessage;
-        bytes packCrossMessage;
+        bytes packCrossMessage; //The sending chain sends the instruction to the target chain after encode and executes the call
+        bytes packCrossParams;
+    }
+
+    struct CrossMessageParams {
+        PackedUserOperation _packedUserOperation;
+        CrossHookMessageParams _hookMessageParams;
     }
 }

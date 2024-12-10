@@ -73,8 +73,8 @@ contract Utils is BaseStruct, Test {
         uint64 mainChainGasLimit = 0x30d40;
         uint64 destChainGasLimit = 0;
         uint64 zkVerificationGasLimit = 1700;
-        uint128 mainChainGasPrice = 2_500_000_000;
-        uint128 destChainGasPrice = 0;
+        uint64 mainChainGasPrice = 2_500_000_000;
+        uint64 destChainGasPrice = 0;
         PackedUserOperation memory account1OwnerUserOp = PackedUserOperation(
             1,
             operationValue,
@@ -104,8 +104,8 @@ contract Utils is BaseStruct, Test {
         uint64 mainChainGasLimit = 0x30d40;
         uint64 destChainGasLimit = 0;
         uint64 zkVerificationGasLimit = 1700;
-        uint128 mainChainGasPrice = 2_500_000_000;
-        uint128 destChainGasPrice = 0;
+        uint64 mainChainGasPrice = 2_500_000_000;
+        uint64 destChainGasPrice = 0;
         PackedUserOperation memory op = PackedUserOperation(
             2,
             _withdrawValue,

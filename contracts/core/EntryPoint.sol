@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
 
@@ -217,9 +217,23 @@ contract EntryPoint is
         }
     }
 
+    function submitDepositOperationByRemote(
+        address sender,
+        uint256 amount,
+        uint256 nonce
+    ) external payable isSyncRouter(MAIN_CHAINID) {
+        _submitDepositOperationRemote(sender, amount, nonce);
+    }
+
+    function sendDepositOperation(
+        CrossMessageParams calldata params
+    ) external payable {
+        ISyncRouter(syncRouter).sendUserOmniMessage{value: msg.value}(params);
+    }
+
     function syncBatches(
         PackedUserOperation[] memory userOps
-    ) external isSyncRouter {
+    ) external isSyncRouter(uint64(block.chainid)) {
         // Todo: remove beneficiary address(0x01), because the synchronization module does not need
         processBatchs(userOps, payable(address(0x01)), true);
     }

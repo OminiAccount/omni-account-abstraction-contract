@@ -12,13 +12,26 @@
   },
   {
     "type": "function",
+    "name": "UserId",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "accountImplementation",
     "inputs": [],
     "outputs": [
       {
         "name": "",
         "type": "address",
-        "internalType": "contract SimpleAccount"
+        "internalType": "contract ZKVizingAccount"
       }
     ],
     "stateMutability": "view"
@@ -31,18 +44,13 @@
         "name": "owner",
         "type": "address",
         "internalType": "address"
-      },
-      {
-        "name": "salt",
-        "type": "uint256",
-        "internalType": "uint256"
       }
     ],
     "outputs": [
       {
         "name": "ret",
         "type": "address",
-        "internalType": "contract SimpleAccount"
+        "internalType": "contract ZKVizingAccount"
       }
     ],
     "stateMutability": "nonpayable"
@@ -57,7 +65,7 @@
         "internalType": "address"
       },
       {
-        "name": "salt",
+        "name": "_userId",
         "type": "uint256",
         "internalType": "uint256"
       }
@@ -67,6 +75,42 @@
         "name": "",
         "type": "address",
         "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getUserAccountInfo",
+    "inputs": [
+      {
+        "name": "_owner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct ZKVizingAccountFactory.UserZKVizingAccountInfo",
+        "components": [
+          {
+            "name": "userId",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "state",
+            "type": "bytes1",
+            "internalType": "bytes1"
+          },
+          {
+            "name": "zkVizingAccount",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
       }
     ],
     "stateMutability": "view"
