@@ -77,6 +77,13 @@ library UserOperationLib {
         packed = bytes32((high128 << 128) | low128);
     }
 
+    function packUint64s(
+        uint64 high64,
+        uint64 low64
+    ) public pure returns (bytes16 packed) {
+        packed = bytes16((uint128(high64) << 64) | uint128(low64));
+    }
+
     function unpackUints(
         bytes32 packed
     ) internal pure returns (uint256 high128, uint256 low128) {
