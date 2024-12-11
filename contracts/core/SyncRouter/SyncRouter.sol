@@ -395,6 +395,14 @@ contract SyncRouter is
                 reciever: crossV3.recipient
             });
             newCrossParams = abi.encode(crossETH);
+        } else if (params._hookMessageParams.way == 254) {
+            // deposit gas remote
+            CrossETHParams memory crossETH = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossETHParams)
+            );
+            sendETHAmount = crossETH.amount;
+            newCrossParams = params._hookMessageParams.packCrossParams;
         } else if (params._hookMessageParams.way == 255) {
             // deposit gas remote
             CrossETHParams memory crossETH = abi.decode(
@@ -501,7 +509,11 @@ contract SyncRouter is
         );
 
         // deposit Gas remote
-        if (_crossMessage._hookMessageParams.way == 255) {
+        if (_crossMessage._hookMessageParams.way == 254) {
+            (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
+                value: crossETHParams.amount
+            }(_crossMessage._hookMessageParams.packCrossMessage);
+        } else if (_crossMessage._hookMessageParams.way == 255) {
             (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
                 value: crossETHParams.amount
             }(_crossMessage._hookMessageParams.packCrossMessage);
