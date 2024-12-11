@@ -75,19 +75,25 @@ contract Utils is BaseStruct, Test {
         uint64 zkVerificationGasLimit = 1700;
         uint64 mainChainGasPrice = 2_500_000_000;
         uint64 destChainGasPrice = 0;
-        PackedUserOperation memory account1OwnerUserOp = PackedUserOperation(
-            1,
-            operationValue,
-            account,
+        ExecData memory exec = ExecData(
             1,
             uint64(block.chainid),
-            data,
             mainChainGasLimit,
             destChainGasLimit,
             zkVerificationGasLimit,
             mainChainGasPrice,
             destChainGasPrice,
-            _owner
+            data
+        );
+        ExecData memory innerExec;
+        PackedUserOperation memory account1OwnerUserOp = PackedUserOperation(
+            0,
+            1,
+            operationValue,
+            account,
+            _owner,
+            exec,
+            innerExec
         );
         return account1OwnerUserOp;
     }
@@ -106,19 +112,25 @@ contract Utils is BaseStruct, Test {
         uint64 zkVerificationGasLimit = 1700;
         uint64 mainChainGasPrice = 2_500_000_000;
         uint64 destChainGasPrice = 0;
-        PackedUserOperation memory op = PackedUserOperation(
-            2,
-            _withdrawValue,
-            account,
+        ExecData memory exec = ExecData(
             2,
             uint64(block.chainid),
-            data,
             mainChainGasLimit,
             destChainGasLimit,
             zkVerificationGasLimit,
             mainChainGasPrice,
             destChainGasPrice,
-            _owner
+            data
+        );
+        ExecData memory innerExec;
+        PackedUserOperation memory op = PackedUserOperation(
+            0,
+            2,
+            _withdrawValue,
+            account,
+            _owner,
+            exec,
+            innerExec
         );
         return op;
     }

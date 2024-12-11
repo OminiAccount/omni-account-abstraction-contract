@@ -2,6 +2,16 @@
 pragma solidity >=0.7.5;
 
 interface BaseStruct {
+    struct ExecData {
+        uint64 nonce; // only used for batchdata
+        uint64 chainId;
+        uint64 mainChainGasLimit;
+        uint64 destChainGasLimit;
+        uint64 zkVerificationGasLimit;
+        uint64 mainChainGasPrice;
+        uint64 destChainGasPrice;
+        bytes callData;
+    }
     /**
      * User Operation struct
      * @param sender                - The sender account of this request.
@@ -16,18 +26,13 @@ interface BaseStruct {
      * @param owner                 - Owner of the account that generated this request.
      */
     struct PackedUserOperation {
-        uint8 operationType; // 0 user; 1 deposit,2 withdraw system
+        uint8 phase; // 0 exec; 1 innerExec
+        uint8 operationType; // 0 user; 1 deposit; 2 withdraw;
         uint256 operationValue;
         address sender;
-        uint64 nonce; // only used for batchdata
-        uint64 chainId;
-        bytes callData;
-        uint64 mainChainGasLimit;
-        uint64 destChainGasLimit;
-        uint64 zkVerificationGasLimit;
-        uint64 mainChainGasPrice;
-        uint64 destChainGasPrice;
         address owner;
+        ExecData exec; // vizing or first chain op
+        ExecData innerExec; // empty or second chain op
     }
     /**
      * EntryPoint***********************************************************
@@ -62,7 +67,6 @@ interface BaseStruct {
     struct MemoryUserOp {
         address sender;
         uint256 chainId;
-        uint256 operationValue;
         uint64 zkVerificationGasLimit;
         uint64 mainChainGasLimit;
         uint64 destChainGasLimit;

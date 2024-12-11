@@ -35,6 +35,7 @@ contract ExecuteTest is Utils, AddressHelper {
         // ep.updateSyncRouter(address(router));
         router.setMirrorEntryPoint(uint64(block.chainid), address(ep));
         factory = new ZKVizingAccountFactory(ep);
+        factory.updateBundler(deployer);
         account1 = factory.createAccount(account1Owner);
         console.log("account %s", address(account1));
         vm.stopPrank();
@@ -58,19 +59,35 @@ contract ExecuteTest is Utils, AddressHelper {
         uint64 zkVerificationGasLimit = 2200;
         uint64 mainChainGasPrice = 2_500_000_000;
         uint64 destChainGasPrice = 0;
-        PackedUserOperation memory account1OwnerUserOp = PackedUserOperation(
-            0,
-            operationValue,
-            sender,
+        ExecData memory exec = ExecData(
             nonce,
             uint64(chainId),
-            data,
             mainChainGasLimit,
             destChainGasLimit,
             zkVerificationGasLimit,
             mainChainGasPrice,
             destChainGasPrice,
-            owner
+            data
+        );
+        ExecData memory innerExec;
+        // ExecData memory innerExec = ExecData(
+        //     nonce,
+        //     uint64(2),
+        //     mainChainGasLimit,
+        //     destChainGasLimit,
+        //     zkVerificationGasLimit,
+        //     mainChainGasPrice,
+        //     destChainGasPrice,
+        //     data
+        // );
+        PackedUserOperation memory account1OwnerUserOp = PackedUserOperation(
+            0,
+            0,
+            operationValue,
+            sender,
+            owner,
+            exec,
+            innerExec
         );
         return account1OwnerUserOp;
     }

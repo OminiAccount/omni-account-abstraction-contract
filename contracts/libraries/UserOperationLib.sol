@@ -25,42 +25,72 @@ library UserOperationLib {
     uint8 constant DEPOSIT_OPERATION = 1;
     uint8 constant WITHDRAW_OPERATION = 2;
 
-    /**
-     * Get sender from user operation data.
-     * @param userOp - The user operation data.
-     */
-    function getSender(
+    function getExec(
         BaseStruct.PackedUserOperation calldata userOp
-    ) internal pure returns (address) {
-        address data;
-        //read sender from userOp, which is first userOp member (saves 800 gas...)
-        assembly {
-            data := calldataload(userOp)
-        }
-        return address(uint160(data));
+    ) internal pure returns (BaseStruct.ExecData memory) {
+        return userOp.phase == 0 ? userOp.exec : userOp.innerExec;
     }
 
-    /**
-     * Relayer/block builder might submit the TX with higher priorityFee,
-     * but the user should not pay above what he signed for.
-     * @param userOp - The user operation data.
-     */
-    function gasPrice(
-        BaseStruct.PackedUserOperation calldata userOp
-    ) internal pure returns (uint256) {
-        return userOp.mainChainGasPrice;
-        // unchecked {
-        //    return userOp.mainChainGasPrice;
-        //     (uint256 maxPriorityFeePerGas, uint256 maxFeePerGas) = unpackUints(
-        //         userOp.gasFees
-        //     );
-        //     if (maxFeePerGas == maxPriorityFeePerGas) {
-        //         //legacy mode (for networks that don't support basefee opcode)
-        //         return maxFeePerGas;
-        //     }
-        //     return min(maxFeePerGas, maxPriorityFeePerGas + block.basefee);
-        // }
-    }
+    // /**
+    //  * Get sender from user operation data.
+    //  * @param userOp - The user operation data.
+    //  */
+    // function getSender(
+    //     BaseStruct.PackedUserOperation calldata userOp
+    // ) internal pure returns (address) {
+    //     address data;
+    //     //read sender from userOp, which is first userOp member (saves 800 gas...)
+    //     assembly {
+    //         data := calldataload(userOp)
+    //     }
+    //     return address(uint160(data));
+    // }
+
+    // function getCalldata(
+    //     BaseStruct.PackedUserOperation calldata userOp
+    // ) internal pure returns (BaseStruct.ExecCalldata memory execCalldata) {
+    //     if (userOp.chainId.length == 2) {
+    //         (
+    //             BaseStruct.ExecCalldata memory execCalldata0,
+    //             BaseStruct.ExecCalldata memory execCalldata1
+    //         ) = abi.decode(
+    //                 userOp.callData,
+    //                 (BaseStruct.ExecCalldata, BaseStruct.ExecCalldata)
+    //             );
+    //         if (userOp.index == 0) {
+    //             execCalldata = execCalldata0;
+    //         } else if (userOp.index == 1) {
+    //             execCalldata = execCalldata1;
+    //         }
+    //     } else if (userOp.chainId.length == 1) {
+    //         (execCalldata) = abi.decode(
+    //             userOp.callData,
+    //             (BaseStruct.ExecCalldata)
+    //         );
+    //     }
+    // }
+
+    // /**
+    //  * Relayer/block builder might submit the TX with higher priorityFee,
+    //  * but the user should not pay above what he signed for.
+    //  * @param userOp - The user operation data.
+    //  */
+    // function gasPrice(
+    //     BaseStruct.PackedUserOperation calldata userOp
+    // ) internal pure returns (uint256) {
+    //     return userOp.mainChainGasPrice;
+    //     // unchecked {
+    //     //    return userOp.mainChainGasPrice;
+    //     //     (uint256 maxPriorityFeePerGas, uint256 maxFeePerGas) = unpackUints(
+    //     //         userOp.gasFees
+    //     //     );
+    //     //     if (maxFeePerGas == maxPriorityFeePerGas) {
+    //     //         //legacy mode (for networks that don't support basefee opcode)
+    //     //         return maxFeePerGas;
+    //     //     }
+    //     //     return min(maxFeePerGas, maxPriorityFeePerGas + block.basefee);
+    //     // }
+    // }
 
     function getValidateOwnerGasLimit(
         BaseStruct.PackedUserOperation calldata userOp
@@ -84,78 +114,69 @@ library UserOperationLib {
         packed = bytes16((uint128(high64) << 64) | uint128(low64));
     }
 
-    function unpackUints(
-        bytes32 packed
-    ) internal pure returns (uint256 high128, uint256 low128) {
-        return (uint128(bytes16(packed)), uint128(uint256(packed)));
-    }
-
-    //unpack just the high 128-bits from a packed value
-    function unpackHigh128(bytes32 packed) internal pure returns (uint256) {
-        return uint256(packed) >> 128;
-    }
-
-    // unpack just the low 128-bits from a packed value
-    function unpackLow128(bytes32 packed) internal pure returns (uint256) {
-        return uint128(uint256(packed));
-    }
-
-    // function unpackMaxPriorityFeePerGas(
-    //     PackedUserOperation calldata userOp
-    // ) internal pure returns (uint256) {
-    //     return unpackHigh128(userOp.gasFees);
+    // function unpackUints(
+    //     bytes32 packed
+    // ) internal pure returns (uint256 high128, uint256 low128) {
+    //     return (uint128(bytes16(packed)), uint128(uint256(packed)));
     // }
 
-    // function unpackMaxFeePerGas(
-    //     PackedUserOperation calldata userOp
-    // ) internal pure returns (uint256) {
-    //     return unpackLow128(userOp.gasFees);
+    // //unpack just the high 128-bits from a packed value
+    // function unpackHigh128(bytes32 packed) internal pure returns (uint256) {
+    //     return uint256(packed) >> 128;
     // }
 
-    function unpackVerificationGasLimit(
-        BaseStruct.PackedUserOperation calldata userOp
-    ) internal pure returns (uint256) {
-        return userOp.zkVerificationGasLimit;
-    }
-
-    function unpackCallGasLimit(
-        BaseStruct.PackedUserOperation calldata userOp
-    ) internal pure returns (uint256) {
-        return userOp.mainChainGasLimit;
-    }
-
-    // function unpackPaymasterVerificationGasLimit(
-    //     PackedUserOperation calldata userOp
-    // ) internal pure returns (uint256) {
-    //     return
-    //         uint128(
-    //             bytes16(
-    //                 userOp
-    //                     .paymasterAndData[PAYMASTER_VALIDATION_GAS_OFFSET:PAYMASTER_POSTOP_GAS_OFFSET]
-    //             )
-    //         );
+    // // unpack just the low 128-bits from a packed value
+    // function unpackLow128(bytes32 packed) internal pure returns (uint256) {
+    //     return uint128(uint256(packed));
     // }
 
-    // function unpackPostOpGasLimit(
-    //     PackedUserOperation calldata userOp
+    // // function unpackMaxPriorityFeePerGas(
+    // //     PackedUserOperation calldata userOp
+    // // ) internal pure returns (uint256) {
+    // //     return unpackHigh128(userOp.gasFees);
+    // // }
+
+    // // function unpackMaxFeePerGas(
+    // //     PackedUserOperation calldata userOp
+    // // ) internal pure returns (uint256) {
+    // //     return unpackLow128(userOp.gasFees);
+    // // }
+
+    // function unpackVerificationGasLimit(
+    //     BaseStruct.PackedUserOperation calldata userOp
     // ) internal pure returns (uint256) {
-    //     return
-    //         uint128(
-    //             bytes16(
-    //                 userOp
-    //                     .paymasterAndData[PAYMASTER_POSTOP_GAS_OFFSET:PAYMASTER_DATA_OFFSET]
-    //             )
-    //         );
+    //     return userOp.zkVerificationGasLimit;
     // }
 
-    function unpackGasOperationData(
-        BaseStruct.PackedUserOperation calldata userOp
-    ) internal pure returns (address, uint256) {
-        return (
-            address(bytes20(userOp.callData[:SYSTEM_OPERATION_ACCOUNT_OFFSET])),
-            uint256(bytes32(userOp.callData[SYSTEM_OPERATION_ACCOUNT_OFFSET:]))
-        );
-    }
+    // function unpackCallGasLimit(
+    //     BaseStruct.PackedUserOperation calldata userOp
+    // ) internal pure returns (uint256) {
+    //     return userOp.mainChainGasLimit;
+    // }
+
+    // // function unpackPaymasterVerificationGasLimit(
+    // //     PackedUserOperation calldata userOp
+    // // ) internal pure returns (uint256) {
+    // //     return
+    // //         uint128(
+    // //             bytes16(
+    // //                 userOp
+    // //                     .paymasterAndData[PAYMASTER_VALIDATION_GAS_OFFSET:PAYMASTER_POSTOP_GAS_OFFSET]
+    // //             )
+    // //         );
+    // // }
+
+    // // function unpackPostOpGasLimit(
+    // //     PackedUserOperation calldata userOp
+    // // ) internal pure returns (uint256) {
+    // //     return
+    // //         uint128(
+    // //             bytes16(
+    // //                 userOp
+    // //                     .paymasterAndData[PAYMASTER_POSTOP_GAS_OFFSET:PAYMASTER_DATA_OFFSET]
+    // //             )
+    // //         );
+    // // }
 
     function isGasOperation(
         BaseStruct.PackedUserOperation calldata userOp
@@ -188,32 +209,56 @@ library UserOperationLib {
 
     /**
      * Get pack data for nonce and chainId.
-     * @param userOp - The user operation data.
+     * @param exec - The exec data.
      */
     function packOpInfo(
-        BaseStruct.PackedUserOperation calldata userOp
+        BaseStruct.ExecData calldata exec
     ) public pure returns (bytes32) {
-        return packUints(userOp.nonce, userOp.chainId);
+        return packUints(exec.nonce, exec.chainId);
     }
 
     /**
      * Get pack data for mainChainGasLimit and destChainGasLimit.
-     * @param userOp - The user operation data.
+     * @param exec - The exec data.
      */
     function packChainGasLimit(
-        BaseStruct.PackedUserOperation calldata userOp
+        BaseStruct.ExecData calldata exec
     ) public pure returns (bytes32) {
-        return packUints(userOp.mainChainGasLimit, userOp.destChainGasLimit);
+        return packUints(exec.mainChainGasLimit, exec.destChainGasLimit);
     }
 
     /**
      * Get pack data for mainChainGasPrice and destChainGasPrice.
-     * @param userOp - The user operation data.
+     * @param exec - The exec data.
      */
     function packChainGasPrice(
-        BaseStruct.PackedUserOperation calldata userOp
+        BaseStruct.ExecData calldata exec
     ) public pure returns (bytes32) {
-        return packUints(userOp.mainChainGasPrice, userOp.destChainGasPrice);
+        return packUints(exec.mainChainGasPrice, exec.destChainGasPrice);
+    }
+
+    function encodeExecData(
+        BaseStruct.ExecData calldata exec
+    ) internal pure returns (bytes memory) {
+        bytes memory encodeBytes;
+        //is not empty
+        if (exec.chainId != 0) {
+            // encodeBytes = new bytes(USER_OP_BYTES);
+            bytes32 opInfo = packOpInfo(exec);
+            bytes32 calldataHash = calldataKeccak(exec.callData);
+            bytes32 chainGasLimit = packChainGasLimit(exec);
+            uint256 zkVerificationGasLimit = exec.zkVerificationGasLimit;
+            bytes32 chainGasPrice = packChainGasPrice(exec);
+            encodeBytes = abi.encode(
+                opInfo,
+                calldataHash,
+                chainGasLimit,
+                zkVerificationGasLimit,
+                chainGasPrice
+            );
+        }
+
+        return encodeBytes;
     }
 
     // Todo:Poseidon
@@ -224,29 +269,31 @@ library UserOperationLib {
     function encode(
         BaseStruct.PackedUserOperation calldata userOp
     ) internal pure returns (bytes memory) {
-        bytes memory encode = new bytes(USER_OP_BYTES);
+        // bytes memory encodeBytes = new bytes(USER_OP_BYTES);
 
         bytes32 operation = packOperation(userOp);
         address sender = userOp.sender;
-        bytes32 opInfo = packOpInfo(userOp);
-        bytes32 calldataHash = calldataKeccak(userOp.callData);
-        bytes32 chainGasLimit = packChainGasLimit(userOp);
-        uint256 zkVerificationGasLimit = userOp.zkVerificationGasLimit;
-        bytes32 chainGasPrice = packChainGasPrice(userOp);
         address owner = userOp.owner;
+        bytes memory encodeBytes = abi.encode(
+            operation,
+            sender,
+            owner,
+            encodeExecData(userOp.exec),
+            encodeExecData(userOp.innerExec)
+        );
 
-        assembly {
-            mstore(add(encode, 0x20), operation) // 32
-            mstore(add(encode, 0x40), sender) // 64
-            mstore(add(encode, 0x60), opInfo) // 96
-            mstore(add(encode, 0x80), calldataHash) // 128
-            mstore(add(encode, 0xa0), chainGasLimit) //160
-            mstore(add(encode, 0xc0), zkVerificationGasLimit) // 192
-            mstore(add(encode, 0xe0), chainGasPrice) // 224
-            mstore(add(encode, 0xf4), owner) // 244
-        }
+        // assembly {
+        //     mstore(add(encodeBytes, 0x20), operation) // 32
+        //     mstore(add(encodeBytes, 0x40), sender) // 64
+        //     mstore(add(encodeBytes, 0x60), opInfo) // 96
+        //     mstore(add(encodeBytes, 0x80), calldataHash) // 128
+        //     mstore(add(encodeBytes, 0xa0), chainGasLimit) //160
+        //     mstore(add(encodeBytes, 0xc0), zkVerificationGasLimit) // 192
+        //     mstore(add(encodeBytes, 0xe0), chainGasPrice) // 224
+        //     mstore(add(encodeBytes, 0xf4), owner) // 244
+        // }
 
-        return encode;
+        return encodeBytes;
     }
 }
 
@@ -264,7 +311,10 @@ library UserOperationsLib {
 
         unchecked {
             for (uint256 i = 0; i < userOps.length; ) {
-                if (userOps[i].chainId == chainId) {
+                BaseStruct.ExecData memory execData = UserOperationLib.getExec(
+                    userOps[i]
+                );
+                if (execData.chainId == chainId) {
                     tempArray[validCount] = userOps[i];
                     ++validCount;
                 }
@@ -287,37 +337,37 @@ library UserOperationsLib {
         return validArray;
     }
 
-    function calculateHash(
-        BaseStruct.PackedUserOperation[] calldata userOps
-    ) internal pure returns (bytes32) {
-        uint256 userOpBytes = UserOperationLib.USER_OP_BYTES;
-        bytes memory encodeBytes = new bytes(userOpBytes * userOps.length);
-        unchecked {
-            for (uint256 i = 0; i < userOps.length; ) {
-                bytes memory encode = UserOperationLib.encode(userOps[i]);
+    // function calculateHash(
+    //     BaseStruct.PackedUserOperation[] calldata userOps
+    // ) internal pure returns (bytes32) {
+    //     uint256 userOpBytes = UserOperationLib.USER_OP_BYTES;
+    //     bytes memory encodeBytes = new bytes(userOpBytes * userOps.length);
+    //     unchecked {
+    //         for (uint256 i = 0; i < userOps.length; ) {
+    //             bytes memory encode = UserOperationLib.encode(userOps[i]);
 
-                uint256 offset = i * userOpBytes;
+    //             uint256 offset = i * userOpBytes;
 
-                assembly {
-                    let encodePtr := add(encode, 0x20)
-                    let encodeBytesPtr := add(add(encodeBytes, 0x20), offset)
+    //             assembly {
+    //                 let encodePtr := add(encode, 0x20)
+    //                 let encodeBytesPtr := add(add(encodeBytes, 0x20), offset)
 
-                    for {
-                        let j := 0
-                    } lt(j, userOpBytes) {
-                        j := add(j, 0x20)
-                    } {
-                        mstore(add(encodeBytesPtr, j), mload(add(encodePtr, j)))
-                    }
-                }
+    //                 for {
+    //                     let j := 0
+    //                 } lt(j, userOpBytes) {
+    //                     j := add(j, 0x20)
+    //                 } {
+    //                     mstore(add(encodeBytesPtr, j), mload(add(encodePtr, j)))
+    //                 }
+    //             }
 
-                ++i;
-            }
-        }
+    //             ++i;
+    //         }
+    //     }
 
-        uint256[4] memory outputs = Poseidon.hashMessage(encodeBytes);
-        return Poseidon.mergeUint64ToBytes32(outputs);
-    }
+    //     uint256[4] memory outputs = Poseidon.hashMessage(encodeBytes);
+    //     return Poseidon.mergeUint64ToBytes32(outputs);
+    // }
 
     function append(
         BaseStruct.PackedUserOperation[] memory target,

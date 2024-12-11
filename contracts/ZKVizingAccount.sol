@@ -157,6 +157,32 @@ contract ZKVizingAccount is
         entryPoint().submitDepositOperation{value: msg.value}(msg.value, nonce);
     }
 
+    function depositRemote(
+        uint256 nonce,
+        uint256 amount,
+        uint256 gasAmount,
+        uint256 destChainExecuteUsedFee,
+        uint24 gasLimit,
+        uint64 gasPrice,
+        uint64 minArrivalTime,
+        uint64 maxArrivalTime,
+        address selectedRelayer
+    ) public payable {
+        require(msg.value >= amount + destChainExecuteUsedFee);
+        if (gasAmount != 0) {
+            this.depositGasRemote{value: gasAmount + destChainExecuteUsedFee}(
+                nonce,
+                gasAmount,
+                destChainExecuteUsedFee,
+                gasLimit,
+                gasPrice,
+                minArrivalTime,
+                maxArrivalTime,
+                selectedRelayer
+            );
+        }
+    }
+
     /**
      * deposit Gas to vizing from other chains
      */
@@ -169,13 +195,13 @@ contract ZKVizingAccount is
         uint64 minArrivalTime,
         uint64 maxArrivalTime,
         address selectedRelayer
-    ) public payable {
+    ) external payable {
         // msg.value = crossFee+amount+destChainExecuteOpFee
         require(msg.value >= amount + destChainExecuteUsedFee);
 
         bytes memory data = abi.encodeCall(
             entryPoint().submitDepositOperationByRemote,
-            (address(this), amount, 1)
+            (address(this), amount, nonce)
         );
 
         // destChainExecuteUsedFee include amount

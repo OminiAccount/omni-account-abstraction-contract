@@ -280,7 +280,13 @@ contract EntryPoint is
             assembly ("memory-safe") {
                 saveFreePtr := mload(0x40)
             }
-            bytes calldata callData = userOp.callData;
+            bytes calldata callData;
+            if (userOp.phase == 0) {
+                callData = userOp.exec.callData;
+            } else {
+                callData = userOp.innerExec.callData;
+            }
+
             bytes memory innerCall;
             bytes4 methodSig;
             assembly {
@@ -488,7 +494,8 @@ contract EntryPoint is
     function getUserOpHash(
         PackedUserOperation calldata userOp
     ) public pure returns (bytes32) {
-        return keccak256(userOp.encode());
+        // return keccak256(userOp.encode());
+        return keccak256(abi.encode(userOp));
     }
 
     /**
@@ -501,13 +508,13 @@ contract EntryPoint is
         MemoryUserOp memory mUserOp
     ) internal pure {
         mUserOp.sender = userOp.sender;
-        mUserOp.chainId = userOp.chainId;
-        mUserOp.operationValue = userOp.operationValue;
-        mUserOp.zkVerificationGasLimit = userOp.zkVerificationGasLimit;
-        mUserOp.mainChainGasPrice = userOp.mainChainGasPrice;
-        mUserOp.destChainGasPrice = userOp.destChainGasPrice;
-        mUserOp.mainChainGasLimit = userOp.mainChainGasLimit;
-        mUserOp.destChainGasLimit = userOp.destChainGasLimit;
+        ExecData memory exec = userOp.getExec();
+        mUserOp.chainId = exec.chainId;
+        mUserOp.zkVerificationGasLimit = exec.zkVerificationGasLimit;
+        mUserOp.mainChainGasPrice = exec.mainChainGasPrice;
+        mUserOp.destChainGasPrice = exec.destChainGasPrice;
+        mUserOp.mainChainGasLimit = exec.mainChainGasLimit;
+        mUserOp.destChainGasLimit = exec.destChainGasLimit;
     }
 
     /**
@@ -555,10 +562,6 @@ contract EntryPoint is
             mUserOp.mainChainGasPrice |
             mUserOp.destChainGasPrice;
         require(maxGasValues <= type(uint120).max, "AA94 gas values overflow");
-        require(
-            mUserOp.operationValue <= type(uint248).max,
-            "AA94 operation value overflow"
-        );
 
         uint256 requiredPreFund = _getRequiredPrefund(mUserOp);
 
