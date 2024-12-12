@@ -240,11 +240,11 @@ async function main() {
             let currentSetChainId=BigInt(setup["VizingPad-TestNet"][i].ChainId);
             console.log("currentSetChainId:", currentSetChainId);
             if(currentSetChainId === currentChainId){
-                // await DeployEntryPoint();
+                await DeployEntryPoint();
                 // await DeployZKVizingAccountFactory(EntryPointAddress);
                 // await DeployWETH();
-                await DeployVizingSwap(WETHAddress);
-                await DeploySyncRouter(setup["VizingPad-TestNet"][i].Address, WETHAddress, VizingSwapAddress);
+                // await DeployVizingSwap(WETHAddress);
+                // await DeploySyncRouter(setup["VizingPad-TestNet"][i].Address, WETHAddress, VizingSwapAddress);
                 // await DeploySenderCreator();
 
                 //create zkaa account

@@ -216,6 +216,57 @@ contract SyncRouter is
             ); 
     }
 
+    function fetchUserOmniMessageFee(
+        CrossMessageParams calldata params
+    ) external view virtual returns (uint256 _gasFee) {
+        bytes memory CrossMessage = abi.encode(params);
+        uint256 sendETHAmount;
+
+        if (params._hookMessageParams.way == 0) {
+            CrossETHParams memory crossETH = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossETHParams)
+            );
+            sendETHAmount = crossETH.amount;
+            //touch source chain uniswapV2
+        } else if (params._hookMessageParams.way == 1) {
+            CrossV2SwapParams memory crossV2 = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossV2SwapParams)
+            );
+            //target chain swap (eth>other)
+            if (crossV2.sourceToken == address(0)) {
+                sendETHAmount = crossV2.amountIn;
+            }
+            //touch source chain uniswapV3
+        } else if (params._hookMessageParams.way == 2) {
+            CrossV3SwapParams memory crossV3 = abi.decode(
+                params._hookMessageParams.packCrossParams,
+                (CrossV3SwapParams)
+            );
+            //target chain swap (eth>other)
+            if (crossV3.sourceChainTokenIn == address(0)) {
+                sendETHAmount = crossV3.amountIn;
+            }
+        } else {
+            revert InvalidWay();
+        }
+
+        bytes memory encodedMessage = _packetMessage(
+            mode,
+            params._hookMessageParams.destContract,
+            params._hookMessageParams.gasLimit,
+            params._hookMessageParams.gasPrice,
+            CrossMessage
+        );
+
+        _gasFee = LaunchPad.estimateGas(
+            params._hookMessageParams.destChainExecuteUsedFee + sendETHAmount,
+            params._hookMessageParams.destChainId,
+            additionParams,
+            encodedMessage
+        );
+    }
 
     function _receiveMessage(
         bytes32 messageId,

@@ -22,36 +22,40 @@ import "../libraries/Error.sol";
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+// import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /*
  * Account-Abstraction (EIP-4337) singleton EntryPoint implementation.
  * Only one instance required on each chain.
  */
 /// @custom:security-contact https://bounty.ethereum.org
+/// Optimize code size --TODO
 contract EntryPoint is
     PreGasManager,
     StateManager,
     ConfigManager,
     ReentrancyGuard,
     IEntryPoint,
-    Ownable,
     ERC165
 {
     using UserOperationLib for PackedUserOperation;
     using UserOperationsLib for PackedUserOperation[];
 
-    constructor() Ownable(msg.sender) {}
+    constructor() {
+        owner = msg.sender;
+    }
 
-    function _isOwner() internal virtual override onlyOwner {}
+    // function _isOwner() internal virtual override onlyOwner {}
+
+    
+    // Marker for inner call revert on out of gas
+    bytes32 private constant INNER_OUT_OF_GAS = hex"deaddead";
+    bytes32 private constant INNER_REVERT_LOW_PREFUND = hex"deadaa51";
+    address private owner;
 
     // compensate for innerHandleOps' emit message and deposit refund.
     // allow some slack for future gas price changes.
     uint256 private constant INNER_GAS_OVERHEAD = 10_000;
-
-    // Marker for inner call revert on out of gas
-    bytes32 private constant INNER_OUT_OF_GAS = hex"deaddead";
-    bytes32 private constant INNER_REVERT_LOW_PREFUND = hex"deadaa51";
 
     uint256 private constant REVERT_REASON_MAX_LEN = 2048;
     uint256 private constant PENALTY_PERCENT = 10;
@@ -79,6 +83,12 @@ contract EntryPoint is
             interfaceId == type(IPreGasManager).interfaceId ||
             super.supportsInterface(interfaceId);
     }
+
+    function transferOwner(address newOwner)external {
+        require(msg.sender == owner);
+        owner = newOwner;
+    }
+
 
     /**
      * //stack deep  --TODO
@@ -113,8 +123,10 @@ contract EntryPoint is
         );
 
         // Calulate the snark input
-        uint256 inputSnark = uint256(sha256(snarkHashBytes)) % _RFIELD;
-        if (!IVerifier(verifier).verifyProof(pA, pB, pC, [inputSnark])) {
+        //stack deep(Optimization parameter)  --TODO
+        // uint256 inputSnark = uint256(sha256(snarkHashBytes)) % _RFIELD;
+        
+        if (!IVerifier(verifier).verifyProof(pA, pB, pC, [ uint256(sha256(snarkHashBytes)) % _RFIELD])) {
             revert InvalidProof();
         }
 
@@ -260,7 +272,10 @@ contract EntryPoint is
      * @param amount      - Amount to transfer.
      */
     function _compensate(address payable beneficiary, uint256 amount) internal {
-        require(beneficiary != address(0), "AA90 invalid beneficiary");
+        // require(beneficiary != address(0), "AA90 invalid beneficiary");
+        // (bool success, ) = beneficiary.call{value: amount}("");
+        // require(success, "AA91 failed send to beneficiary");
+         require(beneficiary != address(0));
         (bool success, ) = beneficiary.call{value: amount}("");
         require(success, "AA91 failed send to beneficiary");
     }
@@ -454,7 +469,7 @@ contract EntryPoint is
         bytes calldata context
     ) external returns (uint256 actualGasCost) {
         uint256 preGas = gasleft();
-        require(msg.sender == address(this), "AA92 internal call only");
+        require(msg.sender == address(this));
         MemoryUserOp memory mUserOp = opInfo.mUserOp;
 
         uint256 callGasLimit = mUserOp.mainChainGasLimit * 100;
@@ -690,6 +705,15 @@ contract EntryPoint is
                     ? mUserOp.mainChainGasPrice
                     : mUserOp.destChainGasPrice;
         }
+    }
+
+    struct SnarkBytesParams{
+        uint64 initNumBatch;
+        uint64 finalNewBatch;
+        bytes32 oldAccInputHash;
+        bytes32 newAccInputHash;
+        bytes32 oldStateRoot;
+        bytes32 newStateRoot;
     }
 
     /**
