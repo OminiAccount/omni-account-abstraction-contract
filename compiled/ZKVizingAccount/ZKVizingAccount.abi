@@ -90,6 +90,59 @@
   },
   {
     "type": "function",
+    "name": "depositRemote",
+    "inputs": [
+      {
+        "name": "nonce",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "gasAmount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "destChainExecuteUsedFee",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "gasLimit",
+        "type": "uint24",
+        "internalType": "uint24"
+      },
+      {
+        "name": "gasPrice",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "minArrivalTime",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "maxArrivalTime",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "selectedRelayer",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
     "name": "entryPoint",
     "inputs": [],
     "outputs": [

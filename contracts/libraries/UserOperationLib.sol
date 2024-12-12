@@ -237,6 +237,12 @@ library UserOperationLib {
         return packUints(exec.mainChainGasPrice, exec.destChainGasPrice);
     }
 
+    function hasInnerExec(
+        BaseStruct.PackedUserOperation calldata userOp
+    ) public pure returns (bool) {
+        return userOp.innerExec.chainId == 0 ? false : true;
+    }
+
     function encodeExecData(
         BaseStruct.ExecData calldata exec
     ) internal pure returns (bytes memory) {

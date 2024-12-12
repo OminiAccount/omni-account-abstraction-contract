@@ -371,6 +371,9 @@ contract EntryPoint is
         emit UserOperationEvent(
             opInfo.userOpHash,
             opInfo.mUserOp.sender,
+            opInfo.mUserOp.owner,
+            opInfo.mUserOp.phase,
+            opInfo.mUserOp.innerExec,
             success,
             actualGasCost,
             actualGas
@@ -508,6 +511,8 @@ contract EntryPoint is
         MemoryUserOp memory mUserOp
     ) internal pure {
         mUserOp.sender = userOp.sender;
+        mUserOp.owner = userOp.owner;
+        mUserOp.innerExec = userOp.hasInnerExec();
         ExecData memory exec = userOp.getExec();
         mUserOp.chainId = exec.chainId;
         mUserOp.zkVerificationGasLimit = exec.zkVerificationGasLimit;
@@ -661,6 +666,7 @@ contract EntryPoint is
                 }
             } else {
                 bool success = mode == IPaymaster.PostOpMode.opSucceeded;
+                console.log("success %s", success);
                 emitUserOperationEvent(
                     opInfo,
                     success,

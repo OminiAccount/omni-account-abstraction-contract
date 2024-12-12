@@ -65,7 +65,10 @@ interface BaseStruct {
      * Excluding: userAddr, chainId, callData. Replacing paymasterAndData with paymaster.
      */
     struct MemoryUserOp {
+        uint8 phase;
         address sender;
+        address owner;
+        bool innerExec;
         uint256 chainId;
         uint64 zkVerificationGasLimit;
         uint64 mainChainGasLimit;
