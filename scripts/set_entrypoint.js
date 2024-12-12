@@ -10,7 +10,7 @@ const { Network } = require("inspector");
 
 const deployedAddresses = require("../deployedAddresses.json");
 async function main() {
-    const [owner, testUser] = await hre.ethers.getSigners();
+    const [deployer, testUser, owner] = await hre.ethers.getSigners();
     console.log("owner:", owner.address);
     console.log("testUser:", testUser.address);
     const provider = ethers.provider;

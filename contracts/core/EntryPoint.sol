@@ -3,12 +3,12 @@ pragma solidity ^0.8.24;
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-inline-assembly */
 
-import "../interfaces/zkaa/IAccount.sol";
-import "../interfaces/zkaa/IAccountExecute.sol";
-import "../interfaces/zkaa/IPaymaster.sol";
-import "../interfaces/zkaa/IEntryPoint.sol";
-import "../interfaces/zkaa/ISyncRouter.sol";
-import "../interfaces/zkaa/IVerifier.sol";
+import "../interfaces/core/IAccount.sol";
+import "../interfaces/core/IAccountExecute.sol";
+import "../interfaces/core/IPaymaster.sol";
+import "../interfaces/core/IEntryPoint.sol";
+import "../interfaces/core/ISyncRouter.sol";
+import "../interfaces/core/IVerifier.sol";
 
 import "../utils/Exec.sol";
 import "./StateManager.sol";
@@ -81,6 +81,7 @@ contract EntryPoint is
     }
 
     /**
+     * //stack deep  --TODO
      * Verify a batch containing userOps and newSmtRoot
      * @param proof The encoded proof.
      * @param batches The encoded public values.
@@ -97,8 +98,9 @@ contract EntryPoint is
             uint256[2] memory pC
         ) = abi.decode(proof, (uint256[2], uint256[2][2], uint256[2]));
 
+        //stack deep(Optimization parameter)  --TODO
         // uint64 batchLength = uint64(batches.length);
-        // uint64 finalNewBatch = lastVerifiedBatch + batchLength;
+        // uint64 finalNewBatch = lastVerifiedBatch + uint64(batches.length);
 
         // Get snark bytes
         bytes memory snarkHashBytes = getInputSnarkBytes(
@@ -111,8 +113,8 @@ contract EntryPoint is
         );
 
         // Calulate the snark input
-        // uint256 inputSnark = uint256(sha256(snarkHashBytes)) % _RFIELD;
-        if (!IVerifier(verifier).verifyProof(pA, pB, pC, [uint256(sha256(snarkHashBytes)) % _RFIELD])) {
+        uint256 inputSnark = uint256(sha256(snarkHashBytes)) % _RFIELD;
+        if (!IVerifier(verifier).verifyProof(pA, pB, pC, [inputSnark])) {
             revert InvalidProof();
         }
 
@@ -120,7 +122,7 @@ contract EntryPoint is
             chainsExecuteInfos.chainExtra.length
         );
 
-        // bytes32[] memory batchHashs = new bytes32[](uint64(batches.length));
+        // bytes32[] memory batchHashs = new bytes32[](batchLength);
 
         unchecked {
             for (uint256 i = 0; i < chainsExecuteInfos.chainExtra.length; ) {
@@ -163,21 +165,25 @@ contract EntryPoint is
         }
 
         // Update State
-        updateState(
-            lastVerifiedBatch + uint64(batches.length),
-            chainsExecuteInfos.newStateRoot,
-            batches[uint64(batches.length) - 1].accInputHash
-        );
-        updateLastVerifiedBatch(uint64(batches.length));
+        {
+            updateState(
+                lastVerifiedBatch + uint64(batches.length),
+                chainsExecuteInfos.newStateRoot,
+                batches[uint64(batches.length) - 1].accInputHash
+            );
+            updateLastVerifiedBatch(uint64(batches.length));
+        }
 
         // Execute vizing userOperations
-        // uint256 startGas = gasleft();
-        processBatchs(
-            chainExecuteInfos[0].userOperations,
-            payable(chainsExecuteInfos.beneficiary),
-            false
-        );
-        // uint256 gasUsed = startGas - gasleft();
+        {
+            uint256 startGas = gasleft();
+            processBatchs(
+                chainExecuteInfos[0].userOperations,
+                payable(chainsExecuteInfos.beneficiary),
+                false
+            );
+            uint256 gasUsed = startGas - gasleft();
+        }
 
         // Sync stateRoot and destUserOperations to other chain
         // Todo: If there is no transaction, is the synchronization state root required?
@@ -216,9 +222,23 @@ contract EntryPoint is
         }
     }
 
+    function submitDepositOperationByRemote(
+        address sender,
+        uint256 amount,
+        uint256 nonce
+    ) external payable isSyncRouter(MAIN_CHAINID) {
+        _submitDepositOperationRemote(sender, amount, nonce);
+    }
+
+    function sendDepositOperation(
+        CrossMessageParams calldata params
+    ) external payable {
+        ISyncRouter(syncRouter).sendUserOmniMessage{value: msg.value}(params);
+    }
+
     function syncBatches(
         PackedUserOperation[] memory userOps
-    ) external isSyncRouter {
+    ) external isSyncRouter(uint64(block.chainid)) {
         // Todo: remove beneficiary address(0x01), because the synchronization module does not need
         processBatchs(userOps, payable(address(0x01)), true);
     }
@@ -265,7 +285,13 @@ contract EntryPoint is
             assembly ("memory-safe") {
                 saveFreePtr := mload(0x40)
             }
-            bytes calldata callData = userOp.callData;
+            bytes calldata callData;
+            if (userOp.phase == 0) {
+                callData = userOp.exec.callData;
+            } else {
+                callData = userOp.innerExec.callData;
+            }
+
             bytes memory innerCall;
             bytes4 methodSig;
             assembly {
@@ -473,7 +499,8 @@ contract EntryPoint is
     function getUserOpHash(
         PackedUserOperation calldata userOp
     ) public pure returns (bytes32) {
-        return keccak256(userOp.encode());
+        // return keccak256(userOp.encode());
+        return keccak256(abi.encode(userOp));
     }
 
     /**
@@ -486,13 +513,13 @@ contract EntryPoint is
         MemoryUserOp memory mUserOp
     ) internal pure {
         mUserOp.sender = userOp.sender;
-        mUserOp.chainId = userOp.chainId;
-        mUserOp.operationValue = userOp.operationValue;
-        mUserOp.zkVerificationGasLimit = userOp.zkVerificationGasLimit;
-        mUserOp.mainChainGasPrice = userOp.mainChainGasPrice;
-        mUserOp.destChainGasPrice = userOp.destChainGasPrice;
-        mUserOp.mainChainGasLimit = userOp.mainChainGasLimit;
-        mUserOp.destChainGasLimit = userOp.destChainGasLimit;
+        ExecData memory exec = userOp.getExec();
+        mUserOp.chainId = exec.chainId;
+        mUserOp.zkVerificationGasLimit = exec.zkVerificationGasLimit;
+        mUserOp.mainChainGasPrice = exec.mainChainGasPrice;
+        mUserOp.destChainGasPrice = exec.destChainGasPrice;
+        mUserOp.mainChainGasLimit = exec.mainChainGasLimit;
+        mUserOp.destChainGasLimit = exec.destChainGasLimit;
     }
 
     /**
@@ -540,10 +567,6 @@ contract EntryPoint is
             mUserOp.mainChainGasPrice |
             mUserOp.destChainGasPrice;
         require(maxGasValues <= type(uint120).max, "AA94 gas values overflow");
-        require(
-            mUserOp.operationValue <= type(uint248).max,
-            "AA94 operation value overflow"
-        );
 
         uint256 requiredPreFund = _getRequiredPrefund(mUserOp);
 

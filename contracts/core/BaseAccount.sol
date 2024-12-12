@@ -4,8 +4,8 @@ pragma solidity ^0.8.24;
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-empty-blocks */
 
-import "../interfaces/zkaa/IAccount.sol";
-import "../interfaces/zkaa/IEntryPoint.sol";
+import "../interfaces/core/IAccount.sol";
+import "../interfaces/core/IEntryPoint.sol";
 import "../libraries/UserOperationLib.sol";
 
 /**

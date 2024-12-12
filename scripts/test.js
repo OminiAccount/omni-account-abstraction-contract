@@ -48,20 +48,51 @@ async function main() {
     //Not deploy
     let EntryPoint;
     let ZKVizingAccountFactory;
-    let WETH;
+    // let WETH;
     let VizingSwap;
     let SyncRouter;
     let SenderCreator;
     let VerifyManager;
     let ZKVizingAAEncode;
-        
 
     let EntryPointAddress=ADDRESS_ZERO;
     let ZKVizingAccountFactoryAddress=ADDRESS_ZERO;
-    let WETHAddress=ADDRESS_ZERO;
     let VizingSwapAddress=ADDRESS_ZERO;
     let SyncRouterAddress=ADDRESS_ZERO;
     let SenderCreatorAddress=ADDRESS_ZERO;
+    let WETHAddress=ADDRESS_ZERO;
+
+    if(currentChainId===11155111n){
+        WETHAddress=setup["WETH-Testnet"][0].Address;
+    }else if(currentChainId===28516n){
+        WETHAddress=setup["WETH-Testnet"][1].Address;
+    }else if(currentChainId===84532n){
+        WETHAddress=setup["WETH-Testnet"][2].Address;
+    }else if(currentChainId===421614n){
+        WETHAddress=setup["WETH-Testnet"][3].Address;
+    }else if(currentChainId===808813n){
+        WETHAddress=setup["WETH-Testnet"][4].Address;
+    }else if(currentChainId===2442n){
+        WETHAddress=setup["WETH-Testnet"][5].Address;
+    }else if(currentChainId===195n){
+        WETHAddress=setup["WETH-Testnet"][6].Address;
+    }else if(currentChainId===11155420n){
+        WETHAddress=setup["WETH-Testnet"][7].Address;
+    }else if(currentChainId===168587773n){
+        WETHAddress=setup["WETH-Testnet"][8].Address;
+    }else if(currentChainId===534351n){
+        WETHAddress=setup["WETH-Testnet"][9].Address;
+    }else if(currentChainId===300n){
+        WETHAddress=setup["WETH-Testnet"][10].Address;
+    }else if(currentChainId===167009n){
+        WETHAddress=setup["WETH-Testnet"][11].Address;
+    }else{
+        throw("Not network");
+    }
+    
+
+
+
 
     // let EntryPointAddress="0x7b418afBbCf67F62511D01d7d76FaCBDEC38d1Ca";
     // let ZKVizingAccountFactoryAddress="0xFC6c648230C5372596ed05d33170e59755734861";
@@ -80,7 +111,7 @@ async function main() {
     // let EntryPoint=new ethers.Contract(EntryPointAddress, EntryPointABI.abi, owner);
     // let ZKVizingAccountFactory=new ethers.Contract(ZKVizingAccountFactoryAddress, ZKVizingAccountFactoryABI.abi, owner);
     // let SyncRouter=new ethers.Contract(SyncRouterAddress, SyncRouterABI.abi, owner);
-    // let WETH=new ethers.Contract(WETHAddress, WETHABI.abi, owner);
+    let WETH=new ethers.Contract(WETHAddress, WETHABI.abi, owner);
 
     async function GetETHBalance(account){
         try{
@@ -122,13 +153,13 @@ async function main() {
         return { EntryPoint };
     }
     
-    async function DeployWETH() {
-        const weth = await ethers.getContractFactory("WETH9");
-        WETH = await weth.deploy();
-        WETHAddress = WETH.target;
-        console.log("WETH:", WETHAddress);
-        return { WETH };
-    }
+    // async function DeployWETH() {
+    //     const weth = await ethers.getContractFactory("WETH9");
+    //     WETH = await weth.deploy();
+    //     WETHAddress = WETH.target;
+    //     console.log("WETH:", WETHAddress);
+    //     return { WETH };
+    // }
 
     async function DeployVizingSwap(weth) {
         const vizingSwap=await hre.ethers.getContractFactory("VizingSwap");
@@ -203,25 +234,23 @@ async function main() {
         console.log("Contract address saved to deployedAddresses.json");
     }
 
-    
-
     // deploy
     {   
         for(let i=0; i<setup["VizingPad-TestNet"].length; i++){
             let currentSetChainId=BigInt(setup["VizingPad-TestNet"][i].ChainId);
             console.log("currentSetChainId:", currentSetChainId);
             if(currentSetChainId === currentChainId){
-                await DeployEntryPoint();
-                await DeployZKVizingAccountFactory(EntryPointAddress);
-                await DeployWETH();
+                // await DeployEntryPoint();
+                // await DeployZKVizingAccountFactory(EntryPointAddress);
+                // await DeployWETH();
                 await DeployVizingSwap(WETHAddress);
                 await DeploySyncRouter(setup["VizingPad-TestNet"][i].Address, WETHAddress, VizingSwapAddress);
-                await DeploySenderCreator();
+                // await DeploySenderCreator();
 
                 //create zkaa account
                 let createdZKAccount=ADDRESS_ZERO;
-                const salt=1;
-                createdZKAccount=await CreateAccount(testUser.address, salt);
+                // const salt=1;
+                // createdZKAccount=await CreateAccount(testUser.address, salt);
                 
                 //fs write json
                 await SaveAddressesToFile(

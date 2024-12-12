@@ -282,22 +282,22 @@
         {
             "Name": "Sepolia",
             "ChainId": 11155111,
-            "Address": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482"
+            "Address": ""
         },
         {
             "Name": "Vizing-testnet",
             "ChainId": 28516,
-            "Address": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482"
+            "Address": "0x01Bc5D6E95D028bEbfdE0257F649838DadF9aE5D"
         },
         {
             "Name": "Base-sepolia",
             "ChainId": 84532,
-            "Address": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482"
+            "Address": "0x847ea91D70532C03dAdCdB59df860E3550191187"
         },
         {
             "Name": "Arbitrum-sepolia",
             "ChainId": 421614,
-            "Address": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482"
+            "Address": "0xF9D889590E8EEeE356ebceA060Eb92be531f6c50"
         },
         {
             "Name": "Bob-testnet",
@@ -317,12 +317,12 @@
         {
             "Name": "Optimism-sepolia",
             "ChainId": 11155420,
-            "Address": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482"
+            "Address": "0xe2640272e2B86F83A236f51ddfC2D9eD7a3F5093"
         },
         {
             "Name": "Blast-testnet",
             "ChainId": 168587773,
-            "Address": "0x878004Db0E5c17BCf94eBAa0b3Fe00a4a53b7482"
+            "Address": "0x01Bc5D6E95D028bEbfdE0257F649838DadF9aE5D"
         },
         {
             "Name": "Scroll-sepolia",

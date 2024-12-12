@@ -16,15 +16,24 @@ async function main() {
     console.log("testUser:",testUser.address);
     const provider = ethers.provider;
     const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
+    const vizingPad="0x0B5a8E5494DDE7039781af500A49E7971AE07a6b";
 
     const USDCAddress="0x2f4555dD23ff52a01e26ab94FE84695a6df7885c";
     const USDTAddress="0x534D0e7eC92524338735952863c874f9Cc810492";
     const FlyDogeAddress="0xDa5Dd0d968e439307A606417c96804440132514E";
-    const EntryPointAddress="0xDB4e8D5eBCfd23298ad68eC0a6247D0D2Ef20115";
-    const ZKVizingAccountFactoryAddress="0xBC401f905E78842e29a08b2d5886E3849E0ce3F9";
-    const WETHAddress="0xD8EeaAD5e98c31a73c0253561b70c7a074C85Cd6";
-    const SyncRouterAddress="0x3A5B354976e950c093ab350e343DeD8d9Ed9C6f0";
+    const EntryPointAddress="0xA2B76dA0593fdEF8F8418F4c8B2D2F3cc5dB6376";
+    const ZKVizingAccountFactoryAddress="0x344bdbD327C6c3796140B0E74C729272D9421621";
+    const WETHAddress="0x847ea91D70532C03dAdCdB59df860E3550191187";
     const SenderCreatorAddress="0x72A3b74a7b8410ae2fdF66B42EFB1c070CBBBB12";
+
+    const vizingSwap=await hre.ethers.getContractFactory("VizingSwap");
+    const VizingSwap=await vizingSwap.deploy(WETHAddress);
+    const VizingSwapAddress=VizingSwap.target;
+    console.log("VizingSwap Address:", VizingSwapAddress);
+
+    const syncRouter = await ethers.getContractFactory("SyncRouter");
+    const SyncRouterAddress = SyncRouter.target;
+    console.log("SyncRouter:", SyncRouterAddress);
 
     let EntryPoint=new ethers.Contract(EntryPointAddress, EntryPointABI.abi, testUser);
     let ZKVizingAccountFactory=new ethers.Contract(ZKVizingAccountFactoryAddress, ZKVizingAccountFactoryABI.abi, testUser);
@@ -55,49 +64,55 @@ async function main() {
         }
     }
     {
-        const mintAmount=ethers.parseEther("10000000");
-        await Mint(USDC, testUser.address, mintAmount);
-        await Mint(USDT, testUser.address, mintAmount);
-        await Mint(FlyDoge, testUser.address, mintAmount);
+        // const mintAmount=ethers.parseEther("10000000");
+        // await Mint(USDC, testUser.address, mintAmount);
+        // await Mint(USDT, testUser.address, mintAmount);
+        // await Mint(FlyDoge, testUser.address, mintAmount);
     }
 
     //approve
-    async function Approve(erc20Contract, spender, amount){
+    const minApprove=ethers.parseEther("100000000");
+    async function Approve(erc20Contract, owner, spender, amount){
         try{
-            const tx=await erc20Contract.approve(spender, amount);
-            await tx.wait();
-            console.log("Approve success");
+            const allowance=await erc20Contract.allowance(owner, spender);
+            if(allowance<minApprove){
+                const tx=await erc20Contract.approve(spender, amount);
+                await tx.wait();
+                console.log("Approve success");
+            }else{
+                console.log("Not approve");
+            }
         }catch(e){
             console.log("Approve error:",e);
         }
     }
 
     {
-        const approveAmount=ethers.parseEther("10000000");
-        await Approve(USDC, testUser.address, approveAmount);
-        await Approve(USDT, testUser.address, approveAmount);
-        await Approve(FlyDoge, testUser.address, approveAmount);
+        const approveAmount=ethers.parseEther("10000000000000");
+        await Approve(USDC, testUser.address, SyncRouterAddress, approveAmount);
+        await Approve(USDT, testUser.address, SyncRouterAddress, approveAmount);
+        await Approve(FlyDoge, testUser.address, SyncRouterAddress, approveAmount);
     }
 
     //create account
 
-    async function CreateAccount(userAddress, salt){
-        try{
-            const tx=await ZKVizingAccountFactory.createAccount(userAddress, salt);
-            await tx.wait();
-            console.log("createAccount success");
-        }catch(e){
-            console.log("createAccount fail:",e);
-        }
-    }
+    // async function CreateAccount(userAddress, salt){
+    //     try{
+    //         const tx=await ZKVizingAccountFactory.createAccount(userAddress, salt);
+    //         await tx.wait();
+    //         console.log("createAccount success");
+    //     }catch(e){
+    //         console.log("createAccount fail:",e);
+    //     }
+    // }
     
-    let zkaaAccount=await ZKVizingAccountFactory.getAccountAddress(testUser.address, 2);
-    console.log("zkaaAccount:",zkaaAccount);
-    await CreateAccount(testUser.address, 2);
+    // let zkaaAccount=await ZKVizingAccountFactory.getAccountAddress(testUser.address, 2);
+    // console.log("zkaaAccount:",zkaaAccount);
+    // await CreateAccount(testUser.address, 2);
     
 
     //deposite gas
-    let ZKAAContract=new ethers.Contract(zkaaAccount, ZKVizingAccountFactoryABI.abi, testUser);
+    // let ZKAAContract=new ethers.Contract(zkaaAccount, ZKVizingAccountFactoryABI.abi, testUser);
     
 
     //test syncRouter
@@ -109,11 +124,12 @@ async function main() {
     const types = ["uint256", "address"];
     const values = [CrossETHParams.amount, CrossETHParams.reciever];
     // Encode the structure into bytes
-    const encodedCrossETHParams = ethers.defaultAbiCoder.encode(types, values);
-    console.log("Encoded CrossETHParams:", encodedCrossETHParams);
+    const encodedCrossETHParams = ethers.AbiCoder.defaultAbiCoder().encode(types, values);
+    // let getEncodeSignData = await ethers.keccak256(encodedCrossETHParams);
+    console.log("getEncodeSignData hash:", encodedCrossETHParams);  
 
     const PackedUserOperation = ({
-        operationType: 1, // 0 user; 1 deposit,2 withdraw system
+        operationType: 0, // 0 user; 1 deposit,2 withdraw system
         operationValue: 100000n,
         sender: testUser.address,
         nonce: 0,
@@ -129,12 +145,12 @@ async function main() {
 
     const CrossHookMessageParams=({
         way: 0,
-        gasLimit: 500000n,
-        gasPrice: 1_000_000_000n,
+        gasLimit: 350000n,
+        gasPrice: 1_350_000_00n,
         destChainId: 421614n,  //arb
-        minArrivalTime: 0n,
-        maxArrivalTime: 0n,
-        destContract:  "0x3A5B354976e950c093ab350e343DeD8d9Ed9C6f0",
+        minArrivalTime: 350n,
+        maxArrivalTime: 1000000000000n,
+        destContract:  "0xA2B76dA0593fdEF8F8418F4c8B2D2F3cc5dB6376",
         selectedRelayer: ADDRESS_ZERO,
         destChainExecuteUsedFee: 100000000n,
         batchsMessage: "0x",
@@ -142,12 +158,14 @@ async function main() {
         packCrossParams: encodedCrossETHParams
     });
     const CrossMessageParams={
-        PackedUserOperation,
-        CrossHookMessageParams
+        _packedUserOperation: PackedUserOperation,
+        _hookMessageParams: CrossHookMessageParams
     };
-    let ethValue=CrossETHParams.amount + gasLimit * gasPrice + destChainExecuteUsedFee;
+    let fetchUserOmniMessageFee=await SyncRouter.fetchUserOmniMessageFee(CrossMessageParams);
+    console.log("CrossMessageParams:",fetchUserOmniMessageFee);
+    let ethValue=CrossETHParams.amount + fetchUserOmniMessageFee + CrossHookMessageParams.destChainExecuteUsedFee;
     console.log("ethValue:",ethValue);
-    const sendOmniMessage=await SyncRouter.sendOmniMessage(CrossMessageParams, {value:ethValue});
+    const sendOmniMessage=await SyncRouter.sendUserOmniMessage(CrossMessageParams, {value:ethers.parseEther("0.003")});
     const sendOmniMessageTx=await sendOmniMessage.wait();
     console.log("sendOmniMessageTx:",sendOmniMessageTx);
 

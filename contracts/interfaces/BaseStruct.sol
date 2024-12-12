@@ -1,7 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.24;
+pragma solidity >=0.7.5;
 
 interface BaseStruct {
+    struct ExecData {
+        uint64 nonce; // only used for batchdata
+        uint64 chainId;
+        uint64 mainChainGasLimit;
+        uint64 destChainGasLimit;
+        uint64 zkVerificationGasLimit;
+        uint64 mainChainGasPrice;
+        uint64 destChainGasPrice;
+        bytes callData;
+    }
     /**
      * User Operation struct
      * @param sender                - The sender account of this request.
@@ -16,18 +26,13 @@ interface BaseStruct {
      * @param owner                 - Owner of the account that generated this request.
      */
     struct PackedUserOperation {
-        uint8 operationType; // 0 user; 1 deposit,2 withdraw system
+        uint8 phase; // 0 exec; 1 innerExec
+        uint8 operationType; // 0 user; 1 deposit; 2 withdraw;
         uint256 operationValue;
         address sender;
-        uint64 nonce; // only used for batchdata
-        uint64 chainId;
-        bytes callData;
-        uint64 mainChainGasLimit;
-        uint64 destChainGasLimit;
-        uint64 zkVerificationGasLimit;
-        uint64 mainChainGasPrice;
-        uint64 destChainGasPrice;
         address owner;
+        ExecData exec; // vizing or first chain op
+        ExecData innerExec; // empty or second chain op
     }
     /**
      * EntryPoint***********************************************************
@@ -62,7 +67,6 @@ interface BaseStruct {
     struct MemoryUserOp {
         address sender;
         uint256 chainId;
-        uint256 operationValue;
         uint64 zkVerificationGasLimit;
         uint64 mainChainGasLimit;
         uint64 destChainGasLimit;
@@ -93,7 +97,8 @@ interface BaseStruct {
      * @param amountIn     - Input swap token amount
      * @param amountOutMin               - Output token minimum receive amount
      * @param path              - Uniswapv2 tokens swap path
-     * @param to             - Touch swap output token receiver
+     * @param sender          _touch swap sender
+     * @param receiver            - Touch swap output token receiver
      * @param deadline              - Swap deadline
      */
     struct V2SwapParams {
@@ -101,7 +106,8 @@ interface BaseStruct {
         uint256 amountIn;
         uint256 amountOutMin;
         address[] path;
-        address to;
+        address sender;
+        address receiver;
         uint256 deadline;
     }
 
@@ -112,7 +118,8 @@ interface BaseStruct {
      * @param sqrtPriceLimitX96     - Default input 0
      * @param tokenIn               - Input swap token
      * @param tokenOut              - Output swap token
-     * @param recipient             - Touch swap output token receiver
+     * @param sender                - Touch swap sender
+     * @param receiver              - Touch swap output token receiver
      * @param amountIn              - Input token amount
      * @param amountOutMinimum      - Output token minimum receive amount
      */
@@ -122,7 +129,8 @@ interface BaseStruct {
         uint160 sqrtPriceLimitX96;
         address tokenIn;
         address tokenOut;
-        address recipient;
+        address sender;
+        address receiver;
         uint256 amountIn;
         uint256 amountOutMinimum;
     }
@@ -134,7 +142,8 @@ interface BaseStruct {
         uint256 amountOutMin;
         address sourceToken;
         address targetToken;
-        address to;
+        address sender;
+        address receiver;
         uint256 deadline;
     }
 
@@ -147,11 +156,13 @@ interface BaseStruct {
         uint160 targetSqrtPriceLimitX96;
         address sourceChainTokenIn;
         address targetChainTokenOut;
-        address recipient;  
+        address sender;
+        address receiver;
         uint256 amountIn;
         uint256 amountOutMinimum;
     }
 
+    //receive message struct
     struct CrossHookMessageParams {
         uint8 way;
         uint24 gasLimit;
@@ -162,13 +173,14 @@ interface BaseStruct {
         address destContract;
         address selectedRelayer;
         uint256 destChainExecuteUsedFee; // Amount that the target chain needs to spend to execute userop
-        bytes batchsMessage;
-        bytes packCrossMessage;  //The sending chain sends the instruction to the target chain after encode and executes the call
+        bytes batchsMessage;  //bytes PackedUserOperation
+        bytes packCrossMessage; //The sending chain sends the instruction to the target chain after encode and executes the call
         bytes packCrossParams;
     }
 
+    //send omni struct
     struct CrossMessageParams {
-        PackedUserOperation _packedUserOperation;
+        PackedUserOperation[] _packedUserOperation;
         CrossHookMessageParams _hookMessageParams;
     }
 }

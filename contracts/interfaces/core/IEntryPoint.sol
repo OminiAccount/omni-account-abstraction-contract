@@ -11,10 +11,9 @@ pragma solidity >=0.7.5;
 /* solhint-disable reason-string */
 
 import "./IPreGasManager.sol";
+import "./IConfigManager.sol";
 
-// import "./BaseStruct.sol";
-
-interface IEntryPoint is IPreGasManager {
+interface IEntryPoint is IPreGasManager, IConfigManager {
     /**
      *
      * An event emitted after each successful request.
@@ -119,6 +118,16 @@ interface IEntryPoint is IPreGasManager {
     error NewAccInputHashDoesNotExist();
     error NewStateRootNotInsidePrime();
     error InvalidProof();
+
+    function submitDepositOperationByRemote(
+        address sender,
+        uint256 amount,
+        uint256 nonce
+    ) external payable;
+
+    function sendDepositOperation(
+        CrossMessageParams calldata params
+    ) external payable;
 
     function syncBatches(PackedUserOperation[] memory userOps) external;
 
