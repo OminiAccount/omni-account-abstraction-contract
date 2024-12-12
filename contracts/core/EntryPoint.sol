@@ -225,6 +225,18 @@ contract EntryPoint is
         _submitDepositOperationRemote(sender, amount, nonce);
     }
 
+    error EstimateRevert(uint256 gas);
+
+    function estimateSubmitDepositOperationByRemoteGas(
+        address sender,
+        uint256 amount,
+        uint256 nonce
+    ) external payable {
+        uint256 preGas = gasleft();
+        _submitDepositOperationRemote(sender, amount, nonce);
+        revert EstimateRevert(preGas - gasleft());
+    }
+
     function sendDepositOperation(
         CrossMessageParams calldata params
     ) external payable {
@@ -497,8 +509,7 @@ contract EntryPoint is
     function getUserOpHash(
         PackedUserOperation calldata userOp
     ) public pure returns (bytes32) {
-        // return keccak256(userOp.encode());
-        return keccak256(abi.encode(userOp));
+        return keccak256(userOp.encode());
     }
 
     /**
@@ -556,7 +567,7 @@ contract EntryPoint is
         MemoryUserOp memory mUserOp = outOpInfo.mUserOp;
         _copyUserOpToMemory(userOp, mUserOp);
         // avoid to over validateOwnerGasLimit
-        // outOpInfo.userOpHash = getUserOpHash(userOp);
+        outOpInfo.userOpHash = getUserOpHash(userOp);
 
         // Validate all numeric values in userOp are well below 128 bit, so they can safely be added
         // and multiplied without causing overflow.
@@ -589,11 +600,11 @@ contract EntryPoint is
         }
 
         // Todo How to check the gas limit of the authentication owner
-        unchecked {
-            if (preGas - gasleft() > validateOwnerGasLimit) {
-                revert FailedOp(opIndex, "AA26 over verificationOwnerGasLimit");
-            }
-        }
+        // unchecked {
+        //     if (preGas - gasleft() > validateOwnerGasLimit) {
+        //         revert FailedOp(opIndex, "AA26 over verificationOwnerGasLimit");
+        //     }
+        // }
 
         bytes memory context;
 
@@ -666,7 +677,7 @@ contract EntryPoint is
                 }
             } else {
                 bool success = mode == IPaymaster.PostOpMode.opSucceeded;
-                console.log("success %s", success);
+                opInfo.mUserOp.phase = 1;
                 emitUserOperationEvent(
                     opInfo,
                     success,

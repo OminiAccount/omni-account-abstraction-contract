@@ -50,7 +50,8 @@ contract ExecuteTest is Utils, AddressHelper {
         address owner,
         uint256 chainId,
         address transferTo,
-        uint64 nonce
+        uint64 nonce,
+        bool inExec
     ) public pure returns (PackedUserOperation memory) {
         bytes memory data = encodeTransferCalldata(transferTo, 0.001 ether);
         uint256 operationValue = 0;
@@ -70,6 +71,18 @@ contract ExecuteTest is Utils, AddressHelper {
             data
         );
         ExecData memory innerExec;
+        if (inExec) {
+            innerExec = ExecData(
+                nonce,
+                uint64(2),
+                mainChainGasLimit,
+                destChainGasLimit,
+                zkVerificationGasLimit,
+                mainChainGasPrice,
+                destChainGasPrice,
+                data
+            );
+        }
         // ExecData memory innerExec = ExecData(
         //     nonce,
         //     uint64(2),
@@ -114,7 +127,8 @@ contract ExecuteTest is Utils, AddressHelper {
                     account1Owner,
                     block.chainid,
                     account2Owner,
-                    uint64(index + 1)
+                    uint64(index + 1),
+                    false
                 );
             }
 
@@ -126,12 +140,14 @@ contract ExecuteTest is Utils, AddressHelper {
         {
             PackedUserOperation[] memory ops = new PackedUserOperation[](64);
             for (uint256 index = 0; index < 64; index++) {
+                bool inExec = index == 63 ? true : false;
                 ops[index] = getUserOp(
                     address(account1),
                     account1Owner,
                     block.chainid,
                     account2Owner,
-                    uint64(65 + index)
+                    uint64(65 + index),
+                    inExec
                 );
             }
 
@@ -163,6 +179,12 @@ contract ExecuteTest is Utils, AddressHelper {
 
     function test_depositGasRemote() public {
         console.log("account1 balance pre", account1.getPreGasBalance());
+
+        ep.estimateSubmitDepositOperationByRemoteGas{value: 1 ether}(
+            address(account1),
+            1 ether,
+            1
+        );
 
         bytes memory data = abi.encodeCall(
             EntryPoint.submitDepositOperationByRemote,
