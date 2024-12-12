@@ -53,13 +53,15 @@ async function main() {
     let SyncRouter;
     let SenderCreator;
     let VerifyManager;
-    let ZKVizingAAEncode;
+    let ZKVizingAADataHelp;
+
 
     let EntryPointAddress=ADDRESS_ZERO;
     let ZKVizingAccountFactoryAddress=ADDRESS_ZERO;
     let VizingSwapAddress=ADDRESS_ZERO;
     let SyncRouterAddress=ADDRESS_ZERO;
     let SenderCreatorAddress=ADDRESS_ZERO;
+    let ZKVizingAADataHelpAddress=ADDRESS_ZERO;
     let WETHAddress=ADDRESS_ZERO;
 
     if(currentChainId===11155111n){
@@ -193,9 +195,19 @@ async function main() {
         return { SenderCreator };
     }
 
-    async function CreateAccount(userAddress, saltNum) {
+    async function DeployZKVizingAADataHelp() {
+        const zkVizingAADataHelp=await ethers.getContractFactory("ZKVizingAADataHelp");
+        ZKVizingAADataHelp = await zkVizingAADataHelp.deploy();
+        ZKVizingAADataHelpAddress = ZKVizingAADataHelp.target;
+        console.log("ZKVizingAADataHelp:", ZKVizingAADataHelpAddress);
+        return { ZKVizingAADataHelp };
+    }
+
+    async function CreateAccount(userAddress) {
         try {
-            const createAccount = await ZKVizingAccountFactory.createAccount(userAddress,saltNum);
+            const UserId=await ZKVizingAccountFactory.UserId();
+            console.log("Last user id:", UserId);
+            const createAccount = await ZKVizingAccountFactory.createAccount(userAddress);
             await createAccount.wait();
             console.log("Create Account success");
             const thisZKVizingAccount=await ZKVizingAccountFactory.getAccountAddress(userAddress,saltNum);
@@ -223,6 +235,7 @@ async function main() {
             VizingSwap: VizingSwapAddress,
             SyncRouter: SyncRouterAddress,
             SenderCreator: SenderCreatorAddress,
+            ZKVizingAADataHelp: ZKVizingAADataHelpAddress,
             CreatedZKVizingAccount:{
                 UserAddress: userAddress,
                 UserZKAccount: userZKAccount
@@ -241,16 +254,17 @@ async function main() {
             console.log("currentSetChainId:", currentSetChainId);
             if(currentSetChainId === currentChainId){
                 await DeployEntryPoint();
-                // await DeployZKVizingAccountFactory(EntryPointAddress);
+                await DeployZKVizingAccountFactory(EntryPointAddress);
+                
                 // await DeployWETH();
                 // await DeployVizingSwap(WETHAddress);
                 // await DeploySyncRouter(setup["VizingPad-TestNet"][i].Address, WETHAddress, VizingSwapAddress);
-                // await DeploySenderCreator();
+                await DeploySenderCreator();
+                await DeployZKVizingAADataHelp();
 
                 //create zkaa account
                 let createdZKAccount=ADDRESS_ZERO;
-                // const salt=1;
-                // createdZKAccount=await CreateAccount(testUser.address, salt);
+                createdZKAccount=await CreateAccount(testUser.address);
                 
                 //fs write json
                 await SaveAddressesToFile(

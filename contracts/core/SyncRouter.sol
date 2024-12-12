@@ -35,7 +35,7 @@ contract SyncRouter is
     uint64 public defaultGasPrice = 1 gwei;
     uint64 public override minArrivalTime;
     uint64 public override maxArrivalTime;
-    address public override selectedRelayer;
+    address public thisRelayer;
     
     /**
      * @dev Constructs a new BatchSend contract instance.
@@ -79,7 +79,7 @@ contract SyncRouter is
     function changeDefaultSet(uint24 newGaslimit,uint64 newGasPrice,address newRelayer)external onlyOwner{
         defaultGaslimit = newGaslimit;
         defaultGasPrice = newGasPrice;
-        selectedRelayer = selectedRelayer;
+        thisRelayer = newRelayer;
     }
 
     // Put hook coding information into?  --TODO
@@ -119,10 +119,45 @@ contract SyncRouter is
         );
     }
 
+    function sendUserOmniMessage(
+        CrossMessageParams calldata cmp
+    ) external payable nonReentrant {
+        (uint256 sendETHAmount, bytes memory encodeOmniMessage)=getUserOmniEncodeMessage(cmp);
+        bytes memory encodedMessage = _packetMessage(
+            mode,
+            cmp._hookMessageParams.destContract,
+            cmp._hookMessageParams.gasLimit,
+            cmp._hookMessageParams.gasPrice,
+            encodeOmniMessage
+        );
+
+        //vizing fee
+        uint256 gasFee = LaunchPad.estimateGas(
+            cmp._hookMessageParams.destChainExecuteUsedFee + sendETHAmount,
+            cmp._hookMessageParams.destChainId,
+            additionParams,
+            encodedMessage
+        );
+
+        //check
+        require(msg.value >= gasFee + cmp._hookMessageParams.destChainExecuteUsedFee + sendETHAmount,"Send eth Insufficient");
+
+        LaunchPad.Launch{value: msg.value}(
+            cmp._hookMessageParams.minArrivalTime,
+            cmp._hookMessageParams.maxArrivalTime,
+            cmp._hookMessageParams.selectedRelayer,
+            msg.sender,
+            cmp._hookMessageParams.destChainExecuteUsedFee + sendETHAmount,  //if transfer eth to target chain
+            cmp._hookMessageParams.destChainId,
+            additionParams,
+            encodedMessage
+        );
+    }
+
     //What does encode do? --TODO
-    function getUserOmniMessage(
+    function getUserOmniEncodeMessage(
         CrossMessageParams memory cmp
-    ) external view returns (bytes memory)  {
+    ) public view returns (uint256, bytes memory)  {
         uint256 sendETHAmount;
         bytes memory payload;
         bytes memory newCrossParams;
@@ -206,14 +241,19 @@ contract SyncRouter is
                 packCrossMessage: payload, //The sending chain sends the instruction to the target chain after encode and executes the call
                 packCrossParams: newCrossParams
         });
+
+        bytes memory crossGGData=abi.encode(
+            CrossMessageParams({
+                _packedUserOperation: cmp._packedUserOperation,
+                _hookMessageParams: newCrossHookMessageParams
+            })
+        ); 
         
-        return
-            abi.encode(
-                CrossMessageParams({
-                    _packedUserOperation: cmp._packedUserOperation,
-                    _hookMessageParams: newCrossHookMessageParams
-                })
-            ); 
+        return(
+            sendETHAmount,
+            crossGGData
+        );
+            
     }
 
     function fetchUserOmniMessageFee(
