@@ -133,6 +133,7 @@ contract SyncRouter is
             uint256 sendETHAmount,
             bytes memory encodeOmniMessage
         ) = getUserOmniEncodeMessage(cmp);
+
         bytes memory encodedMessage = _packetMessage(
             mode,
             cmp._hookMessageParams.destContract,

@@ -264,10 +264,19 @@ contract EntryPoint is
         revert EstimateRevert(preGas - gasleft());
     }
 
+    function estimateSubmitDepositOperationByRemoteCrossGas(
+        CrossMessageParams calldata params
+    ) external returns (uint256) {
+        return
+            ISyncRouter(getChainConfigs(uint64(block.chainid)).router)
+                .fetchUserOmniMessageFee(params);
+    }
+
     function sendDepositOperation(
         CrossMessageParams calldata params
     ) external payable {
-        ISyncRouter(syncRouter).sendUserOmniMessage{value: msg.value}(params);
+        ISyncRouter(getChainConfigs(uint64(block.chainid)).router)
+            .sendUserOmniMessage{value: msg.value}(params);
     }
 
     function syncBatches(

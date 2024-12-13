@@ -36,7 +36,7 @@ contract ExecuteTest is Utils, AddressHelper {
         router.setMirrorEntryPoint(uint64(block.chainid), address(ep));
         factory = new ZKVizingAccountFactory(ep);
         factory.updateBundler(deployer);
-        account1 = factory.createAccount(account1Owner);
+        account1 = factory.createAccount(account1Owner, 1);
         console.log("account %s", address(account1));
         vm.stopPrank();
         vm.deal(address(account1), 1 ether);

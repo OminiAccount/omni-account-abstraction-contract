@@ -125,6 +125,10 @@ interface IEntryPoint is IPreGasManager, IConfigManager {
     error NewStateRootNotInsidePrime();
     error InvalidProof();
 
+    function estimateSubmitDepositOperationByRemoteCrossGas(
+        CrossMessageParams calldata params
+    ) external returns (uint256);
+
     function submitDepositOperationByRemote(
         address sender,
         uint256 amount,

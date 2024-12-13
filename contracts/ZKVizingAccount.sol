@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "./core/BaseAccount.sol";
 import "./libraries/Helpers.sol";
 import "./TokenCallbackHandler.sol";
-
+import "forge-std/console.sol";
 /**
  * ZK vizing account.
  *  this is vizing account.
@@ -23,8 +23,6 @@ contract ZKVizingAccount is
     UUPSUpgradeable,
     Initializable
 {
-    error InsufficientBalance();
-
     address public owner;
 
     IEntryPoint private immutable _entryPoint;
@@ -196,16 +194,11 @@ contract ZKVizingAccount is
         uint64 maxArrivalTime,
         address selectedRelayer
     ) external payable {
-        // msg.value = crossFee+amount+destChainExecuteOpFee
-        require(msg.value >= amount + destChainExecuteUsedFee);
-
         bytes memory data = abi.encodeCall(
             entryPoint().submitDepositOperationByRemote,
             (address(this), amount, nonce)
         );
 
-        // destChainExecuteUsedFee include amount
-        destChainExecuteUsedFee += amount;
         CrossMessageParams memory params;
         CrossETHParams memory crossETH;
         crossETH.amount = amount;
@@ -225,7 +218,13 @@ contract ZKVizingAccount is
         params._hookMessageParams.packCrossMessage = data;
         params._hookMessageParams.packCrossParams = abi.encode(crossETH);
 
-        entryPoint().sendDepositOperation{value: msg.value}(params);
+        uint256 crossFee = entryPoint()
+            .estimateSubmitDepositOperationByRemoteCrossGas(params);
+
+        require(msg.value >= crossFee + amount + destChainExecuteUsedFee);
+        entryPoint().sendDepositOperation{
+            value: crossFee + amount + destChainExecuteUsedFee
+        }(params);
     }
 
     /**
