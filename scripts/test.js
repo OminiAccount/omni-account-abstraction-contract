@@ -257,14 +257,14 @@ async function main() {
                 await DeployZKVizingAccountFactory(EntryPointAddress);
                 
                 // await DeployWETH();
-                // await DeployVizingSwap(WETHAddress);
-                // await DeploySyncRouter(setup["VizingPad-TestNet"][i].Address, WETHAddress, VizingSwapAddress);
+                await DeployVizingSwap(WETHAddress);
+                await DeploySyncRouter(setup["VizingPad-TestNet"][i].Address, WETHAddress, VizingSwapAddress);
                 await DeploySenderCreator();
                 await DeployZKVizingAADataHelp();
 
                 //create zkaa account
                 let createdZKAccount=ADDRESS_ZERO;
-                createdZKAccount=await CreateAccount(testUser.address);
+                // createdZKAccount=await CreateAccount(testUser.address);
                 
                 //fs write json
                 await SaveAddressesToFile(

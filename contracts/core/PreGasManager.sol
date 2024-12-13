@@ -8,7 +8,8 @@ import "../interfaces/core/IPreGasManager.sol";
 contract PreGasManager is IPreGasManager {
     using UserOperationLib for PackedUserOperation;
 
-    mapping(address account => uint256 amount) public preGasBalance;
+    mapping(address account => uint256 amount) private preGasBalance;
+    //  mapping(address account => uint256 amount) public preGasBalance;
 
     /// @inheritdoc IPreGasManager
     function getPreGasBalanceInfo(

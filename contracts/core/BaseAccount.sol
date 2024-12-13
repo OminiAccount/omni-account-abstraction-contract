@@ -35,10 +35,16 @@ abstract contract BaseAccount is IAccount {
      */
     function _requireFromEntryPoint() internal view virtual {
         require(
-            msg.sender == address(entryPoint()),
-            "account: not from EntryPoint"
+            msg.sender == address(entryPoint())
         );
     }
+
+    // function _requireFromEntryPoint() internal view virtual {
+    //     require(
+    //         msg.sender == address(entryPoint()),
+    //         "account: not from EntryPoint"
+    //     );
+    // }
 
     /**
      * Validate the _owner is valid for IAccount owner.

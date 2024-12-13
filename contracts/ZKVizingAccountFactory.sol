@@ -21,8 +21,6 @@ contract ZKVizingAccountFactory is Ownable {
 
     event AccountCreated(address indexed account, address owner);
 
-    uint256 public UserId;
-
     ZKVizingAccount public immutable accountImplementation;
 
     address internal bundler;
@@ -50,7 +48,8 @@ contract ZKVizingAccountFactory is Ownable {
      * This method returns an existing account address so that entryPoint.getSenderAddress() would work even after account creation
      */
     function createAccount(
-        address owner
+        address owner,
+        uint256 userId
     ) public onlyBundler returns (ZKVizingAccount ret) {
         require(
             _UserZKVizingAccountInfo[owner].state != 0x01,
@@ -58,7 +57,7 @@ contract ZKVizingAccountFactory is Ownable {
         );
         ret = ZKVizingAccount(
             payable(
-                new ERC1967Proxy{salt: bytes32(UserId)}(
+                new ERC1967Proxy{salt: bytes32(userId)}(
                     address(accountImplementation),
                     abi.encodeCall(ZKVizingAccount.initialize, (owner))
                 )
@@ -67,11 +66,10 @@ contract ZKVizingAccountFactory is Ownable {
         address zkVizingAccountAddress = address(ret);
         require(zkVizingAccountAddress != address(0));
         _UserZKVizingAccountInfo[owner] = UserZKVizingAccountInfo({
-            userId: UserId,
+            userId: userId,
             state: 0x01,
             zkVizingAccount: zkVizingAccountAddress
         });
-        UserId++;
         emit AccountCreated(zkVizingAccountAddress, owner);
     }
 
@@ -80,11 +78,11 @@ contract ZKVizingAccountFactory is Ownable {
      */
     function getAccountAddress(
         address owner,
-        uint256 _userId
+        uint256 userId
     ) public view returns (address) {
         return
             Create2.computeAddress(
-                bytes32(_userId),
+                bytes32(userId),
                 keccak256(
                     abi.encodePacked(
                         type(ERC1967Proxy).creationCode,

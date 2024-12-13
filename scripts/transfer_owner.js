@@ -78,10 +78,15 @@ async function main() {
         const transferOwner1=await SyncRouter.transferOwnership(owner.address);
         await transferOwner1.wait();
         console.log("SyncRouter transferOwner success");
+        
+        const transferManager=await VizingSwap.setManager(owner.address);
+        await transferManager.wait();
+        console.log("VizingSwap setManager success");
 
         const transferOwner2=await VizingSwap.transferOwnership(owner.address);
         await transferOwner2.wait();
         console.log("VizingSwap transferOwner success");
+
     }
 
 }

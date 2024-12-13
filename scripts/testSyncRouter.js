@@ -21,19 +21,10 @@ async function main() {
     const USDCAddress="0x2f4555dD23ff52a01e26ab94FE84695a6df7885c";
     const USDTAddress="0x534D0e7eC92524338735952863c874f9Cc810492";
     const FlyDogeAddress="0xDa5Dd0d968e439307A606417c96804440132514E";
-    const EntryPointAddress="0xA2B76dA0593fdEF8F8418F4c8B2D2F3cc5dB6376";
-    const ZKVizingAccountFactoryAddress="0x344bdbD327C6c3796140B0E74C729272D9421621";
+    const EntryPointAddress="0xcE22fd390a19a6a526D953dBF7969F0b21675D78";
+    const ZKVizingAccountFactoryAddress="0x0e0b188a6df921829DF267c039a251b4a1ca4A46";
     const WETHAddress="0x847ea91D70532C03dAdCdB59df860E3550191187";
-    const SenderCreatorAddress="0x72A3b74a7b8410ae2fdF66B42EFB1c070CBBBB12";
-
-    const vizingSwap=await hre.ethers.getContractFactory("VizingSwap");
-    const VizingSwap=await vizingSwap.deploy(WETHAddress);
-    const VizingSwapAddress=VizingSwap.target;
-    console.log("VizingSwap Address:", VizingSwapAddress);
-
-    const syncRouter = await ethers.getContractFactory("SyncRouter");
-    const SyncRouterAddress = SyncRouter.target;
-    console.log("SyncRouter:", SyncRouterAddress);
+    const SyncRouterAddress="0xd985E5B96608C217378d075870cD1F814b834ebb";
 
     let EntryPoint=new ethers.Contract(EntryPointAddress, EntryPointABI.abi, testUser);
     let ZKVizingAccountFactory=new ethers.Contract(ZKVizingAccountFactoryAddress, ZKVizingAccountFactoryABI.abi, testUser);
@@ -95,20 +86,20 @@ async function main() {
     }
 
     //create account
-
-    // async function CreateAccount(userAddress, salt){
-    //     try{
-    //         const tx=await ZKVizingAccountFactory.createAccount(userAddress, salt);
-    //         await tx.wait();
-    //         console.log("createAccount success");
-    //     }catch(e){
-    //         console.log("createAccount fail:",e);
-    //     }
-    // }
-    
-    // let zkaaAccount=await ZKVizingAccountFactory.getAccountAddress(testUser.address, 2);
-    // console.log("zkaaAccount:",zkaaAccount);
-    // await CreateAccount(testUser.address, 2);
+    async function CreateAccount(userAddress){
+        try{
+            let userId=await ZKVizingAccountFactory.UserId();
+            console.log("userId:",userId);
+            let zkaaAccount=await ZKVizingAccountFactory.getAccountAddress(testUser.address, userId);
+            console.log("zkaaAccount:",zkaaAccount);
+            const tx=await ZKVizingAccountFactory.createAccount(userAddress);
+            await tx.wait();
+            console.log("createAccount success");
+        }catch(e){
+            console.log("createAccount fail:",e);
+        }
+    }
+    await CreateAccount(testUser.address);
     
 
     //deposite gas
@@ -161,13 +152,13 @@ async function main() {
         _packedUserOperation: PackedUserOperation,
         _hookMessageParams: CrossHookMessageParams
     };
-    let fetchUserOmniMessageFee=await SyncRouter.fetchUserOmniMessageFee(CrossMessageParams);
-    console.log("CrossMessageParams:",fetchUserOmniMessageFee);
-    let ethValue=CrossETHParams.amount + fetchUserOmniMessageFee + CrossHookMessageParams.destChainExecuteUsedFee;
-    console.log("ethValue:",ethValue);
-    const sendOmniMessage=await SyncRouter.sendUserOmniMessage(CrossMessageParams, {value:ethers.parseEther("0.003")});
-    const sendOmniMessageTx=await sendOmniMessage.wait();
-    console.log("sendOmniMessageTx:",sendOmniMessageTx);
+    // let fetchUserOmniMessageFee=await SyncRouter.fetchUserOmniMessageFee(CrossMessageParams);
+    // console.log("CrossMessageParams:",fetchUserOmniMessageFee);
+    // let ethValue=CrossETHParams.amount + fetchUserOmniMessageFee + CrossHookMessageParams.destChainExecuteUsedFee;
+    // console.log("ethValue:",ethValue);
+    // const sendOmniMessage=await SyncRouter.sendUserOmniMessage(CrossMessageParams, {value:ethers.parseEther("0.003")});
+    // const sendOmniMessageTx=await sendOmniMessage.wait();
+    // console.log("sendOmniMessageTx:",sendOmniMessageTx);
 
     
 

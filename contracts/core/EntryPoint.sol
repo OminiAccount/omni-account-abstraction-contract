@@ -40,22 +40,16 @@ contract EntryPoint is
 {
     using UserOperationLib for PackedUserOperation;
     using UserOperationsLib for PackedUserOperation[];
-
-    constructor() {
-        owner = msg.sender;
-    }
-
-    // function _isOwner() internal virtual override onlyOwner {}
-
     
     // Marker for inner call revert on out of gas
     bytes32 private constant INNER_OUT_OF_GAS = hex"deaddead";
     bytes32 private constant INNER_REVERT_LOW_PREFUND = hex"deadaa51";
-    address private owner;
+
+    address private _owner;
 
     // compensate for innerHandleOps' emit message and deposit refund.
     // allow some slack for future gas price changes.
-    uint256 private constant INNER_GAS_OVERHEAD = 10_000;
+    // uint256 private constant INNER_GAS_OVERHEAD = 10_000;
 
     uint256 private constant REVERT_REASON_MAX_LEN = 2048;
     uint256 private constant PENALTY_PERCENT = 10;
@@ -69,6 +63,28 @@ contract EntryPoint is
 
     // L2 chain identifier
     uint64 public constant FORK_ID = 1;
+    
+    constructor(){
+        _owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == _owner);
+        _;
+    }
+    
+    function _isOwner() internal virtual override onlyOwner {}
+
+    function transferOwnership(address newOwner) external onlyOwner {
+        _owner = newOwner;
+    }
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view returns (address) {
+        return _owner;
+    }
 
     /// @inheritdoc IERC165
     function supportsInterface(
@@ -82,11 +98,6 @@ contract EntryPoint is
             interfaceId == type(IEntryPoint).interfaceId ||
             interfaceId == type(IPreGasManager).interfaceId ||
             super.supportsInterface(interfaceId);
-    }
-
-    function transferOwner(address newOwner)external {
-        require(msg.sender == owner);
-        owner = newOwner;
     }
 
 
@@ -581,7 +592,8 @@ contract EntryPoint is
             mUserOp.destChainGasLimit |
             mUserOp.mainChainGasPrice |
             mUserOp.destChainGasPrice;
-        require(maxGasValues <= type(uint120).max, "AA94 gas values overflow");
+        require(maxGasValues <= type(uint120).max);
+        // require(maxGasValues <= type(uint120).max, "AA94 gas values overflow");
 
         uint256 requiredPreFund = _getRequiredPrefund(mUserOp);
 
