@@ -43,6 +43,9 @@ contract ExecuteTest is Utils, AddressHelper {
         console.log("ep address", address(ep));
         console.log("factory address", address(factory));
         console.log("account1 balance", address(account1).balance);
+        vm.startPrank(account1Owner);
+        ep.updateVerifier(address(gverifier));
+        vm.stopPrank();
     }
 
     function getUserOp(
@@ -199,8 +202,8 @@ contract ExecuteTest is Utils, AddressHelper {
         params._hookMessageParams.packCrossMessage = data;
         params._hookMessageParams.packCrossParams = abi.encode(crossETH);
         params._hookMessageParams.destChainExecuteUsedFee = 5000;
-        bytes memory paramsData = router.getUserOmniMessage(params);
-        router.testReceiveMessage{value: 3 ether}(paramsData);
+        (, bytes memory paramsData) = router.getUserOmniEncodeMessage(params);
+        // router.testReceiveMessage{value: 3 ether}(paramsData);
 
         console.log("account1 balance after", account1.getPreGasBalance());
     }

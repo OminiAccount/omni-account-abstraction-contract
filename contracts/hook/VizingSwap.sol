@@ -16,7 +16,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
     using SafeERC20 for IERC20;
 
-    address private WETH;
+    address public WETH;
+    address public SyncRouter;
+    address public Manager;
     address[] private routers;
 
     mapping(uint256 => bytes1) public LockWay;
@@ -28,33 +30,57 @@ contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
         _;
     }
 
-    constructor(address _WETH) Ownable(msg.sender) {
-        WETH = _WETH;
+    modifier onlySyncRouter() {
+        require(msg.sender == SyncRouter, "Non syncRouter");
+        _;
     }
 
-    function setLock(uint256 _way, bytes1 _lockState) external onlyOwner {
+    modifier onlyManager() {
+        require(msg.sender == Manager, "Non Manager");
+        _;
+    }
+
+    constructor(address _WETH) Ownable(msg.sender) {
+        WETH = _WETH;
+        Manager = msg.sender;
+    }
+
+    function setManager(address _newManager) external onlyOwner {
+        Manager = _newManager;
+    }
+
+    function setLock(uint256 _way, bytes1 _lockState) external onlyManager {
         LockWay[_way] = _lockState;
     }
 
-    function addRouter(address _newRouter) external onlyOwner {
+    function initialize(
+        address _syncRouter,
+        address _newRouter
+    ) external onlyManager {
+        SyncRouter = _syncRouter;
         routers.push(_newRouter);
     }
 
-    function removeRouter(uint256 _indexOldRouter) external onlyOwner {
+    function addRouter(address _newRouter) external onlyManager {
+        routers.push(_newRouter);
+    }
+
+    function removeRouter(uint256 _indexOldRouter) external onlyManager {
         delete routers[_indexOldRouter];
     }
 
     /**
      * @notice public swap way.ETH=>Other token，params.tokenIn==address(0), Other token=>ETH, params.tokenOut=address(0)
+     * The user needs to a the ERC20 token to the vizingswap contract
      * @param params user swap input V3SwapParams
      */
     function v3Swap(
         V3SwapParams calldata params
-    ) public payable nonReentrant lock(1) returns (uint256) {
+    ) public payable onlySyncRouter nonReentrant lock(1) returns (uint256) {
         address router = routers[params.index];
         address _tokenIn = params.tokenIn;
         address _tokenOut = params.tokenOut;
-        address receiver = params.recipient;
+        address receiver = params.receiver;
         uint256 amountOut;
         if (params.tokenIn == address(0) && params.tokenOut != address(0)) {
             require(msg.value >= params.amountIn, "Send eth insufficient");
@@ -66,7 +92,7 @@ contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
             _tokenOut = WETH;
             receiver = address(this);
             IERC20(params.tokenIn).transferFrom(
-                msg.sender,
+                params.sender,
                 address(this),
                 params.amountIn
             );
@@ -74,7 +100,7 @@ contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
             params.tokenIn != address(0) && params.tokenOut != address(0)
         ) {
             IERC20(params.tokenIn).transferFrom(
-                msg.sender,
+                params.sender,
                 address(this),
                 params.amountIn
             );
@@ -100,15 +126,15 @@ contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
                 ? amountOut
                 : WETHBalance;
             IWETH9(WETH).withdraw(withdrawWETHAmount);
-            (bool suc, ) = params.recipient.call{value: withdrawWETHAmount}("");
+            (bool suc, ) = params.receiver.call{value: withdrawWETHAmount}("");
             amountOut = withdrawWETHAmount;
             require(suc, "Withdraw eth fail");
         }
         emit VizingSwapEvent(
-            msg.sender,
+            params.sender,
             params.tokenIn,
             params.tokenOut,
-            params.recipient,
+            params.receiver,
             params.amountIn,
             amountOut
         );
@@ -117,7 +143,7 @@ contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
 
     function v2Swap(
         V2SwapParams calldata params
-    ) public payable nonReentrant lock(2) returns (uint256) {
+    ) public payable onlySyncRouter nonReentrant lock(2) returns (uint256) {
         address router = routers[params.index];
         address fromToken = params.path[0];
         address toToken = params.path[params.path.length - 1];
@@ -129,7 +155,7 @@ contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
         //other swap other
         if (fromToken != address(0) && toToken != address(0)) {
             IERC20(fromToken).transferFrom(
-                msg.sender,
+                params.sender,
                 address(this),
                 params.amountIn
             );
@@ -138,14 +164,14 @@ contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
                 params.amountIn,
                 params.amountOutMin,
                 params.path,
-                params.to,
+                params.receiver,
                 block.timestamp + params.deadline
             );
             //other swap eth
         } else if (fromToken != address(0) && toToken == address(0)) {
             newPath[newPath.length - 1] = WETH;
             IERC20(fromToken).transferFrom(
-                msg.sender,
+                params.sender,
                 address(this),
                 params.amountIn
             );
@@ -154,7 +180,7 @@ contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
                 params.amountIn,
                 params.amountOutMin,
                 params.path,
-                params.to,
+                params.receiver,
                 block.timestamp + params.deadline
             );
             //eth swap other
@@ -165,41 +191,44 @@ contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
             }(
                 params.amountOutMin,
                 params.path,
-                params.to,
+                params.receiver,
                 block.timestamp + params.deadline
             );
         } else {
             revert InvalidPath();
         }
         emit VizingSwapEvent(
-            msg.sender,
+            params.sender,
             fromToken,
             toToken,
-            params.to,
+            params.receiver,
             params.amountIn,
             outputData[1]
         );
         return outputData[1];
     }
 
-    // function callV3Swap(V3SwapParams calldata params) external payable {
-    //     bool success;
-    //     if(params.tokenIn!=address(0)){
-    //         (success,) = address(this).delegatecall(
-    //             abi.encodeWithSignature("v3Swap((uint8,uint24,uint160,address,address,address,uint256,uint256))",
-    //                 params
-    //             )
-    //         );
-    //     }else{
-    //         require(msg.value>=params.amountIn,"ETH Amount");
-    //         (success,) = address(this).call{value: msg.value}(
-    //             abi.encodeWithSignature("v3Swap((uint8,uint24,uint160,address,address,address,uint256,uint256))",
-    //                 params
-    //             )
-    //         );
-    //     }
-    //     require(success, "v3Swap call failed");
-    // }
+    /**
+     * @notice Return tokens mistakenly sent by users, or remove shit coins
+     * @param token  refund token (eth=address(0))
+     * @param receiver token receiver
+     * @param amount  receive amount
+     */
+    function refund(
+        address token,
+        address receiver,
+        uint256 amount
+    ) external onlyManager {
+        if (token == address(0)) {
+            uint256 balance = address(this).balance;
+            require(balance > 0 && balance >= amount, "Insufficient balance");
+            (bool suc, ) = receiver.call{value: amount}("");
+            require(suc, "Refund eth fail");
+        } else {
+            IERC20(token).transfer(receiver, amount);
+        }
+        emit RefundEvent(token, receiver, amount);
+    }
 
     function _getTokenBalance(
         address _token,

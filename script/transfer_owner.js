@@ -12,13 +12,20 @@ const { Network } = require("inspector");
 const deployedAddresses = require("../deployedAddresses.json");
 async function main() {
     const [deployer, testUser, owner] = await hre.ethers.getSigners();
+    console.log("deployer:", deployer.address);
     console.log("owner:", owner.address);
     console.log("testUser:", testUser.address);
     const provider = ethers.provider;
     const ADDRESS_ZERO = "0x0000000000000000000000000000000000000000";
 
+    const deployerETHBalance = await provider.getBalance(deployer.address);
+    console.log("deployerETHBalance:", deployerETHBalance);
+
     const ownerETHBalance = await provider.getBalance(owner.address);
     console.log("ownerETHBalance:", ownerETHBalance);
+
+    const testUserETHBalance = await provider.getBalance(testUser.address);
+    console.log("testUserETHBalance:", testUserETHBalance);
 
     const network = await provider.getNetwork();
     const currentChainId = network.chainId;
@@ -55,25 +62,35 @@ async function main() {
     let networkData = deployedAddresses[networkName]
     console.log("Network Data:", networkData);
 
+    const SyncRouter = new ethers.Contract(
+        networkData.SyncRouter,
+        SyncRouterABI.abi,
+        deployer
+    );
+
     const VizingSwap = new ethers.Contract(
         networkData.VizingSwap,
         VizingSwapABI.abi,
-        owner
+        deployer
     );
 
-    /** add routers */
-    for (let i = 0; i < setup["UniswapV3-Router-Testnet"].length; i++) {
-        let currentSetUniV3ChainId = BigInt(setup["UniswapV3-Router-Testnet"][i].ChainId);
-        if (currentChainId === currentSetUniV3ChainId) {
-            const addUniV3Router = await VizingSwap.addRouter(setup["UniswapV3-Router-Testnet"][i].Address);
-            await addUniV3Router.wait();
-            console.log(`addUniV3Router in ${setup["UniswapV3-Router-Testnet"][i].Name} success`);
-        }
+    {
+        const transferOwner1 = await SyncRouter.transferOwnership(owner.address);
+        await transferOwner1.wait();
+        console.log("SyncRouter transferOwner success");
+
+        const transferManager = await VizingSwap.setManager(owner.address);
+        await transferManager.wait();
+        console.log("VizingSwap setManager success");
+
+        const transferOwner2 = await VizingSwap.transferOwnership(owner.address);
+        await transferOwner2.wait();
+        console.log("VizingSwap transferOwner success");
+
     }
 
-
-
 }
+
 main().catch((error) => {
     console.error(error);
     process.exitCode = 1;

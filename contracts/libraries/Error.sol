@@ -13,6 +13,12 @@ error InvalidPath();
 
 error InvalidWay();
 
+error ExecutionCompleted();
+
+error NotFromEP();
+
+error AAGasValueOverflow();
+
 /**
  * A custom revert error of handleOps, to identify the offending op.
  * Should be caught in off-chain handleOps simulation and not happen on-chain.

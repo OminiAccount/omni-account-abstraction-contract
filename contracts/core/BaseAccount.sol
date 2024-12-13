@@ -4,6 +4,7 @@ pragma solidity ^0.8.24;
 /* solhint-disable avoid-low-level-calls */
 /* solhint-disable no-empty-blocks */
 
+import "../libraries/Error.sol";
 import "../interfaces/core/IAccount.sol";
 import "../interfaces/core/IEntryPoint.sol";
 import "../libraries/UserOperationLib.sol";
@@ -34,10 +35,9 @@ abstract contract BaseAccount is IAccount {
      * Ensure the request comes from the known entrypoint.
      */
     function _requireFromEntryPoint() internal view virtual {
-        require(
-            msg.sender == address(entryPoint()),
-            "account: not from EntryPoint"
-        );
+        if (msg.sender != address(entryPoint())) {
+            revert NotFromEP();
+        }
     }
 
     /**

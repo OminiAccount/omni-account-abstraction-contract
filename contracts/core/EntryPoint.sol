@@ -21,7 +21,7 @@ import "../libraries/UserOperationLib.sol";
 
 import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+// import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 import "forge-std/console.sol";
 /*
@@ -36,19 +36,16 @@ contract EntryPoint is
     PreGasManager,
     ConfigManager,
     ReentrancyGuard,
-    Ownable,
     ERC165
 {
     using UserOperationLib for PackedUserOperation;
     using UserOperationsLib for PackedUserOperation[];
 
-    constructor() Ownable(msg.sender) {}
-
-    function _isOwner() internal virtual override onlyOwner {}
+    address private _owner;
 
     // compensate for innerHandleOps' emit message and deposit refund.
     // allow some slack for future gas price changes.
-    uint256 private constant INNER_GAS_OVERHEAD = 10_000;
+    // uint256 private constant INNER_GAS_OVERHEAD = 10_000;
 
     // Marker for inner call revert on out of gas
     bytes32 private constant INNER_OUT_OF_GAS = hex"deaddead";
@@ -62,10 +59,26 @@ contract EntryPoint is
         21_888_242_871_839_275_222_246_405_745_257_275_088_548_364_400_416_034_343_698_204_186_575_808_495_617;
 
     // L2 chain identifier
-    // uint64 public constant chainID = 1;
-
-    // L2 chain identifier
     uint64 public constant FORK_ID = 1;
+
+    constructor() {
+        _owner = msg.sender;
+    }
+    modifier onlyOwner() {
+        require(msg.sender == _owner);
+        _;
+    }
+
+    function _isOwner() internal virtual override onlyOwner {}
+    function transferOwnership(address newOwner) external onlyOwner {
+        _owner = newOwner;
+    }
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view returns (address) {
+        return _owner;
+    }
 
     /// @inheritdoc IERC165
     function supportsInterface(
@@ -98,22 +111,32 @@ contract EntryPoint is
             uint256[2] memory pC
         ) = abi.decode(proof, (uint256[2], uint256[2][2], uint256[2]));
 
-        uint64 batchLength = uint64(batches.length);
-        uint64 finalNewBatch = lastVerifiedBatch + batchLength;
+        //stack deep(Optimization parameter)  --TODO
+        // uint64 batchLength = uint64(batches.length);
+        // uint64 finalNewBatch = lastVerifiedBatch + uint64(batches.length);
 
         // Get snark bytes
         bytes memory snarkHashBytes = getInputSnarkBytes(
             lastVerifiedBatch,
-            finalNewBatch,
+            lastVerifiedBatch + uint64(batches.length),
             batchNumToState[lastVerifiedBatch].accInputRoot,
-            batches[batchLength - 1].accInputHash,
+            batches[uint64(batches.length) - 1].accInputHash,
             batchNumToState[lastVerifiedBatch].stateRoot,
             chainsExecuteInfos.newStateRoot
         );
 
         // Calulate the snark input
-        uint256 inputSnark = uint256(sha256(snarkHashBytes)) % _RFIELD;
-        if (!IVerifier(verifier).verifyProof(pA, pB, pC, [inputSnark])) {
+        //stack deep(Optimization parameter)  --TODO
+        // uint256 inputSnark = uint256(sha256(snarkHashBytes)) % _RFIELD;
+
+        if (
+            !IVerifier(verifier).verifyProof(
+                pA,
+                pB,
+                pC,
+                [uint256(sha256(snarkHashBytes)) % _RFIELD]
+            )
+        ) {
             revert InvalidProof();
         }
 
@@ -121,7 +144,7 @@ contract EntryPoint is
             chainsExecuteInfos.chainExtra.length
         );
 
-        bytes32[] memory batchHashs = new bytes32[](batchLength);
+        // bytes32[] memory batchHashs = new bytes32[](batchLength);
 
         unchecked {
             for (uint256 i = 0; i < chainsExecuteInfos.chainExtra.length; ) {
@@ -143,7 +166,7 @@ contract EntryPoint is
 
                 uint256 userOpsIndex;
 
-                for (uint256 j = 0; j < batchLength; ) {
+                for (uint256 j = 0; j < uint64(batches.length); ) {
                     // batchHashs[j] = batches[j].userOperations.calculateHash();
                     PackedUserOperation[] memory userOps = batches[j]
                         .userOperations
@@ -164,21 +187,25 @@ contract EntryPoint is
         }
 
         // Update State
-        updateState(
-            finalNewBatch,
-            chainsExecuteInfos.newStateRoot,
-            batches[batchLength - 1].accInputHash
-        );
-        updateLastVerifiedBatch(batchLength);
+        {
+            updateState(
+                lastVerifiedBatch + uint64(batches.length),
+                chainsExecuteInfos.newStateRoot,
+                batches[uint64(batches.length) - 1].accInputHash
+            );
+            updateLastVerifiedBatch(uint64(batches.length));
+        }
 
         // Execute vizing userOperations
-        uint256 startGas = gasleft();
-        processBatchs(
-            chainExecuteInfos[0].userOperations,
-            payable(chainsExecuteInfos.beneficiary),
-            false
-        );
-        uint256 gasUsed = startGas - gasleft();
+        {
+            uint256 startGas = gasleft();
+            processBatchs(
+                chainExecuteInfos[0].userOperations,
+                payable(chainsExecuteInfos.beneficiary),
+                false
+            );
+            uint256 gasUsed = startGas - gasleft();
+        }
 
         // Sync stateRoot and destUserOperations to other chain
         // Todo: If there is no transaction, is the synchronization state root required?
@@ -577,7 +604,10 @@ contract EntryPoint is
             mUserOp.destChainGasLimit |
             mUserOp.mainChainGasPrice |
             mUserOp.destChainGasPrice;
-        require(maxGasValues <= type(uint120).max, "AA94 gas values overflow");
+
+        if (maxGasValues > type(uint120).max) {
+            revert AAGasValueOverflow();
+        }
 
         uint256 requiredPreFund = _getRequiredPrefund(mUserOp);
 

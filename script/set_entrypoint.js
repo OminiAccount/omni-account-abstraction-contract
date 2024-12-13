@@ -5,7 +5,6 @@ const WETHABI = require("../artifacts/contracts/WETH.sol/WETH9.json");
 const EntryPointABI = require("../artifacts/contracts/core/EntryPoint.sol/EntryPoint.json");
 const ZKVizingAccountFactoryABI = require("../artifacts/contracts/ZKVizingAccountFactory.sol/ZKVizingAccountFactory.json");
 const SyncRouterABI = require("../artifacts/contracts/core/SyncRouter.sol/SyncRouter.json");
-const VizingSwapABI = require("../artifacts/contracts/hook/VizingSwap.sol/VizingSwap.json");
 const setup = require("../setup/setup.json");
 const { Network } = require("inspector");
 
@@ -19,6 +18,9 @@ async function main() {
 
     const ownerETHBalance = await provider.getBalance(owner.address);
     console.log("ownerETHBalance:", ownerETHBalance);
+
+    const testUserETHBalance = await provider.getBalance(testUser.address);
+    console.log("testUserETHBalance:", testUserETHBalance);
 
     const network = await provider.getNetwork();
     const currentChainId = network.chainId;
@@ -55,25 +57,34 @@ async function main() {
     let networkData = deployedAddresses[networkName]
     console.log("Network Data:", networkData);
 
-    const VizingSwap = new ethers.Contract(
-        networkData.VizingSwap,
-        VizingSwapABI.abi,
+    const SyncRouter = new ethers.Contract(
+        networkData.SyncRouter,
+        SyncRouterABI.abi,
         owner
     );
 
-    /** add routers */
-    for (let i = 0; i < setup["UniswapV3-Router-Testnet"].length; i++) {
-        let currentSetUniV3ChainId = BigInt(setup["UniswapV3-Router-Testnet"][i].ChainId);
-        if (currentChainId === currentSetUniV3ChainId) {
-            const addUniV3Router = await VizingSwap.addRouter(setup["UniswapV3-Router-Testnet"][i].Address);
-            await addUniV3Router.wait();
-            console.log(`addUniV3Router in ${setup["UniswapV3-Router-Testnet"][i].Name} success`);
+    //setMirrorEntryPoint
+    async function SetMirrorEntryPoint(chainId, contractAddress) {
+        try {
+            const setMirrorEntryPoint = await SyncRouter.setMirrorEntryPoint(chainId, contractAddress);
+            await setMirrorEntryPoint.wait();
+            console.log("SetMirrorEntryPoint success");
+        } catch (e) {
+            console.log("SetMirrorEntryPoint fail:", e);
         }
     }
 
-
+    {
+        await SetMirrorEntryPoint(deployedAddresses["Arbitrum-sepolia"].ChainId, deployedAddresses["Arbitrum-sepolia"].EntryPoint);
+        await SetMirrorEntryPoint(deployedAddresses["Blast-testnet"].ChainId, deployedAddresses["Blast-testnet"].EntryPoint);
+        await SetMirrorEntryPoint(deployedAddresses["Optimism-sepolia"].ChainId, deployedAddresses["Optimism-sepolia"].EntryPoint);
+        await SetMirrorEntryPoint(deployedAddresses["Base-sepolia"].ChainId, deployedAddresses["Base-sepolia"].EntryPoint);
+        // await SetMirrorEntryPoint(deployedAddresses["Sepolia"].ChainId, deployedAddresses["Sepolia"].EntryPoint);
+        await SetMirrorEntryPoint(deployedAddresses["Vizing-testnet"].ChainId, deployedAddresses["Vizing-testnet"].EntryPoint);
+    }
 
 }
+
 main().catch((error) => {
     console.error(error);
     process.exitCode = 1;

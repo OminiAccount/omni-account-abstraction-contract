@@ -100,7 +100,8 @@ interface BaseStruct {
      * @param amountIn     - Input swap token amount
      * @param amountOutMin               - Output token minimum receive amount
      * @param path              - Uniswapv2 tokens swap path
-     * @param to             - Touch swap output token receiver
+     * @param sender          _touch swap sender
+     * @param receiver            - Touch swap output token receiver
      * @param deadline              - Swap deadline
      */
     struct V2SwapParams {
@@ -108,7 +109,8 @@ interface BaseStruct {
         uint256 amountIn;
         uint256 amountOutMin;
         address[] path;
-        address to;
+        address sender;
+        address receiver;
         uint256 deadline;
     }
 
@@ -119,7 +121,8 @@ interface BaseStruct {
      * @param sqrtPriceLimitX96     - Default input 0
      * @param tokenIn               - Input swap token
      * @param tokenOut              - Output swap token
-     * @param recipient             - Touch swap output token receiver
+     * @param sender                - Touch swap sender
+     * @param receiver              - Touch swap output token receiver
      * @param amountIn              - Input token amount
      * @param amountOutMinimum      - Output token minimum receive amount
      */
@@ -129,7 +132,8 @@ interface BaseStruct {
         uint160 sqrtPriceLimitX96;
         address tokenIn;
         address tokenOut;
-        address recipient;
+        address sender;
+        address receiver;
         uint256 amountIn;
         uint256 amountOutMinimum;
     }
@@ -141,7 +145,8 @@ interface BaseStruct {
         uint256 amountOutMin;
         address sourceToken;
         address targetToken;
-        address to;
+        address sender;
+        address receiver;
         uint256 deadline;
     }
 
@@ -154,11 +159,13 @@ interface BaseStruct {
         uint160 targetSqrtPriceLimitX96;
         address sourceChainTokenIn;
         address targetChainTokenOut;
-        address recipient;
+        address sender;
+        address receiver;
         uint256 amountIn;
         uint256 amountOutMinimum;
     }
 
+    //receive message struct
     struct CrossHookMessageParams {
         uint8 way;
         uint24 gasLimit;
@@ -169,13 +176,14 @@ interface BaseStruct {
         address destContract;
         address selectedRelayer;
         uint256 destChainExecuteUsedFee; // Amount that the target chain needs to spend to execute userop
-        bytes batchsMessage;
+        bytes batchsMessage; //bytes PackedUserOperation
         bytes packCrossMessage; //The sending chain sends the instruction to the target chain after encode and executes the call
         bytes packCrossParams;
     }
 
+    //send omni struct
     struct CrossMessageParams {
-        PackedUserOperation _packedUserOperation;
+        PackedUserOperation[] _packedUserOperation;
         CrossHookMessageParams _hookMessageParams;
     }
 }
