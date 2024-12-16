@@ -60,6 +60,11 @@
         "internalType": "uint256"
       },
       {
+        "name": "crossFee",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
         "name": "gasLimit",
         "type": "uint24",
         "internalType": "uint24"
@@ -113,6 +118,11 @@
         "internalType": "uint256"
       },
       {
+        "name": "crossFee",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
         "name": "gasLimit",
         "type": "uint24",
         "internalType": "uint24"
@@ -150,6 +160,114 @@
         "name": "",
         "type": "address",
         "internalType": "contract IEntryPoint"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "estimateDepositRemoteCrossFee",
+    "inputs": [
+      {
+        "name": "nonce",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "destChainExecuteUsedFee",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "gasLimit",
+        "type": "uint24",
+        "internalType": "uint24"
+      },
+      {
+        "name": "gasPrice",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "minArrivalTime",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "maxArrivalTime",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "selectedRelayer",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "estimateWithdrawRemoteCrossFee",
+    "inputs": [
+      {
+        "name": "destChainId",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "receiver",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "gasLimit",
+        "type": "uint24",
+        "internalType": "uint24"
+      },
+      {
+        "name": "gasPrice",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "minArrivalTime",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "maxArrivalTime",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "selectedRelayer",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
       }
     ],
     "stateMutability": "view"
@@ -451,11 +569,6 @@
     "name": "withdrawRemote",
     "inputs": [
       {
-        "name": "nonce",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
         "name": "destChainId",
         "type": "uint64",
         "internalType": "uint64"
@@ -471,7 +584,7 @@
         "internalType": "address"
       },
       {
-        "name": "destChainExecuteUsedFee",
+        "name": "crossFee",
         "type": "uint256",
         "internalType": "uint256"
       },
@@ -589,6 +702,11 @@
   {
     "type": "error",
     "name": "InvalidInitialization",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NotFromEP",
     "inputs": []
   },
   {
