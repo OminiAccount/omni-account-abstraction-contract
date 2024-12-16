@@ -2,8 +2,6 @@
 pragma solidity ^0.8.23;
 
 interface Event {
-
-
     /************************************************VzingSwap*********************************************************** */
 
     /**
@@ -30,11 +28,13 @@ interface Event {
      * @param receiver     - Touch swap input token(tokenIn==address(0)=>eth)
      * @param amount    - Touch swap output token(tokenOut==address(0)=>eth)
      */
-    event RefundEvent(address indexed token, address indexed receiver, uint256 amount);
+    event RefundEvent(
+        address indexed token,
+        address indexed receiver,
+        uint256 amount
+    );
 
     /************************************************SyncRouter*********************************************************** */
-
-    
 
     /**
      * Target chain touch hook

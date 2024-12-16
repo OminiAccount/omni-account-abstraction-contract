@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {BaseStruct} from "../interfaces/BaseStruct.sol";
+import {BaseStruct} from "../interfaces/core/BaseStruct.sol";
 contract ZKVizingAADataHelp is BaseStruct {
 
     function decodeCrossETHData(bytes memory callData)external view returns(CrossETHParams memory){

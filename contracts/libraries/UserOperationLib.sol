@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.23;
 
 /* solhint-disable no-inline-assembly */
 
+import "../interfaces/core/BaseStruct.sol";
 import {calldataKeccak, min} from "./Helpers.sol";
 import "../utils/Poseidon.sol";
-import "../interfaces/BaseStruct.sol";
 
 /**
  * Utility functions helpful when working with UserOperation structs.
  */
 library UserOperationLib {
-    uint256 public constant PAYMASTER_VALIDATION_GAS_OFFSET = 20;
-    uint256 public constant PAYMASTER_POSTOP_GAS_OFFSET = 36;
-    uint256 public constant PAYMASTER_DATA_OFFSET = 52;
+    uint256 internal constant PAYMASTER_VALIDATION_GAS_OFFSET = 20;
+    uint256 internal constant PAYMASTER_POSTOP_GAS_OFFSET = 36;
+    uint256 internal constant PAYMASTER_DATA_OFFSET = 52;
 
-    uint256 public constant SYSTEM_OPERATION_ACCOUNT_OFFSET = 20;
+    uint256 internal constant SYSTEM_OPERATION_ACCOUNT_OFFSET = 20;
 
-    uint256 public constant VALIDATE_OWNER_GAS_LIMIT = 10_000;
+    uint256 internal constant VALIDATE_OWNER_GAS_LIMIT = 10_000;
 
-    uint256 public constant USER_OP_BYTES = 32 * 7 + 20;
+    uint256 internal constant USER_OP_BYTES = 32 * 7 + 20;
 
     uint8 constant NOMAL_OPERATION = 0;
     uint8 constant DEPOSIT_OPERATION = 1;
@@ -92,25 +92,27 @@ library UserOperationLib {
     //     // }
     // }
 
-    function getValidateOwnerGasLimit(
-        BaseStruct.PackedUserOperation calldata userOp
-    ) internal pure returns (uint256) {
-        return VALIDATE_OWNER_GAS_LIMIT;
-    }
+    // function getValidateOwnerGasLimit(
+    //     BaseStruct.PackedUserOperation calldata userOp
+    // ) internal pure returns (uint256) {
+    //     return VALIDATE_OWNER_GAS_LIMIT;
+    // }
 
     function packUints(
         uint256 high128,
         uint256 low128
-    ) public pure returns (bytes32 packed) {
-        require(high128 <= type(uint128).max, "high128 exceeds uint128 range");
-        require(low128 <= type(uint128).max, "low128 exceeds uint128 range");
+    ) internal pure returns (bytes32 packed) {
+        // require(high128 <= type(uint128).max, "high128 exceeds uint128 range");
+        // require(low128 <= type(uint128).max, "low128 exceeds uint128 range");
+        require(high128 <= type(uint128).max);
+        require(low128 <= type(uint128).max);
         packed = bytes32((high128 << 128) | low128);
     }
 
     function packUint64s(
         uint64 high64,
         uint64 low64
-    ) public pure returns (bytes16 packed) {
+    ) internal pure returns (bytes16 packed) {
         packed = bytes16((uint128(high64) << 64) | uint128(low64));
     }
 
@@ -194,7 +196,7 @@ library UserOperationLib {
      */
     function packOperation(
         BaseStruct.PackedUserOperation calldata userOp
-    ) public pure returns (bytes32 encoded) {
+    ) internal pure returns (bytes32 encoded) {
         uint8 operationType = userOp.operationType;
         uint248 operationValue = uint248(userOp.operationValue);
 
@@ -213,7 +215,7 @@ library UserOperationLib {
      */
     function packOpInfo(
         BaseStruct.ExecData calldata exec
-    ) public pure returns (bytes32) {
+    ) internal pure returns (bytes32) {
         return packUints(exec.nonce, exec.chainId);
     }
 
@@ -223,7 +225,7 @@ library UserOperationLib {
      */
     function packChainGasLimit(
         BaseStruct.ExecData calldata exec
-    ) public pure returns (bytes32) {
+    ) internal pure returns (bytes32) {
         return packUints(exec.mainChainGasLimit, exec.destChainGasLimit);
     }
 
@@ -233,8 +235,14 @@ library UserOperationLib {
      */
     function packChainGasPrice(
         BaseStruct.ExecData calldata exec
-    ) public pure returns (bytes32) {
+    ) internal pure returns (bytes32) {
         return packUints(exec.mainChainGasPrice, exec.destChainGasPrice);
+    }
+
+    function hasInnerExec(
+        BaseStruct.PackedUserOperation calldata userOp
+    ) internal pure returns (bool) {
+        return userOp.innerExec.chainId == 0 ? false : true;
     }
 
     function encodeExecData(
@@ -268,7 +276,7 @@ library UserOperationLib {
      */
     function encode(
         BaseStruct.PackedUserOperation calldata userOp
-    ) internal pure returns (bytes memory) {
+    ) public pure returns (bytes memory) {
         // bytes memory encodeBytes = new bytes(USER_OP_BYTES);
 
         bytes32 operation = packOperation(userOp);
@@ -374,9 +382,13 @@ library UserOperationsLib {
         BaseStruct.PackedUserOperation[] memory source,
         uint256 startIndex
     ) internal pure {
+        // require(
+        //     target.length >= startIndex + source.length,
+        //     "Target array too small"
+        // );
+        // --change TODO
         require(
-            target.length >= startIndex + source.length,
-            "Target array too small"
+            target.length < startIndex + source.length
         );
 
         for (uint256 i = 0; i < source.length; i++) {

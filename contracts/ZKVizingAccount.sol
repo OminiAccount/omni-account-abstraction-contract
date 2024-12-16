@@ -253,7 +253,6 @@ contract ZKVizingAccount is
      * Withdraw the balance of AA account from vizing to other chains
      */
     function withdrawRemote(
-        uint256 nonce,
         uint64 destChainId,
         uint256 amount,
         address receiver,

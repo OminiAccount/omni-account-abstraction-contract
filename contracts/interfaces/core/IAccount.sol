@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.5;
 
-import "../BaseStruct.sol";
+import "./BaseStruct.sol";
 
 interface IAccount is BaseStruct {
     /**

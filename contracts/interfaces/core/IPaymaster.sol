@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.5;
 
-import "../BaseStruct.sol";
+import "./BaseStruct.sol";
 
 /**
  * The interface exposed by a paymaster contract, who agrees to pay the gas for user's operations.

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.5;
 
-import "../BaseStruct.sol";
+import "./BaseStruct.sol";
 /**
  * Ticket to manage deposit and withdraw.
  * Deposit is just a balance used to pay for UserOperations (either by a paymaster or an account).

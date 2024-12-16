@@ -1,0 +1,1398 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "FORK_ID",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "batchNumToState",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "stateRoot",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "accInputRoot",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "delegateAndRevert",
+    "inputs": [
+      {
+        "name": "target",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "data",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getChainConfigs",
+    "inputs": [
+      {
+        "name": "chainId",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct IConfigManager.Config",
+        "components": [
+          {
+            "name": "entryPoint",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "router",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getInputSnarkBytes",
+    "inputs": [
+      {
+        "name": "initNumBatch",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "finalNewBatch",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "oldAccInputHash",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "newAccInputHash",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "oldStateRoot",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "newStateRoot",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "getMainChainId",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "getPreGasBalanceInfo",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getUserOpHash",
+    "inputs": [
+      {
+        "name": "userOp",
+        "type": "tuple",
+        "internalType": "struct BaseStruct.PackedUserOperation",
+        "components": [
+          {
+            "name": "operationType",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "operationValue",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "sender",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "nonce",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "chainId",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "callData",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "mainChainGasLimit",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "destChainGasLimit",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "zkVerificationGasLimit",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "mainChainGasPrice",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "destChainGasPrice",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "owner",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "handleOps",
+    "inputs": [
+      {
+        "name": "ops",
+        "type": "tuple[]",
+        "internalType": "struct BaseStruct.PackedUserOperation[]",
+        "components": [
+          {
+            "name": "operationType",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "operationValue",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "sender",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "nonce",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "chainId",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "callData",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "mainChainGasLimit",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "destChainGasLimit",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "zkVerificationGasLimit",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "mainChainGasPrice",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "destChainGasPrice",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "owner",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      },
+      {
+        "name": "beneficiary",
+        "type": "address",
+        "internalType": "address payable"
+      },
+      {
+        "name": "isSync",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "innerHandleOp",
+    "inputs": [
+      {
+        "name": "callData",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "opInfo",
+        "type": "tuple",
+        "internalType": "struct BaseStruct.UserOpInfo",
+        "components": [
+          {
+            "name": "mUserOp",
+            "type": "tuple",
+            "internalType": "struct BaseStruct.MemoryUserOp",
+            "components": [
+              {
+                "name": "sender",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "chainId",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "operationValue",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "zkVerificationGasLimit",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "mainChainGasLimit",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "destChainGasLimit",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "mainChainGasPrice",
+                "type": "uint128",
+                "internalType": "uint128"
+              },
+              {
+                "name": "destChainGasPrice",
+                "type": "uint128",
+                "internalType": "uint128"
+              }
+            ]
+          },
+          {
+            "name": "userOpHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "prefund",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "contextOffset",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "preOpGas",
+            "type": "uint256",
+            "internalType": "uint256"
+          }
+        ]
+      },
+      {
+        "name": "context",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "actualGasCost",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "lastVerifiedBatch",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "owner",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "preGasBalance",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "renounceOwnership",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "sendDepositOperation",
+    "inputs": [
+      {
+        "name": "params",
+        "type": "tuple",
+        "internalType": "struct BaseStruct.CrossMessageParams",
+        "components": [
+          {
+            "name": "_packedUserOperation",
+            "type": "tuple",
+            "internalType": "struct BaseStruct.PackedUserOperation",
+            "components": [
+              {
+                "name": "operationType",
+                "type": "uint8",
+                "internalType": "uint8"
+              },
+              {
+                "name": "operationValue",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "sender",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "nonce",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "chainId",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "callData",
+                "type": "bytes",
+                "internalType": "bytes"
+              },
+              {
+                "name": "mainChainGasLimit",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "destChainGasLimit",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "zkVerificationGasLimit",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "mainChainGasPrice",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "destChainGasPrice",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "owner",
+                "type": "address",
+                "internalType": "address"
+              }
+            ]
+          },
+          {
+            "name": "_hookMessageParams",
+            "type": "tuple",
+            "internalType": "struct BaseStruct.CrossHookMessageParams",
+            "components": [
+              {
+                "name": "way",
+                "type": "uint8",
+                "internalType": "uint8"
+              },
+              {
+                "name": "gasLimit",
+                "type": "uint24",
+                "internalType": "uint24"
+              },
+              {
+                "name": "gasPrice",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "destChainId",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "minArrivalTime",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "maxArrivalTime",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "destContract",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "selectedRelayer",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "destChainExecuteUsedFee",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "batchsMessage",
+                "type": "bytes",
+                "internalType": "bytes"
+              },
+              {
+                "name": "packCrossMessage",
+                "type": "bytes",
+                "internalType": "bytes"
+              },
+              {
+                "name": "packCrossParams",
+                "type": "bytes",
+                "internalType": "bytes"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "submitDepositOperation",
+    "inputs": [
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "nonce",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "submitDepositOperationByRemote",
+    "inputs": [
+      {
+        "name": "sender",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "nonce",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "submitWithdrawOperation",
+    "inputs": [
+      {
+        "name": "amount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "supportsInterface",
+    "inputs": [
+      {
+        "name": "interfaceId",
+        "type": "bytes4",
+        "internalType": "bytes4"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "syncBatches",
+    "inputs": [
+      {
+        "name": "userOps",
+        "type": "tuple[]",
+        "internalType": "struct BaseStruct.PackedUserOperation[]",
+        "components": [
+          {
+            "name": "operationType",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "operationValue",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "sender",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "nonce",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "chainId",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "callData",
+            "type": "bytes",
+            "internalType": "bytes"
+          },
+          {
+            "name": "mainChainGasLimit",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "destChainGasLimit",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "zkVerificationGasLimit",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "mainChainGasPrice",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "destChainGasPrice",
+            "type": "uint64",
+            "internalType": "uint64"
+          },
+          {
+            "name": "owner",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "syncRouter",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "transferOwnership",
+    "inputs": [
+      {
+        "name": "newOwner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "updateChainConfigs",
+    "inputs": [
+      {
+        "name": "_chainIds",
+        "type": "uint64[]",
+        "internalType": "uint64[]"
+      },
+      {
+        "name": "_config",
+        "type": "tuple[]",
+        "internalType": "struct IConfigManager.Config[]",
+        "components": [
+          {
+            "name": "entryPoint",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "router",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "updateVerifier",
+    "inputs": [
+      {
+        "name": "_verifier",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "verifier",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "verifyBatches",
+    "inputs": [
+      {
+        "name": "proof",
+        "type": "bytes",
+        "internalType": "bytes"
+      },
+      {
+        "name": "batches",
+        "type": "tuple[]",
+        "internalType": "struct BaseStruct.BatchData[]",
+        "components": [
+          {
+            "name": "userOperations",
+            "type": "tuple[]",
+            "internalType": "struct BaseStruct.PackedUserOperation[]",
+            "components": [
+              {
+                "name": "operationType",
+                "type": "uint8",
+                "internalType": "uint8"
+              },
+              {
+                "name": "operationValue",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "sender",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "nonce",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "chainId",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "callData",
+                "type": "bytes",
+                "internalType": "bytes"
+              },
+              {
+                "name": "mainChainGasLimit",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "destChainGasLimit",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "zkVerificationGasLimit",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "mainChainGasPrice",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "destChainGasPrice",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "owner",
+                "type": "address",
+                "internalType": "address"
+              }
+            ]
+          },
+          {
+            "name": "accInputHash",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          }
+        ]
+      },
+      {
+        "name": "chainsExecuteInfos",
+        "type": "tuple",
+        "internalType": "struct BaseStruct.ChainsExecuteInfo",
+        "components": [
+          {
+            "name": "chainExtra",
+            "type": "tuple[]",
+            "internalType": "struct BaseStruct.ChainExecuteExtra[]",
+            "components": [
+              {
+                "name": "chainId",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "chainFee",
+                "type": "uint64",
+                "internalType": "uint64"
+              },
+              {
+                "name": "chainUserOperationsNumber",
+                "type": "uint64",
+                "internalType": "uint64"
+              }
+            ]
+          },
+          {
+            "name": "newStateRoot",
+            "type": "bytes32",
+            "internalType": "bytes32"
+          },
+          {
+            "name": "beneficiary",
+            "type": "address",
+            "internalType": "address"
+          }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "event",
+    "name": "AccountDeployed",
+    "inputs": [
+      {
+        "name": "userOpHash",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "factory",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "paymaster",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "BeforeExecution",
+    "inputs": [],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "DepositTicketAdded",
+    "inputs": [
+      {
+        "name": "did",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "timestamp",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "DepositTicketDeleted",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OwnershipTransferred",
+    "inputs": [
+      {
+        "name": "previousOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "newOwner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "PostOpRevertReason",
+    "inputs": [
+      {
+        "name": "userOpHash",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "revertReason",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "UserOperationEvent",
+    "inputs": [
+      {
+        "name": "userOpHash",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "success",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "actualGasCost",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "actualGasUsed",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "UserOperationPrefundTooLow",
+    "inputs": [
+      {
+        "name": "userOpHash",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "UserOperationRevertReason",
+    "inputs": [
+      {
+        "name": "userOpHash",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "revertReason",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "WithdrawTicketAdded",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "timestamp",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "WithdrawTicketDeleted",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "CallFailed",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "DelegateAndRevert",
+    "inputs": [
+      {
+        "name": "success",
+        "type": "bool",
+        "internalType": "bool"
+      },
+      {
+        "name": "ret",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "FailedOp",
+    "inputs": [
+      {
+        "name": "opIndex",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "internalType": "string"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "FailedOpWithRevert",
+    "inputs": [
+      {
+        "name": "opIndex",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "reason",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "inner",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InsufficientBalance",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidProof",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NewAccInputHashDoesNotExist",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NewStateRootNotInsidePrime",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NotSupportChainId",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NumberIsNotEqual",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OldAccInputHashDoesNotExist",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "OwnableInvalidOwner",
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "OwnableUnauthorizedAccount",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "PostOpReverted",
+    "inputs": [
+      {
+        "name": "returnData",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ReentrancyGuardReentrantCall",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "SenderAddressResult",
+    "inputs": [
+      {
+        "name": "sender",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ValueNotEqual",
+    "inputs": []
+  }
+]

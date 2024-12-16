@@ -1,0 +1,3486 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/TokenCallbackHandler.sol": {
+      "lastModificationDate": 1733314090565,
+      "contentHash": "b73c9b2d1858a13614089e8a3e78fd2c",
+      "sourceName": "contracts/TokenCallbackHandler.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+        "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
+        "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "TokenCallbackHandler"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/utils/introspection/IERC165.sol": {
+      "lastModificationDate": 1724671391350,
+      "contentHash": "de0163561b417b800d01749cbbe2147e",
+      "sourceName": "@openzeppelin/contracts/utils/introspection/IERC165.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC165"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/token/ERC721/IERC721Receiver.sol": {
+      "lastModificationDate": 1724671391345,
+      "contentHash": "fc8a9841f4bdd6329c26a00d5e75f4b3",
+      "sourceName": "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC721Receiver"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/token/ERC1155/IERC1155Receiver.sol": {
+      "lastModificationDate": 1724671391340,
+      "contentHash": "d14616defa6d417fafa47e416e3cec73",
+      "sourceName": "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../utils/introspection/IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC1155Receiver"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/ZKVizingAccount.sol": {
+      "lastModificationDate": 1733904716989,
+      "contentHash": "a7615b6c53aa7b1e606382c838644c0f",
+      "sourceName": "contracts/ZKVizingAccount.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/proxy/utils/Initializable.sol",
+        "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol",
+        "./core/BaseAccount.sol",
+        "./libraries/Helpers.sol",
+        "./TokenCallbackHandler.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "ZKVizingAccount"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/BaseAccount.sol": {
+      "lastModificationDate": 1734059129446,
+      "contentHash": "54951bc59e36895d0af32d243e5ce194",
+      "sourceName": "contracts/core/BaseAccount.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../libraries/Error.sol",
+        "../interfaces/core/IAccount.sol",
+        "../interfaces/core/IEntryPoint.sol",
+        "../libraries/UserOperationLib.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "BaseAccount"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/libraries/Helpers.sol": {
+      "lastModificationDate": 1733368033601,
+      "contentHash": "d9a3c7fc04ae5f3fc8011d8792e8cb18",
+      "sourceName": "contracts/libraries/Helpers.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": []
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/proxy/utils/UUPSUpgradeable.sol": {
+      "lastModificationDate": 1724671391340,
+      "contentHash": "c6d3b3ab4be412d410950f5dfd36cb32",
+      "sourceName": "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../../interfaces/draft-IERC1822.sol",
+        "../ERC1967/ERC1967Utils.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "UUPSUpgradeable"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/proxy/utils/Initializable.sol": {
+      "lastModificationDate": 1724671391222,
+      "contentHash": "f0cedd674b4863ee90d1521a92ab82df",
+      "sourceName": "@openzeppelin/contracts/proxy/utils/Initializable.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Initializable"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IAccount.sol": {
+      "lastModificationDate": 1733369844726,
+      "contentHash": "d4ce7a9d9b56e595e77edaaf76cf653c",
+      "sourceName": "contracts/interfaces/core/IAccount.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./BaseStruct.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "IAccount"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IEntryPoint.sol": {
+      "lastModificationDate": 1733986724526,
+      "contentHash": "0154b6ea9b18c8aeca3e59bea3ce392d",
+      "sourceName": "contracts/interfaces/core/IEntryPoint.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IPreGasManager.sol",
+        "./IConfigManager.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "IEntryPoint"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/libraries/UserOperationLib.sol": {
+      "lastModificationDate": 1733992403317,
+      "contentHash": "39d5d9fbcb8ed663d725d13425a3c713",
+      "sourceName": "contracts/libraries/UserOperationLib.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/core/BaseStruct.sol",
+        "./Helpers.sol",
+        "../utils/Poseidon.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "UserOperationLib",
+        "UserOperationsLib"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/BaseStruct.sol": {
+      "lastModificationDate": 1734057534775,
+      "contentHash": "89e3ed399be0d28d6c2acb482d40d9e8",
+      "sourceName": "contracts/interfaces/core/BaseStruct.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "BaseStruct"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IPreGasManager.sol": {
+      "lastModificationDate": 1733801881685,
+      "contentHash": "ce9623cec2660b1ceac83468631a5b20",
+      "sourceName": "contracts/interfaces/core/IPreGasManager.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./BaseStruct.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "IPreGasManager"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IConfigManager.sol": {
+      "lastModificationDate": 1733818816830,
+      "contentHash": "03d051a2f0854449649d4bcc50b280da",
+      "sourceName": "contracts/interfaces/core/IConfigManager.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "IConfigManager"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/utils/Poseidon.sol": {
+      "lastModificationDate": 1733369042100,
+      "contentHash": "fb438d6a55d18048a707964ae019b0e0",
+      "sourceName": "contracts/utils/Poseidon.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "contracts/libraries/GoldilocksPoseidon.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "Poseidon"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/libraries/GoldilocksPoseidon.sol": {
+      "lastModificationDate": 1733309971551,
+      "contentHash": "af58fc47932e281c17f97481ed2e6f63",
+      "sourceName": "contracts/libraries/GoldilocksPoseidon.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "GoldilocksPoseidon"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/interfaces/draft-IERC1822.sol": {
+      "lastModificationDate": 1724671391335,
+      "contentHash": "5a6f0412127636d802db818a7d6ac404",
+      "sourceName": "@openzeppelin/contracts/interfaces/draft-IERC1822.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC1822Proxiable"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Utils.sol": {
+      "lastModificationDate": 1724671391337,
+      "contentHash": "838bc3ef3bcf0376af7d9b2041989b6a",
+      "sourceName": "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../beacon/IBeacon.sol",
+        "../../utils/Address.sol",
+        "../../utils/StorageSlot.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC1967Utils"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/utils/Address.sol": {
+      "lastModificationDate": 1724671391347,
+      "contentHash": "79c699f80eb8a9b168cb34e37816f894",
+      "sourceName": "@openzeppelin/contracts/utils/Address.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Address"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/utils/StorageSlot.sol": {
+      "lastModificationDate": 1724671391348,
+      "contentHash": "08cbccfefa284405c12b4bfa8c8c9c2b",
+      "sourceName": "@openzeppelin/contracts/utils/StorageSlot.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "StorageSlot"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/proxy/beacon/IBeacon.sol": {
+      "lastModificationDate": 1724671391221,
+      "contentHash": "0a5c323fd908535580597848b8e550fb",
+      "sourceName": "@openzeppelin/contracts/proxy/beacon/IBeacon.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IBeacon"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/ZKVizingAccountFactory.sol": {
+      "lastModificationDate": 1734058941220,
+      "contentHash": "aaa2604d64ed56020a6ae01c2ee63c73",
+      "sourceName": "contracts/ZKVizingAccountFactory.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/Create2.sol",
+        "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "./ZKVizingAccount.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "ZKVizingAccountFactory"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/access/Ownable.sol": {
+      "lastModificationDate": 1724671391209,
+      "contentHash": "d3c790edc9ccf808a17c5a6cd13614fd",
+      "sourceName": "@openzeppelin/contracts/access/Ownable.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../utils/Context.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Ownable"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/utils/Create2.sol": {
+      "lastModificationDate": 1724671391347,
+      "contentHash": "30964d662b27a7894b1cf10058dc8d6b",
+      "sourceName": "@openzeppelin/contracts/utils/Create2.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Create2"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/proxy/ERC1967/ERC1967Proxy.sol": {
+      "lastModificationDate": 1724671391337,
+      "contentHash": "48a23123892520179a95b4461c1d752a",
+      "sourceName": "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../Proxy.sol",
+        "./ERC1967Utils.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC1967Proxy"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/utils/Context.sol": {
+      "lastModificationDate": 1724671391226,
+      "contentHash": "67bfbc07588eb8683b3fd8f6f909563e",
+      "sourceName": "@openzeppelin/contracts/utils/Context.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Context"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/proxy/Proxy.sol": {
+      "lastModificationDate": 1724671391221,
+      "contentHash": "35308c2fa7be99a959494c37e8257c16",
+      "sourceName": "@openzeppelin/contracts/proxy/Proxy.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Proxy"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol": {
+      "lastModificationDate": 1724671391344,
+      "contentHash": "697fd27924863e77c17dace2179018b2",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC20.sol",
+        "../extensions/IERC20Permit.sol",
+        "../../../utils/Address.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "SafeERC20"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol": {
+      "lastModificationDate": 1724671391342,
+      "contentHash": "5517c8678c18eb1a8ba58810e7ca39ca",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC20"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Permit.sol": {
+      "lastModificationDate": 1724671391343,
+      "contentHash": "da291753fa4641f2c5837bfc4aa4c01b",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Permit.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC20Permit"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@vizing/contracts/interface/IMessageEmitter.sol": {
+      "lastModificationDate": 1733307594329,
+      "contentHash": "e1e30c69bd939b0ff6cc0e631afeb2bf",
+      "sourceName": "@vizing/contracts/interface/IMessageEmitter.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IMessageSpaceStation.sol",
+        "@openzeppelin/contracts/token/ERC20/IERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "IMessageEmitter"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@vizing/contracts/interface/IMessageSpaceStation.sol": {
+      "lastModificationDate": 1733307594330,
+      "contentHash": "e9abe78f44bef2a3b0d25b20c34750fa",
+      "sourceName": "@vizing/contracts/interface/IMessageSpaceStation.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IMessageStruct.sol",
+        "./IMessageDashboard.sol",
+        "../interface/IMessageEvent.sol",
+        "../interface/IMessageChannel.sol",
+        "../interface/IMessageSimulation.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "IMessageSpaceStation"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@vizing/contracts/interface/IMessageChannel.sol": {
+      "lastModificationDate": 1733307594328,
+      "contentHash": "5a986ad5b26293e90ecd16992e00c527",
+      "sourceName": "@vizing/contracts/interface/IMessageChannel.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IMessageStruct.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "IMessageChannel"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@vizing/contracts/interface/IMessageStruct.sol": {
+      "lastModificationDate": 1733307594330,
+      "contentHash": "e90a62582e6fbebeb188801e0541c4b8",
+      "sourceName": "@vizing/contracts/interface/IMessageStruct.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "IMessageStruct"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@vizing/contracts/interface/IMessageEvent.sol": {
+      "lastModificationDate": 1733307594329,
+      "contentHash": "26db36a9ddfb919c04024dd39cf34c71",
+      "sourceName": "@vizing/contracts/interface/IMessageEvent.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IMessageStruct.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "IMessageEvent"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@vizing/contracts/interface/IMessageSimulation.sol": {
+      "lastModificationDate": 1733307594329,
+      "contentHash": "2b22761f7f4bd7ee4ae4ad91eac9c587",
+      "sourceName": "@vizing/contracts/interface/IMessageSimulation.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IMessageStruct.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "IMessageSimulation"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@vizing/contracts/interface/IMessageDashboard.sol": {
+      "lastModificationDate": 1733307594329,
+      "contentHash": "45fcc5eac3be393dd2423f34b6475082",
+      "sourceName": "@vizing/contracts/interface/IMessageDashboard.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IMessageStruct.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "IMessageDashboard"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@vizing/contracts/MessageEmitter-upgradeable.sol": {
+      "lastModificationDate": 1733307594335,
+      "contentHash": "0c5b07eb8ba4a7808b0a20acaabe16bc",
+      "sourceName": "@vizing/contracts/MessageEmitter-upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interface/IMessageStruct.sol",
+        "./interface/IMessageChannel.sol",
+        "./interface/IMessageEmitter.sol",
+        "./interface/IMessageReceiver.sol",
+        "./interface/IVizingGasSystemChannel.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "MessageEmitterUpgradeable"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@vizing/contracts/interface/IMessageReceiver.sol": {
+      "lastModificationDate": 1733307594329,
+      "contentHash": "d589e094592e7ada0cfd99fc124a234c",
+      "sourceName": "@vizing/contracts/interface/IMessageReceiver.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "IMessageReceiver"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@vizing/contracts/interface/IVizingGasSystemChannel.sol": {
+      "lastModificationDate": 1733307594334,
+      "contentHash": "d2bf1af71586ab389e965e332d8e736b",
+      "sourceName": "@vizing/contracts/interface/IVizingGasSystemChannel.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "IVizingGasSystemChannel"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@vizing/contracts/MessageReceiver-upgradeable.sol": {
+      "lastModificationDate": 1733307594336,
+      "contentHash": "fe09c6288b5031b16c89e17744a7c29a",
+      "sourceName": "@vizing/contracts/MessageReceiver-upgradeable.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./interface/IMessageChannel.sol",
+        "./interface/IMessageReceiver.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "MessageReceiverUpgradeable"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@vizing/contracts/MessageReceiver.sol": {
+      "lastModificationDate": 1733307594336,
+      "contentHash": "8b1d5866ee48d6882f3ff7e6ce189350",
+      "sourceName": "@vizing/contracts/MessageReceiver.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./MessageReceiver-upgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "MessageReceiver"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@vizing/contracts/VizingOmni.sol": {
+      "lastModificationDate": 1733307594370,
+      "contentHash": "afb0dcd2240356801870d8f6ed92c9fb",
+      "sourceName": "@vizing/contracts/VizingOmni.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./MessageEmitter.sol",
+        "./MessageReceiver.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "VizingOmni"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@vizing/contracts/MessageEmitter.sol": {
+      "lastModificationDate": 1733307594336,
+      "contentHash": "fd6a0799a944b6420ee2ed52597b0554",
+      "sourceName": "@vizing/contracts/MessageEmitter.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./MessageEmitter-upgradeable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "MessageEmitter"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/SyncRouter/SyncRouter.sol": {
+      "lastModificationDate": 1734059499932,
+      "contentHash": "ff810148de105bf24dce5554fa13b220",
+      "sourceName": "contracts/core/SyncRouter/SyncRouter.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@vizing/contracts/VizingOmni.sol",
+        "@openzeppelin/contracts/access/Ownable.sol",
+        "../../interfaces/IWETH9.sol",
+        "../../interfaces/uniswapv3/ISwapRouter02.sol",
+        "../../interfaces/core/IEntryPoint.sol",
+        "../../interfaces/Event.sol",
+        "../../interfaces/uniswapv2/IUniswapV2Router02.sol",
+        "../../interfaces/core/ISyncRouter.sol",
+        "../../interfaces/hook/IVizingSwap.sol",
+        "../../libraries/Error.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "forge-std/console.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "SyncRouter"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/IWETH9.sol": {
+      "lastModificationDate": 1733365728065,
+      "contentHash": "b4ea3df986570ba1d293b4353a9ead8f",
+      "sourceName": "contracts/interfaces/IWETH9.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IWETH9"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/ISwapRouter02.sol": {
+      "lastModificationDate": 1733366001869,
+      "contentHash": "10cc88852c7edc30eccd0b68456882b1",
+      "sourceName": "contracts/interfaces/uniswapv3/ISwapRouter02.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v3-periphery/contracts/interfaces/ISelfPermit.sol",
+        "./IV2SwapRouter.sol",
+        "./IV3SwapRouter.sol",
+        "./IApproveAndCall.sol",
+        "./IMulticallExtended.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.5 <=0.8.25"
+      ],
+      "artifacts": [
+        "ISwapRouter02"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/Event.sol": {
+      "lastModificationDate": 1734057471959,
+      "contentHash": "c9a7e4c46b12892195f17d908a2eff90",
+      "sourceName": "contracts/interfaces/Event.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "Event"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv2/IUniswapV2Router02.sol": {
+      "lastModificationDate": 1734057260110,
+      "contentHash": "b62dc6d8b1acbd6f75a8bb7789f492c4",
+      "sourceName": "contracts/interfaces/uniswapv2/IUniswapV2Router02.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IUniswapV2Router01.sol"
+      ],
+      "versionPragmas": [
+        ">=0.6.2 <0.8.25"
+      ],
+      "artifacts": [
+        "IUniswapV2Router02"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/ISyncRouter.sol": {
+      "lastModificationDate": 1733800340583,
+      "contentHash": "93505b984c08faf17e44a6943e55da70",
+      "sourceName": "contracts/interfaces/core/ISyncRouter.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./BaseStruct.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "ISyncRouter"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/hook/IVizingSwap.sol": {
+      "lastModificationDate": 1733799485930,
+      "contentHash": "f16168afa5b3c7771a102de668022fa1",
+      "sourceName": "contracts/interfaces/hook/IVizingSwap.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../core/BaseStruct.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "IVizingSwap"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/libraries/Error.sol": {
+      "lastModificationDate": 1734059264169,
+      "contentHash": "4a611a6400b76ecf4216eac54f2a4dc6",
+      "sourceName": "contracts/libraries/Error.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": []
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/forge-std/src/console.sol": {
+      "lastModificationDate": 1724655239169,
+      "contentHash": "19bc22856c14b56e4e55ab19c7a27c87",
+      "sourceName": "forge-std/console.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "console"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol": {
+      "lastModificationDate": 1724671391348,
+      "contentHash": "a92331adac11b453a4de0323fc948119",
+      "sourceName": "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ReentrancyGuard"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/IERC20.sol": {
+      "lastModificationDate": 1733365728030,
+      "contentHash": "e8ec63056d9480976ec97e08842b4384",
+      "sourceName": "contracts/interfaces/IERC20.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC20"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/IV2SwapRouter.sol": {
+      "lastModificationDate": 1733366001870,
+      "contentHash": "80985c3d4694a6e8cd7934411a0abf09",
+      "sourceName": "contracts/interfaces/uniswapv3/IV2SwapRouter.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.5 <=0.8.25"
+      ],
+      "artifacts": [
+        "IV2SwapRouter"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/IV3SwapRouter.sol": {
+      "lastModificationDate": 1733366001870,
+      "contentHash": "3e575cc7223425d05e5e749cbfd99980",
+      "sourceName": "contracts/interfaces/uniswapv3/IV3SwapRouter.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.5 <=0.8.25"
+      ],
+      "artifacts": [
+        "IV3SwapRouter"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/IMulticallExtended.sol": {
+      "lastModificationDate": 1733366001867,
+      "contentHash": "3b7521d1d229d44980b45a15d73f0a36",
+      "sourceName": "contracts/interfaces/uniswapv3/IMulticallExtended.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@uniswap/v3-periphery/contracts/interfaces/IMulticall.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.5 <=0.8.25"
+      ],
+      "artifacts": [
+        "IMulticallExtended"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/IApproveAndCall.sol": {
+      "lastModificationDate": 1733366001863,
+      "contentHash": "4a73327762b31bac36446d819a2edd3a",
+      "sourceName": "contracts/interfaces/uniswapv3/IApproveAndCall.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.6 <=0.8.25"
+      ],
+      "artifacts": [
+        "IApproveAndCall"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@uniswap/v3-periphery/contracts/interfaces/ISelfPermit.sol": {
+      "lastModificationDate": 1733371668483,
+      "contentHash": "bb6ee7140c27d283bf7c5f5780c8fcd9",
+      "sourceName": "@uniswap/v3-periphery/contracts/interfaces/ISelfPermit.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "ISelfPermit"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback.sol": {
+      "lastModificationDate": 1733371668430,
+      "contentHash": "a8ba2d37b0107911ae0e3b0e123cbd83",
+      "sourceName": "@uniswap/v3-core/contracts/interfaces/callback/IUniswapV3SwapCallback.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0"
+      ],
+      "artifacts": [
+        "IUniswapV3SwapCallback"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/node_modules/@uniswap/v3-periphery/contracts/interfaces/IMulticall.sol": {
+      "lastModificationDate": 1733371668481,
+      "contentHash": "a2e56a9714654fdbdf3a7bd35ad4ebd1",
+      "sourceName": "@uniswap/v3-periphery/contracts/interfaces/IMulticall.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "IMulticall"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv2/IUniswapV2Router01.sol": {
+      "lastModificationDate": 1734057253623,
+      "contentHash": "189b36c4e6049a7388bc95aa51128438",
+      "sourceName": "contracts/interfaces/uniswapv2/IUniswapV2Router01.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.6.2 <0.8.25"
+      ],
+      "artifacts": [
+        "IUniswapV2Router01"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/hook/VizingSwap.sol": {
+      "lastModificationDate": 1734057208492,
+      "contentHash": "c4b97e7dbc8f0381a97a9c0d73652c95",
+      "sourceName": "contracts/hook/VizingSwap.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/uniswapv3/IUniswapFactory.sol",
+        "../interfaces/uniswapv3/ISwapRouter02.sol",
+        "../interfaces/hook/IVizingSwap.sol",
+        "../interfaces/IWETH9.sol",
+        "../interfaces/Event.sol",
+        "../interfaces/core/BaseStruct.sol",
+        "../interfaces/uniswapv2/IUniswapV2Router02.sol",
+        "../libraries/Error.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "VizingSwap"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/IUniswapFactory.sol": {
+      "lastModificationDate": 1733366001869,
+      "contentHash": "91224cef79c5373e0b16a00e1222387d",
+      "sourceName": "contracts/interfaces/uniswapv3/IUniswapFactory.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0 <=0.8.25"
+      ],
+      "artifacts": [
+        "IUniswapV3Factory"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/EntryPoint.sol": {
+      "lastModificationDate": 1734059303506,
+      "contentHash": "b5c9357b41a4b14f616c935c9d07512f",
+      "sourceName": "contracts/core/EntryPoint.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/core/IAccount.sol",
+        "../interfaces/core/IAccountExecute.sol",
+        "../interfaces/core/IPaymaster.sol",
+        "../interfaces/core/IEntryPoint.sol",
+        "../interfaces/core/ISyncRouter.sol",
+        "../interfaces/core/IVerifier.sol",
+        "../utils/Exec.sol",
+        "./StateManager.sol",
+        "./PreGasManager.sol",
+        "./ConfigManager.sol",
+        "../libraries/Error.sol",
+        "../libraries/Helpers.sol",
+        "../libraries/UserOperationLib.sol",
+        "@openzeppelin/contracts/utils/introspection/ERC165.sol",
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
+        "forge-std/console.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "EntryPoint"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IAccountExecute.sol": {
+      "lastModificationDate": 1733369847714,
+      "contentHash": "f629ee7f88d84f285e9c4717b9559f72",
+      "sourceName": "contracts/interfaces/core/IAccountExecute.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./BaseStruct.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "IAccountExecute"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IPaymaster.sol": {
+      "lastModificationDate": 1733367582717,
+      "contentHash": "31dcb1b041fca027fb607b581135d919",
+      "sourceName": "contracts/interfaces/core/IPaymaster.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./BaseStruct.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "IPaymaster"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IVerifier.sol": {
+      "lastModificationDate": 1733799434727,
+      "contentHash": "c55aacef566f9b070663864be7ad353d",
+      "sourceName": "contracts/interfaces/core/IVerifier.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "IVerifier",
+        "VerifierHelper"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/utils/Exec.sol": {
+      "lastModificationDate": 1733309971552,
+      "contentHash": "8156fbf5a7fe2e169f75483db6787860",
+      "sourceName": "contracts/utils/Exec.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "Exec"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/StateManager.sol": {
+      "lastModificationDate": 1733799375320,
+      "contentHash": "2fb0f0a1c181ceb2e6a61133c16eb38f",
+      "sourceName": "contracts/core/StateManager.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "StateManager"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/PreGasManager.sol": {
+      "lastModificationDate": 1734059335454,
+      "contentHash": "3b3a4e0ae64b44acfe180874c1cbabd1",
+      "sourceName": "contracts/core/PreGasManager.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../libraries/Error.sol",
+        "../libraries/UserOperationLib.sol",
+        "../interfaces/core/IPreGasManager.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "PreGasManager"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/ConfigManager.sol": {
+      "lastModificationDate": 1734059152869,
+      "contentHash": "19c7784eb03bacbe42a62beabc7af608",
+      "sourceName": "contracts/core/ConfigManager.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/core/IConfigManager.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "ConfigManager"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol": {
+      "lastModificationDate": 1724671391349,
+      "contentHash": "6a55c353946e471d9792965d06208295",
+      "sourceName": "@openzeppelin/contracts/utils/introspection/ERC165.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC165.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "ERC165"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/hook/testCall.sol": {
+      "lastModificationDate": 1733799337941,
+      "contentHash": "105a1e2ee92f3557eca658badfe1d7e7",
+      "sourceName": "contracts/hook/testCall.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/core/BaseStruct.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
+        "../interfaces/hook/IVizingSwap.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "TestCall"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/ZKVizingAADataHelp.sol": {
+      "lastModificationDate": 1734057181047,
+      "contentHash": "78e1fbf2471fa9ef90f63a06d516e634",
+      "sourceName": "contracts/core/ZKVizingAADataHelp.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../interfaces/core/BaseStruct.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "ZKVizingAADataHelp"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/EntryPointSimulations.sol": {
+      "lastModificationDate": 1733309971547,
+      "contentHash": "4c52c3eb07452aea2a441c5a298f3a42",
+      "sourceName": "contracts/core/EntryPointSimulations.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [],
+      "artifacts": []
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/SenderCreator.sol": {
+      "lastModificationDate": 1733799372130,
+      "contentHash": "e3ad4035303c07bd00a83e41487f2e82",
+      "sourceName": "contracts/core/SenderCreator.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "SenderCreator"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IEntryPointSimulations.sol": {
+      "lastModificationDate": 1733365762442,
+      "contentHash": "40739730720345e457eb1d1e898a4ed2",
+      "sourceName": "contracts/interfaces/core/IEntryPointSimulations.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [],
+      "artifacts": []
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/IERC165.sol": {
+      "lastModificationDate": 1733366001863,
+      "contentHash": "4bc8c24b4d0ffba8f3e4cc8651fbad34",
+      "sourceName": "contracts/interfaces/uniswapv3/IERC165.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.0 <=0.8.25"
+      ],
+      "artifacts": [
+        "IERC165"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/IERC721.sol": {
+      "lastModificationDate": 1733366001864,
+      "contentHash": "c0a2a9a5d77a3d90173b1ceaa3787107",
+      "sourceName": "contracts/interfaces/uniswapv3/IERC721.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC165.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.0 <=0.8.25"
+      ],
+      "artifacts": [
+        "IERC721"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/IERC721Permit.sol": {
+      "lastModificationDate": 1733366001866,
+      "contentHash": "19d96799d7664bc0122a9bb85c784d07",
+      "sourceName": "contracts/interfaces/uniswapv3/IERC721Permit.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC721.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.5 <=0.8.25"
+      ],
+      "artifacts": [
+        "IERC721Permit"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/INonfungiblePositionManager.sol": {
+      "lastModificationDate": 1733799525128,
+      "contentHash": "17685f44aa40145ec49d4e051d0fa245",
+      "sourceName": "contracts/interfaces/uniswapv3/INonfungiblePositionManager.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC721Metadata.sol",
+        "./IERC721Enumerable.sol",
+        "./IPoolInitializer.sol",
+        "./IERC721Permit.sol",
+        "./IPeripheryPayments.sol",
+        "./IPeripheryImmutableState.sol",
+        "../../libraries/PoolAddress.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.5 <=0.8.25"
+      ],
+      "artifacts": [
+        "INonfungiblePositionManager"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/libraries/PoolAddress.sol": {
+      "lastModificationDate": 1733799512645,
+      "contentHash": "aab2b2d8bdee73001acbd4671f9e4380",
+      "sourceName": "contracts/libraries/PoolAddress.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.6 <0.8.25"
+      ],
+      "artifacts": [
+        "PoolAddress"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/IERC721Metadata.sol": {
+      "lastModificationDate": 1733366001866,
+      "contentHash": "c6701aeca16f8039606ceeaa78ca91c3",
+      "sourceName": "contracts/interfaces/uniswapv3/IERC721Metadata.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC721.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.0 <=0.8.25"
+      ],
+      "artifacts": [
+        "IERC721Metadata"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/IERC721Enumerable.sol": {
+      "lastModificationDate": 1733366001864,
+      "contentHash": "3b3022aabd432b4b765fa75f8f80fc8d",
+      "sourceName": "contracts/interfaces/uniswapv3/IERC721Enumerable.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./IERC721.sol"
+      ],
+      "versionPragmas": [
+        ">=0.7.0 <=0.8.25"
+      ],
+      "artifacts": [
+        "IERC721Enumerable"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/IPoolInitializer.sol": {
+      "lastModificationDate": 1733366001869,
+      "contentHash": "eb3ddf7f5b96436b720b91086fab1dc8",
+      "sourceName": "contracts/interfaces/uniswapv3/IPoolInitializer.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.5 <=0.8.25"
+      ],
+      "artifacts": [
+        "IPoolInitializer"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/IPeripheryPayments.sol": {
+      "lastModificationDate": 1733366001868,
+      "contentHash": "137a58a5ceff741667e28046cef88f03",
+      "sourceName": "contracts/interfaces/uniswapv3/IPeripheryPayments.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.5.0 <=0.8.25"
+      ],
+      "artifacts": [
+        "IPeripheryImmutableState"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/IPeripheryImmutableState.sol": {
+      "lastModificationDate": 1733366001868,
+      "contentHash": "1a580eb66c684961cf41310e19144a82",
+      "sourceName": "contracts/interfaces/uniswapv3/IPeripheryImmutableState.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.5 <=0.8.25"
+      ],
+      "artifacts": [
+        "IPeripheryPayments"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv3/IERC721Receiver.sol": {
+      "lastModificationDate": 1733371403067,
+      "contentHash": "3b5a03af2fd6c3c3c3a9f8c75da8a4e8",
+      "sourceName": "contracts/interfaces/uniswapv3/IERC721Receiver.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.8.0 <=0.8.25"
+      ],
+      "artifacts": [
+        "IERC721Receiver"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/verifiers/Groth16Verifier.sol": {
+      "lastModificationDate": 1733309971553,
+      "contentHash": "1d7814be17a08babb1e99d54ea56b98c",
+      "sourceName": "contracts/verifiers/Groth16Verifier.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.0 <0.9.0"
+      ],
+      "artifacts": [
+        "Groth16Verifier"
+      ]
+    }
+  }
+}

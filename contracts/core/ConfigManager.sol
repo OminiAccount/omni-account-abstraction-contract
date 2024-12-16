@@ -5,7 +5,7 @@ import "../interfaces/core/IConfigManager.sol";
 
 contract ConfigManager is IConfigManager {
     error NumberIsNotEqual();
-    //change this chainId --TODO
+
     uint64 internal constant MAIN_CHAINID = 28516;
 
     address public syncRouter;
