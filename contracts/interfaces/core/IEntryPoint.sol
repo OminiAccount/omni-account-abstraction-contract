@@ -120,14 +120,11 @@ interface IEntryPoint is IPreGasManager, IConfigManager {
 
     error NotSupportChainId();
 
-    error OldAccInputHashDoesNotExist();
-    error NewAccInputHashDoesNotExist();
-    error NewStateRootNotInsidePrime();
     error InvalidProof();
 
-    function estimateSubmitDepositOperationByRemoteCrossGas(
+    function estimateCrossMessageParamsCrossGas(
         CrossMessageParams calldata params
-    ) external returns (uint256);
+    ) external view returns (uint256);
 
     function submitDepositOperationByRemote(
         address sender,
@@ -135,7 +132,7 @@ interface IEntryPoint is IPreGasManager, IConfigManager {
         uint256 nonce
     ) external payable;
 
-    function sendDepositOperation(
+    function sendUserOmniMessage(
         CrossMessageParams calldata params
     ) external payable;
 

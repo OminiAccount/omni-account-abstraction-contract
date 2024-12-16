@@ -152,8 +152,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/ZKVizingAccount.sol": {
-      "lastModificationDate": 1733904716989,
-      "contentHash": "a7615b6c53aa7b1e606382c838644c0f",
+      "lastModificationDate": 1734082913521,
+      "contentHash": "f93c908f2048e05c402e958361f92c1a",
       "sourceName": "contracts/ZKVizingAccount.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -184,7 +184,8 @@
         "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol",
         "./core/BaseAccount.sol",
         "./libraries/Helpers.sol",
-        "./TokenCallbackHandler.sol"
+        "./TokenCallbackHandler.sol",
+        "forge-std/console.sol"
       ],
       "versionPragmas": [
         "^0.8.23"
@@ -382,8 +383,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IEntryPoint.sol": {
-      "lastModificationDate": 1733986724526,
-      "contentHash": "0154b6ea9b18c8aeca3e59bea3ce392d",
+      "lastModificationDate": 1734082834180,
+      "contentHash": "9ac1e0ff5f5a378cadd4a6db12291320",
       "sourceName": "contracts/interfaces/core/IEntryPoint.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1705,8 +1706,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/SyncRouter/SyncRouter.sol": {
-      "lastModificationDate": 1734059499932,
-      "contentHash": "ff810148de105bf24dce5554fa13b220",
+      "lastModificationDate": 1734085801751,
+      "contentHash": "a0da99021ca394aff5eeda5e53ae3285",
       "sourceName": "contracts/core/SyncRouter/SyncRouter.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2503,8 +2504,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/EntryPoint.sol": {
-      "lastModificationDate": 1734059303506,
-      "contentHash": "b5c9357b41a4b14f616c935c9d07512f",
+      "lastModificationDate": 1734087640729,
+      "contentHash": "a0c3e2c4e62fe68654651ac6f686ec18",
       "sourceName": "contracts/core/EntryPoint.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2545,8 +2546,7 @@
         "../libraries/Helpers.sol",
         "../libraries/UserOperationLib.sol",
         "@openzeppelin/contracts/utils/introspection/ERC165.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "forge-std/console.sol"
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
@@ -2705,8 +2705,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/StateManager.sol": {
-      "lastModificationDate": 1733799375320,
-      "contentHash": "2fb0f0a1c181ceb2e6a61133c16eb38f",
+      "lastModificationDate": 1734316213794,
+      "contentHash": "b0813bbf92dc9e64c61a8b0a66671412",
       "sourceName": "contracts/core/StateManager.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2781,8 +2781,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/ConfigManager.sol": {
-      "lastModificationDate": 1734059152869,
-      "contentHash": "19c7784eb03bacbe42a62beabc7af608",
+      "lastModificationDate": 1734087900856,
+      "contentHash": "9e326da5f121cee06cd6181dfec07564",
       "sourceName": "contracts/core/ConfigManager.sol",
       "solcConfig": {
         "version": "0.8.24",

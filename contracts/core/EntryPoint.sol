@@ -23,7 +23,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 // import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
-import "forge-std/console.sol";
+// import "forge-std/console.sol";
 /*
  * Account-Abstraction (EIP-4337) singleton EntryPoint implementation.
  * Only one instance required on each chain.
@@ -247,8 +247,8 @@ contract EntryPoint is
     function submitDepositOperationByRemote(
         address sender,
         uint256 amount,
-        uint256 nonce
-    ) external payable isSyncRouter(MAIN_CHAINID) {
+        uint256 nonce //isSyncRouter(MAIN_CHAINID)
+    ) external payable {
         _submitDepositOperationRemote(sender, amount, nonce);
     }
 
@@ -264,15 +264,15 @@ contract EntryPoint is
         revert EstimateRevert(preGas - gasleft());
     }
 
-    function estimateSubmitDepositOperationByRemoteCrossGas(
+    function estimateCrossMessageParamsCrossGas(
         CrossMessageParams calldata params
-    ) external returns (uint256) {
+    ) external view returns (uint256) {
         return
             ISyncRouter(getChainConfigs(uint64(block.chainid)).router)
                 .fetchUserOmniMessageFee(params);
     }
 
-    function sendDepositOperation(
+    function sendUserOmniMessage(
         CrossMessageParams calldata params
     ) external payable {
         ISyncRouter(getChainConfigs(uint64(block.chainid)).router)

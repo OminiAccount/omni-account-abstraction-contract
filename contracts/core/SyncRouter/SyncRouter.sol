@@ -134,6 +134,8 @@ contract SyncRouter is
             bytes memory encodeOmniMessage
         ) = getUserOmniEncodeMessage(cmp);
 
+        console.logBytes(encodeOmniMessage);
+
         bytes memory encodedMessage = _packetMessage(
             mode,
             cmp._hookMessageParams.destContract,
@@ -331,6 +333,52 @@ contract SyncRouter is
         );
     }
 
+    function testReceiveMessage(bytes calldata message) external payable {
+        IEntryPoint ep = IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]);
+        CrossMessageParams memory _crossMessage = abi.decode(
+            message,
+            (CrossMessageParams)
+        );
+
+        if (_crossMessage._packedUserOperation.length != 0) {
+            ep.syncBatches(_crossMessage._packedUserOperation);
+        }
+
+        bool suc;
+        bytes memory resultData;
+        CrossETHParams memory crossETHParams = abi.decode(
+            _crossMessage._hookMessageParams.packCrossParams,
+            (CrossETHParams)
+        );
+
+        // withdraw remote
+        if (_crossMessage._hookMessageParams.way == 254) {
+            (suc, resultData) = crossETHParams.reciever.call{
+                value: crossETHParams.amount
+            }("");
+        } else if (_crossMessage._hookMessageParams.way == 255) {
+            (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
+                value: crossETHParams.amount
+            }(_crossMessage._hookMessageParams.packCrossMessage);
+        } else if (_crossMessage._hookMessageParams.way == 0) {
+            //receive eth  --TODO
+            (suc, resultData) = crossETHParams.reciever.call{
+                value: crossETHParams.amount
+            }("");
+        } else {
+            // Do hook
+            (suc, resultData) = address(this).call{
+                value: crossETHParams.amount
+            }(_crossMessage._hookMessageParams.packCrossMessage);
+        }
+
+        emit ReceiveTouchHook(
+            suc,
+            resultData,
+            _crossMessage._hookMessageParams.packCrossMessage
+        );
+    }
+
     function _receiveMessage(
         bytes32 messageId,
         uint64 srcChainId,
@@ -341,18 +389,15 @@ contract SyncRouter is
             MirrorEntryPoint[srcChainId] == address(uint160(srcContract)),
             "Invalid contract"
         );
+        IEntryPoint ep = IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]);
         CrossMessageParams memory _crossMessage = abi.decode(
             message,
             (CrossMessageParams)
         );
-        PackedUserOperation[] memory userOps = abi.decode(
-            _crossMessage._hookMessageParams.batchsMessage,
-            (PackedUserOperation[])
-        );
 
-        IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]).syncBatches(
-            userOps
-        );
+        if (_crossMessage._packedUserOperation.length != 0) {
+            ep.syncBatches(_crossMessage._packedUserOperation);
+        }
 
         bool suc;
         bytes memory resultData;

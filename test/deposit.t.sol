@@ -53,6 +53,7 @@ contract DepositTest is Utils, AddressHelper {
             1 ether,
             0.2 ether,
             0.01 ether,
+            0.001 ether,
             50000,
             0.1 gwei,
             0,

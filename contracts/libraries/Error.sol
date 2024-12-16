@@ -19,6 +19,12 @@ error NotFromEP();
 
 error AAGasValueOverflow();
 
+error OldAccInputHashDoesNotExist();
+
+error NewAccInputHashDoesNotExist();
+
+error NewStateRootNotInsidePrime();
+
 /**
  * A custom revert error of handleOps, to identify the offending op.
  * Should be caught in off-chain handleOps simulation and not happen on-chain.
