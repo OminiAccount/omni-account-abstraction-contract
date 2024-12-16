@@ -11,15 +11,15 @@ import "../utils/Poseidon.sol";
  * Utility functions helpful when working with UserOperation structs.
  */
 library UserOperationLib {
-    uint256 public constant PAYMASTER_VALIDATION_GAS_OFFSET = 20;
-    uint256 public constant PAYMASTER_POSTOP_GAS_OFFSET = 36;
-    uint256 public constant PAYMASTER_DATA_OFFSET = 52;
+    uint256 internal constant PAYMASTER_VALIDATION_GAS_OFFSET = 20;
+    uint256 internal constant PAYMASTER_POSTOP_GAS_OFFSET = 36;
+    uint256 internal constant PAYMASTER_DATA_OFFSET = 52;
 
-    uint256 public constant SYSTEM_OPERATION_ACCOUNT_OFFSET = 20;
+    uint256 internal constant SYSTEM_OPERATION_ACCOUNT_OFFSET = 20;
 
-    uint256 public constant VALIDATE_OWNER_GAS_LIMIT = 10_000;
+    uint256 internal constant VALIDATE_OWNER_GAS_LIMIT = 10_000;
 
-    uint256 public constant USER_OP_BYTES = 32 * 7 + 20;
+    uint256 internal constant USER_OP_BYTES = 32 * 7 + 20;
 
     uint8 constant NOMAL_OPERATION = 0;
     uint8 constant DEPOSIT_OPERATION = 1;
