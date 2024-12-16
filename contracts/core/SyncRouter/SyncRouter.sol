@@ -334,14 +334,15 @@ contract SyncRouter is
     }
 
     function testReceiveMessage(bytes calldata message) external payable {
-        IEntryPoint ep = IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]);
         CrossMessageParams memory _crossMessage = abi.decode(
             message,
             (CrossMessageParams)
         );
 
         if (_crossMessage._packedUserOperation.length != 0) {
-            ep.syncBatches(_crossMessage._packedUserOperation);
+            IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]).syncBatches(
+                _crossMessage._packedUserOperation
+            );
         }
 
         bool suc;
@@ -389,14 +390,16 @@ contract SyncRouter is
             MirrorEntryPoint[srcChainId] == address(uint160(srcContract)),
             "Invalid contract"
         );
-        IEntryPoint ep = IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]);
+
         CrossMessageParams memory _crossMessage = abi.decode(
             message,
             (CrossMessageParams)
         );
 
         if (_crossMessage._packedUserOperation.length != 0) {
-            ep.syncBatches(_crossMessage._packedUserOperation);
+            IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]).syncBatches(
+                _crossMessage._packedUserOperation
+            );
         }
 
         bool suc;
@@ -406,16 +409,15 @@ contract SyncRouter is
             (CrossETHParams)
         );
 
-        // withdraw remote
-        if (_crossMessage._hookMessageParams.way == 254) {
+        // deposit remote
+        if (_crossMessage._hookMessageParams.way == 255) {
             (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
                 value: crossETHParams.amount
             }(_crossMessage._hookMessageParams.packCrossMessage);
-        } else if (_crossMessage._hookMessageParams.way == 255) {
-            (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
-                value: crossETHParams.amount
-            }(_crossMessage._hookMessageParams.packCrossMessage);
-        } else if (_crossMessage._hookMessageParams.way == 0) {
+        } else if (
+            _crossMessage._hookMessageParams.way == 0 ||
+            _crossMessage._hookMessageParams.way == 254
+        ) {
             //receive eth  --TODO
             (suc, resultData) = crossETHParams.reciever.call{
                 value: crossETHParams.amount
