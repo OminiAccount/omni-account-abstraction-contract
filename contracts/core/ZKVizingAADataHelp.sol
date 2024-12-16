@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
 import {BaseStruct} from "../interfaces/core/BaseStruct.sol";
+import "../libraries/UserOperationLib.sol";
 contract ZKVizingAADataHelp is BaseStruct {
+
+    
+    uint64 public constant FORK_ID = 1;
 
     function decodeCrossETHData(bytes memory callData)external view returns(CrossETHParams memory){
         return abi.decode(callData, (CrossETHParams));
@@ -105,5 +109,91 @@ contract ZKVizingAADataHelp is BaseStruct {
         CrossV2SwapParams calldata params
     ) external view returns (bytes memory crossV3MessageBytes) {
         crossV3MessageBytes = abi.encode(params);
+    }
+
+    function getPackUints(
+        uint256 high128,
+        uint256 low128
+    )external view returns(bytes32 packed){
+        packed = UserOperationLib.packUints(high128, low128);
+    }
+
+    function getPackUint64s(
+        uint64 high64,
+        uint64 low64
+    )external view returns (bytes16 packed) {
+        packed = UserOperationLib.packUint64s(high64, low64);
+    }
+
+    function getPackOperation(BaseStruct.PackedUserOperation calldata userOp)external view returns(bytes32 encoded){
+        encoded = UserOperationLib.packOperation(userOp);
+    }
+
+    function getPackOpInfo(BaseStruct.ExecData calldata exec) external view returns (bytes32){
+        return UserOperationLib.packOpInfo(exec);
+    }
+
+    function getPackChainGasLimit(
+        BaseStruct.ExecData calldata exec
+    ) external view returns (bytes32) {
+        return UserOperationLib.packChainGasLimit(exec);
+    }
+
+    /**
+     * Get pack data for mainChainGasPrice and destChainGasPrice.
+     * @param exec - The exec data.
+     */
+    function getPackChainGasPrice(
+        BaseStruct.ExecData calldata exec
+    ) external view returns (bytes32) {
+        return UserOperationLib.packChainGasPrice(exec);
+    }
+
+    function getHasInnerExec(
+        BaseStruct.PackedUserOperation calldata userOp
+    ) external view returns (bool){
+        return UserOperationLib.hasInnerExec(userOp);
+    }
+
+    function getInputSnarkBytes(
+        uint64 initNumBatch,
+        uint64 finalNewBatch,
+        bytes32 oldAccInputHash,
+        bytes32 newAccInputHash,
+        bytes32 oldStateRoot,
+        bytes32 newStateRoot
+    ) public view returns (bytes memory) {
+        // sanity checks
+        bytes32 ZeroBytes32;
+
+        // if (initNumBatch != 0 && oldAccInputHash == bytes32(0)) {
+        //     revert OldAccInputHashDoesNotExist();
+        // }
+
+        // if (newAccInputHash == bytes32(0)) {
+        //     revert NewAccInputHashDoesNotExist();
+        // }
+        // --TODO
+        require(initNumBatch ==0 || oldAccInputHash != ZeroBytes32);
+        require(newAccInputHash != ZeroBytes32);
+
+        // Check that new state root is inside goldilocks field
+        // if (!checkStateRootInsidePrime(uint256(newStateRoot))) {
+        //     revert NewStateRootNotInsidePrime();
+        // }
+
+        return
+            abi.encodePacked(
+                0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266,
+                oldStateRoot,
+                oldAccInputHash,
+                initNumBatch,
+                uint64(1),
+                FORK_ID,
+                newStateRoot,
+                newAccInputHash,
+                bytes32(0),
+                finalNewBatch
+            );
     }
 }

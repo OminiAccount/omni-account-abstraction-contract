@@ -1,27 +1,29 @@
 // SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.8.24;
 
+import {VizingOmni} from "@vizing/contracts/VizingOmni.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IWETH9} from "../../interfaces/IWETH9.sol";
 import {ISwapRouter02, IV3SwapRouter} from "../../interfaces/uniswapv3/ISwapRouter02.sol";
 import {IEntryPoint} from "../../interfaces/core/IEntryPoint.sol";
 import {Event} from "../../interfaces/Event.sol";
 import {IUniswapV2Router02} from "../../interfaces/uniswapv2/IUniswapV2Router02.sol";
-import {BaseStruct} from "../../interfaces/core/BaseStruct.sol";
+import {ISyncRouter} from "../../interfaces/core/ISyncRouter.sol";
 import {IVizingSwap} from "../../interfaces/hook/IVizingSwap.sol";
 import "../../libraries/Error.sol";
 
-import {VizingOmni} from "@vizing/contracts/VizingOmni.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
+
+// Todo: The cross-chain module is separated from the business module.
 contract SyncRouter is
     VizingOmni,
     Ownable,
     ReentrancyGuard,
     Event,
-    BaseStruct
-{   
+    ISyncRouter
+{
     using SafeERC20 for IERC20;
 
     uint256 public OrderId;
@@ -328,28 +330,17 @@ contract SyncRouter is
         );
     }
 
-    function _receiveMessage(
-        bytes32 messageId,
-        uint64 srcChainId,
-        uint256 srcContract,
-        bytes calldata message
-    ) internal virtual override {
-        require(
-            MirrorEntryPoint[srcChainId] == address(uint160(srcContract)),
-            "Invalid contract"
-        );
+    function testReceiveMessage(bytes calldata message) external payable {
         CrossMessageParams memory _crossMessage = abi.decode(
             message,
             (CrossMessageParams)
         );
-        PackedUserOperation[] memory userOps = abi.decode(
-            _crossMessage._hookMessageParams.batchsMessage,
-            (PackedUserOperation[])
-        );
 
-        IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]).syncBatches(
-            userOps
-        );
+        if (_crossMessage._packedUserOperation.length != 0) {
+            IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]).syncBatches(
+                _crossMessage._packedUserOperation
+            );
+        }
 
         bool suc;
         bytes memory resultData;
@@ -360,14 +351,70 @@ contract SyncRouter is
 
         // withdraw remote
         if (_crossMessage._hookMessageParams.way == 254) {
-            (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
+            (suc, resultData) = crossETHParams.reciever.call{
                 value: crossETHParams.amount
-            }(_crossMessage._hookMessageParams.packCrossMessage);
+            }("");
         } else if (_crossMessage._hookMessageParams.way == 255) {
             (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
                 value: crossETHParams.amount
             }(_crossMessage._hookMessageParams.packCrossMessage);
         } else if (_crossMessage._hookMessageParams.way == 0) {
+            //receive eth  --TODO
+            (suc, resultData) = crossETHParams.reciever.call{
+                value: crossETHParams.amount
+            }("");
+        } else {
+            // Do hook
+            (suc, resultData) = address(this).call{
+                value: crossETHParams.amount
+            }(_crossMessage._hookMessageParams.packCrossMessage);
+        }
+
+        emit ReceiveTouchHook(
+            suc,
+            resultData,
+            _crossMessage._hookMessageParams.packCrossMessage
+        );
+    }
+
+    function _receiveMessage(
+        bytes32 messageId,
+        uint64 srcChainId,
+        uint256 srcContract,
+        bytes calldata message
+    ) internal virtual override {
+        require(
+            MirrorEntryPoint[srcChainId] == address(uint160(srcContract)),
+            "Invalid contract"
+        );
+
+        CrossMessageParams memory _crossMessage = abi.decode(
+            message,
+            (CrossMessageParams)
+        );
+
+        if (_crossMessage._packedUserOperation.length != 0) {
+            IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]).syncBatches(
+                _crossMessage._packedUserOperation
+            );
+        }
+
+        bool suc;
+        bytes memory resultData;
+        CrossETHParams memory crossETHParams = abi.decode(
+            _crossMessage._hookMessageParams.packCrossParams,
+            (CrossETHParams)
+        );
+
+        // deposit remote
+        if (_crossMessage._hookMessageParams.way == 255) {
+            (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
+                value: crossETHParams.amount
+            }(_crossMessage._hookMessageParams.packCrossMessage);
+        } else if (
+            _crossMessage._hookMessageParams.way == 0 ||
+            _crossMessage._hookMessageParams.way == 254
+        ) {
             //receive eth  --TODO
             (suc, resultData) = crossETHParams.reciever.call{
                 value: crossETHParams.amount

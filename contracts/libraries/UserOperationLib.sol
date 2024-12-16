@@ -92,11 +92,11 @@ library UserOperationLib {
     //     // }
     // }
 
-    // function getValidateOwnerGasLimit(
-    //     BaseStruct.PackedUserOperation calldata userOp
-    // ) internal pure returns (uint256) {
-    //     return VALIDATE_OWNER_GAS_LIMIT;
-    // }
+    function getValidateOwnerGasLimit(
+        BaseStruct.PackedUserOperation calldata userOp
+    ) internal pure returns (uint256) {
+        return VALIDATE_OWNER_GAS_LIMIT;
+    }
 
     function packUints(
         uint256 high128,
@@ -276,7 +276,7 @@ library UserOperationLib {
      */
     function encode(
         BaseStruct.PackedUserOperation calldata userOp
-    ) public pure returns (bytes memory) {
+    ) internal pure returns (bytes memory) {
         // bytes memory encodeBytes = new bytes(USER_OP_BYTES);
 
         bytes32 operation = packOperation(userOp);
@@ -382,13 +382,9 @@ library UserOperationsLib {
         BaseStruct.PackedUserOperation[] memory source,
         uint256 startIndex
     ) internal pure {
-        // require(
-        //     target.length >= startIndex + source.length,
-        //     "Target array too small"
-        // );
-        // --change TODO
         require(
-            target.length < startIndex + source.length
+            target.length >= startIndex + source.length,
+            "Target array too small"
         );
 
         for (uint256 i = 0; i < source.length; i++) {

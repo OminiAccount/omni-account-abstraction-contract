@@ -14,7 +14,7 @@ import "../utils/Exec.sol";
 import "./StateManager.sol";
 
 import "./PreGasManager.sol";
-import "./ConfigManager.sol";
+// import "./ConfigManager.sol";
 import "../libraries/Error.sol";
 import "../libraries/Helpers.sol";
 import "../libraries/UserOperationLib.sol";
@@ -23,24 +23,25 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 // import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
+// import "forge-std/console.sol";
 /*
  * Account-Abstraction (EIP-4337) singleton EntryPoint implementation.
  * Only one instance required on each chain.
  */
+
 /// @custom:security-contact https://bounty.ethereum.org
-/// Optimize code size --TODO
 contract EntryPoint is
-    PreGasManager,
-    StateManager,
-    ConfigManager,
-    ReentrancyGuard,
     IEntryPoint,
+    StateManager,
+    PreGasManager,
+    ReentrancyGuard,
     ERC165
 {
     using UserOperationLib for PackedUserOperation;
     using UserOperationsLib for PackedUserOperation[];
 
     address private _owner;
+    address public verifier;
 
     // compensate for innerHandleOps' emit message and deposit refund.
     // allow some slack for future gas price changes.
@@ -49,8 +50,11 @@ contract EntryPoint is
     // Marker for inner call revert on out of gas
     bytes32 private constant INNER_OUT_OF_GAS = hex"deaddead";
     bytes32 private constant INNER_REVERT_LOW_PREFUND = hex"deadaa51";
+    
     // L2 chain identifier
-    uint64 private constant FORK_ID = 1;
+    uint64 public constant FORK_ID = 1;
+    //vizng sepolia --TODO
+    uint64 internal constant MAIN_CHAINID = 28516;
 
     uint256 private constant REVERT_REASON_MAX_LEN = 2048;
     uint256 private constant PENALTY_PERCENT = 10;
@@ -58,6 +62,7 @@ contract EntryPoint is
     // Modulus zkSNARK
     uint256 internal constant _RFIELD =
         21_888_242_871_839_275_222_246_405_745_257_275_088_548_364_400_416_034_343_698_204_186_575_808_495_617;
+
 
 
     constructor() {
@@ -68,7 +73,49 @@ contract EntryPoint is
         _;
     }
 
-    function _isOwner() internal virtual override onlyOwner {}
+    modifier isSyncRouter(uint64 chainId) {
+        require(msg.sender == chainConfigs[chainId].router);
+        _;
+    }
+
+    mapping(uint64 => Config) private chainConfigs;
+
+    function getMainChainId() public pure returns (uint64) {
+        return MAIN_CHAINID;
+    }
+
+    function getChainConfigs(
+        uint64 chainId
+    ) public view returns (Config memory) {
+        return chainConfigs[chainId];
+    }
+
+    function updateVerifier(address _verifier) external onlyOwner {
+        verifier = _verifier;
+    }
+    /// change to single update --TODO
+    // function updateChainConfigs(
+    //     uint64[] calldata _chainIds,
+    //     Config[] calldata _config
+    // ) external onlyOwner {
+    //     require(_chainIds.length == _config.length);
+    //     unchecked {
+    //         for (uint256 i = 0; i < _chainIds.length; ) {
+    //             chainConfigs[_chainIds[i]] = _config[i];
+    //             ++i;
+    //         }
+    //     }
+    // }
+
+    function updateChainConfig(
+        uint64 _chainId,
+        Config calldata _config
+    ) external onlyOwner {
+        chainConfigs[_chainId].entryPoint=_config.entryPoint;
+        chainConfigs[_chainId].router=_config.router;
+    }
+
+    // function _isOwner() internal virtual onlyOwner {}
     function transferOwnership(address newOwner) external onlyOwner {
         _owner = newOwner;
     }
@@ -151,12 +198,6 @@ contract EntryPoint is
                     i
                 ];
 
-                // if (
-                //     extra.chainId != block.chainid &&
-                //     chainConfigs[extra.chainId].entryPoint == address(0)
-                // ) {
-                //     revert NotSupportChainId();
-                // }
                 if (
                     extra.chainId != block.chainid &&
                     chainConfigs[extra.chainId].entryPoint == address(0)
@@ -252,8 +293,8 @@ contract EntryPoint is
     function submitDepositOperationByRemote(
         address sender,
         uint256 amount,
-        uint256 nonce
-    ) external payable isSyncRouter(MAIN_CHAINID) {
+        uint256 nonce //isSyncRouter(MAIN_CHAINID)
+    ) external payable {
         _submitDepositOperationRemote(sender, amount, nonce);
     }
 
@@ -266,19 +307,18 @@ contract EntryPoint is
     ) external payable {
         uint256 preGas = gasleft();
         _submitDepositOperationRemote(sender, amount, nonce);
-        //optimize --TODO
-        // revert EstimateRevert(preGas - gasleft()
+        revert EstimateRevert(preGas - gasleft());
     }
 
-    function estimateSubmitDepositOperationByRemoteCrossGas(
+    function estimateCrossMessageParamsCrossGas(
         CrossMessageParams calldata params
-    ) external returns (uint256) {
+    ) external view returns (uint256) {
         return
             ISyncRouter(getChainConfigs(uint64(block.chainid)).router)
                 .fetchUserOmniMessageFee(params);
     }
 
-    function sendDepositOperation(
+    function sendUserOmniMessage(
         CrossMessageParams calldata params
     ) external payable {
         ISyncRouter(getChainConfigs(uint64(block.chainid)).router)
@@ -309,11 +349,12 @@ contract EntryPoint is
      * @param amount      - Amount to transfer.
      */
     function _compensate(address payable beneficiary, uint256 amount) internal {
-        //--TODO
         // require(beneficiary != address(0), "AA90 invalid beneficiary");
+        require(beneficiary != address(0));
         (bool success, ) = beneficiary.call{value: amount}("");
         // require(success, "AA91 failed send to beneficiary");
         require(success);
+
     }
 
     /**
@@ -397,7 +438,7 @@ contract EntryPoint is
                 // innerCall reverted on prefund too low. treat entire prefund as "gas cost"
                 uint256 actualGas = preGas - gasleft() + opInfo.preOpGas;
                 uint256 actualGasCost = opInfo.prefund;
-                // emitPrefundTooLow(opInfo);
+                emitPrefundTooLow(opInfo);
                 emitUserOperationEvent(opInfo, false, actualGasCost, actualGas);
                 collected = actualGasCost;
             } else {
@@ -436,12 +477,12 @@ contract EntryPoint is
         );
     }
 
-    // function emitPrefundTooLow(UserOpInfo memory opInfo) internal virtual {
-    //     emit UserOperationPrefundTooLow(
-    //         opInfo.userOpHash,
-    //         opInfo.mUserOp.sender
-    //     );
-    // }
+    function emitPrefundTooLow(UserOpInfo memory opInfo) internal virtual {
+        emit UserOperationPrefundTooLow(
+            opInfo.userOpHash,
+            opInfo.mUserOp.sender
+        );
+    }
 
     /**
      * Execute a gas operation.
@@ -508,8 +549,9 @@ contract EntryPoint is
         bytes calldata context
     ) external returns (uint256 actualGasCost) {
         uint256 preGas = gasleft();
-        // --TODO
+        //Delete throw error messages --TODO
         // require(msg.sender == address(this), "AA92 internal call only");
+        require(msg.sender == address(this));
         MemoryUserOp memory mUserOp = opInfo.mUserOp;
 
         uint256 callGasLimit = mUserOp.mainChainGasLimit * 100;
@@ -616,19 +658,17 @@ contract EntryPoint is
 
         // Validate all numeric values in userOp are well below 128 bit, so they can safely be added
         // and multiplied without causing overflow.
-
-        
-        // --TODO
-        // uint256 zkVerificationGasLimit = mUserOp.zkVerificationGasLimit;
-        // uint256 maxGasValues = mUserOp.mainChainGasLimit |
-        //     mUserOp.zkVerificationGasLimit |
-        //     mUserOp.destChainGasLimit |
-        //     mUserOp.mainChainGasPrice |
-        //     mUserOp.destChainGasPrice;
+        uint256 zkVerificationGasLimit = mUserOp.zkVerificationGasLimit;
+        uint256 maxGasValues = mUserOp.mainChainGasLimit |
+            mUserOp.zkVerificationGasLimit |
+            mUserOp.destChainGasLimit |
+            mUserOp.mainChainGasPrice |
+            mUserOp.destChainGasPrice;
 
         // if (maxGasValues > type(uint120).max) {
         //     revert AAGasValueOverflow();
         // }
+        require(maxGasValues <= type(uint120).max);
 
         uint256 requiredPreFund = _getRequiredPrefund(mUserOp);
 
@@ -636,21 +676,19 @@ contract EntryPoint is
         // Constraints are made in the circuit
         // uint256 accountPreBalance = getPreGasBalanceInfo(mUserOp.sender);
 
-        //--TODO
         // if (requiredPreFund > accountPreBalance) {
         //     revert FailedOp(opIndex, "AA insufficient account preBalance");
         // }
 
-        // uint256 validateOwnerGasLimit = userOp.getValidateOwnerGasLimit();
-        uint256 validateOwnerGasLimit = 10_000;
+        uint256 validateOwnerGasLimit = userOp.getValidateOwnerGasLimit();
 
         bool validationResult = IAccount(mUserOp.sender).validateUserOp{
             gas: validateOwnerGasLimit
         }(userOp.owner);
 
-        // if (!validationResult) {
-        //     revert FailedOp(opIndex, "AA owner verification falied");
-        // }
+        if (!validationResult) {
+            revert FailedOp(opIndex, "AA owner verification falied");
+        }
 
         // Todo How to check the gas limit of the authentication owner
         // unchecked {
@@ -715,7 +753,7 @@ contract EntryPoint is
             if (prefund < actualGasCost) {
                 if (mode == IPaymaster.PostOpMode.postOpReverted) {
                     actualGasCost = prefund;
-                    // emitPrefundTooLow(opInfo);
+                    emitPrefundTooLow(opInfo);
                     emitUserOperationEvent(
                         opInfo,
                         false,
@@ -757,6 +795,7 @@ contract EntryPoint is
         }
     }
 
+    //public getInputSnarkBytes transfer ZKVizingAADataHelp.sol --TODO
     /**
      * @notice Function to calculate the input snark bytes
      * @param initNumBatch Batch which the aggregator starts the verification
@@ -771,10 +810,10 @@ contract EntryPoint is
         bytes32 newAccInputHash,
         bytes32 oldStateRoot,
         bytes32 newStateRoot
-    ) public pure returns (bytes memory) {
+    ) private pure returns (bytes memory) {
         // sanity checks
+        bytes32 ZeroBytes32;
 
-        //---TODO
         // if (initNumBatch != 0 && oldAccInputHash == bytes32(0)) {
         //     revert OldAccInputHashDoesNotExist();
         // }
@@ -782,6 +821,9 @@ contract EntryPoint is
         // if (newAccInputHash == bytes32(0)) {
         //     revert NewAccInputHashDoesNotExist();
         // }
+        // --TODO
+        require(initNumBatch ==0 || oldAccInputHash != ZeroBytes32);
+        require(newAccInputHash != ZeroBytes32);
 
         // Check that new state root is inside goldilocks field
         // if (!checkStateRootInsidePrime(uint256(newStateRoot))) {

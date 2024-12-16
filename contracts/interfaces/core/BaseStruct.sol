@@ -38,6 +38,11 @@ interface BaseStruct {
      * EntryPoint***********************************************************
      */
 
+    // struct Config {
+    //     address entryPoint;
+    //     address router;
+    // }
+
     struct BatchData {
         PackedUserOperation[] userOperations; // accInputHash
         bytes32 accInputHash; // Todo: Use the poseidonHash to calculate the value

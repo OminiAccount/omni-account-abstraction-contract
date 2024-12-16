@@ -3,17 +3,16 @@ pragma solidity ^0.8.24;
 
 import {IUniswapV3Factory} from "../interfaces/uniswapv3/IUniswapFactory.sol";
 import {ISwapRouter02, IV2SwapRouter, IV3SwapRouter} from "../interfaces/uniswapv3/ISwapRouter02.sol";
-import {IVizingSwap} from "../interfaces/hook/IVizingSwap.sol";
+import {BaseStruct} from "../interfaces/core/BaseStruct.sol";
 import {IWETH9} from "../interfaces/IWETH9.sol";
 import {Event} from "../interfaces/Event.sol";
-import {BaseStruct} from "../interfaces/core/BaseStruct.sol";
 import {IUniswapV2Router02} from "../interfaces/uniswapv2/IUniswapV2Router02.sol";
 import "../libraries/Error.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
+contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event{
     using SafeERC20 for IERC20;
 
     address public WETH;
@@ -23,40 +22,37 @@ contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
 
     mapping(uint256 => bytes1) public LockWay;
 
-    receive() external payable {}
+    receive()external payable{}
 
     modifier lock(uint256 way) {
-        require(LockWay[way] == 0x00, "Locked");
+        require(LockWay[way] == 0x00,"Locked");
         _;
     }
 
-    modifier onlySyncRouter() {
-        require(msg.sender == SyncRouter, "Non syncRouter");
+    modifier onlySyncRouter {
+        require(msg.sender == SyncRouter,"Non syncRouter");
         _;
     }
 
-    modifier onlyManager() {
+    modifier onlyManager {
         require(msg.sender == Manager, "Non Manager");
         _;
     }
 
-    constructor(address _WETH) Ownable(msg.sender) {
-        WETH = _WETH;
-        Manager = msg.sender;
+    constructor(address _WETH)Ownable(msg.sender){
+        WETH=_WETH;
+        Manager=msg.sender;
     }
 
     function setManager(address _newManager) external onlyOwner {
-        Manager = _newManager;
+        Manager=_newManager;
     }
 
     function setLock(uint256 _way, bytes1 _lockState) external onlyManager {
         LockWay[_way] = _lockState;
     }
 
-    function initialize(
-        address _syncRouter,
-        address _newRouter
-    ) external onlyManager {
+    function initialize(address _syncRouter, address _newRouter) external onlyManager {
         SyncRouter = _syncRouter;
         routers.push(_newRouter);
     }
@@ -86,25 +82,21 @@ contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
             require(msg.value >= params.amountIn, "Send eth insufficient");
             _tokenIn = WETH;
             IWETH9(WETH).deposit{value: msg.value}();
-        } else if (
-            params.tokenIn != address(0) && params.tokenOut == address(0)
-        ) {
+        } else if (params.tokenIn != address(0) && params.tokenOut == address(0)) {
             _tokenOut = WETH;
             receiver = address(this);
             IERC20(params.tokenIn).transferFrom(
-                params.sender,
+                params.sender, 
                 address(this),
                 params.amountIn
             );
-        } else if (
-            params.tokenIn != address(0) && params.tokenOut != address(0)
-        ) {
+        } else if (params.tokenIn != address(0) && params.tokenOut != address(0)){
             IERC20(params.tokenIn).transferFrom(
                 params.sender,
                 address(this),
                 params.amountIn
             );
-        } else {
+        }else {
             revert InvalidPath();
         }
         IERC20(_tokenIn).approve(router, params.amountIn);
@@ -155,7 +147,7 @@ contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
         //other swap other
         if (fromToken != address(0) && toToken != address(0)) {
             IERC20(fromToken).transferFrom(
-                params.sender,
+                params.sender, 
                 address(this),
                 params.amountIn
             );
@@ -214,41 +206,32 @@ contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
      * @param receiver token receiver
      * @param amount  receive amount
      */
-    function refund(
-        address token,
-        address receiver,
-        uint256 amount
-    ) external onlyManager {
-        if (token == address(0)) {
-            uint256 balance = address(this).balance;
-            require(balance > 0 && balance >= amount, "Insufficient balance");
-            (bool suc, ) = receiver.call{value: amount}("");
-            require(suc, "Refund eth fail");
-        } else {
+    function refund(address token, address receiver, uint256 amount) external onlyManager {
+        if(token==address(0)){
+            uint256 balance=address(this).balance;
+            require(balance>0 && balance>=amount,"Insufficient balance");
+            (bool suc,)=receiver.call{value: amount}("");
+            require(suc,"Refund eth fail");
+        }else{
             IERC20(token).transfer(receiver, amount);
         }
         emit RefundEvent(token, receiver, amount);
     }
 
-    function _getTokenBalance(
-        address _token,
-        address _user
-    ) private view returns (uint256 _balance) {
+    function _getTokenBalance(address _token,address _user)private view returns(uint256 _balance){
         _balance = IERC20(_token).balanceOf(_user);
     }
 
-    function getTokenBalance(
-        address token,
-        address user
-    ) external view returns (uint256) {
-        return _getTokenBalance(token, user);
+    function getTokenBalance(address token,address user)external view returns(uint256){
+        return _getTokenBalance(token,user);
     }
 
-    function routerLength() external view returns (uint256) {
+    function routerLength()external view returns(uint256){
         return routers.length;
     }
 
-    function indexRouter(uint256 index) public view returns (address) {
+    function indexRouter(uint256 index)public view returns(address){
         return routers[index];
     }
+
 }

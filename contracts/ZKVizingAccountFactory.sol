@@ -70,7 +70,6 @@ contract ZKVizingAccountFactory is Ownable {
             state: 0x01,
             zkVizingAccount: zkVizingAccountAddress
         });
-
         emit AccountCreated(zkVizingAccountAddress, owner);
     }
 

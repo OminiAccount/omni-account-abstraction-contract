@@ -8,7 +8,6 @@ contract ConfigManager is IConfigManager {
 
     uint64 internal constant MAIN_CHAINID = 28516;
 
-    address public syncRouter;
     address public verifier;
 
     mapping(uint64 => Config) internal chainConfigs;
