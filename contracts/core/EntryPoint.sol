@@ -14,7 +14,7 @@ import "../utils/Exec.sol";
 import "./StateManager.sol";
 
 import "./PreGasManager.sol";
-import "./ConfigManager.sol";
+// import "./ConfigManager.sol";
 import "../libraries/Error.sol";
 import "../libraries/Helpers.sol";
 import "../libraries/UserOperationLib.sol";
@@ -34,7 +34,6 @@ contract EntryPoint is
     IEntryPoint,
     StateManager,
     PreGasManager,
-    ConfigManager,
     ReentrancyGuard,
     ERC165
 {
@@ -42,6 +41,7 @@ contract EntryPoint is
     using UserOperationsLib for PackedUserOperation[];
 
     address private _owner;
+    address public verifier;
 
     // compensate for innerHandleOps' emit message and deposit refund.
     // allow some slack for future gas price changes.
@@ -51,15 +51,17 @@ contract EntryPoint is
     bytes32 private constant INNER_OUT_OF_GAS = hex"deaddead";
     bytes32 private constant INNER_REVERT_LOW_PREFUND = hex"deadaa51";
 
+    // L2 chain identifier
+    uint64 public constant FORK_ID = 1;
+    //vizng sepolia --TODO
+    uint64 internal constant MAIN_CHAINID = 28516;
+
     uint256 private constant REVERT_REASON_MAX_LEN = 2048;
     uint256 private constant PENALTY_PERCENT = 10;
 
     // Modulus zkSNARK
     uint256 internal constant _RFIELD =
         21_888_242_871_839_275_222_246_405_745_257_275_088_548_364_400_416_034_343_698_204_186_575_808_495_617;
-
-    // L2 chain identifier
-    uint64 public constant FORK_ID = 1;
 
     constructor() {
         _owner = msg.sender;
@@ -69,7 +71,49 @@ contract EntryPoint is
         _;
     }
 
-    function _isOwner() internal virtual override onlyOwner {}
+    modifier isSyncRouter(uint64 chainId) {
+        require(msg.sender == chainConfigs[chainId].router);
+        _;
+    }
+
+    mapping(uint64 => Config) private chainConfigs;
+
+    function getMainChainId() public pure returns (uint64) {
+        return MAIN_CHAINID;
+    }
+
+    function getChainConfigs(
+        uint64 chainId
+    ) public view returns (Config memory) {
+        return chainConfigs[chainId];
+    }
+
+    function updateVerifier(address _verifier) external onlyOwner {
+        verifier = _verifier;
+    }
+    /// change to single update --TODO
+    // function updateChainConfigs(
+    //     uint64[] calldata _chainIds,
+    //     Config[] calldata _config
+    // ) external onlyOwner {
+    //     require(_chainIds.length == _config.length);
+    //     unchecked {
+    //         for (uint256 i = 0; i < _chainIds.length; ) {
+    //             chainConfigs[_chainIds[i]] = _config[i];
+    //             ++i;
+    //         }
+    //     }
+    // }
+
+    function updateChainConfig(
+        uint64 _chainId,
+        Config calldata _config
+    ) external onlyOwner {
+        chainConfigs[_chainId].entryPoint = _config.entryPoint;
+        chainConfigs[_chainId].router = _config.router;
+    }
+
+    // function _isOwner() internal virtual onlyOwner {}
     function transferOwnership(address newOwner) external onlyOwner {
         _owner = newOwner;
     }
@@ -246,10 +290,13 @@ contract EntryPoint is
 
     function submitDepositOperationByRemote(
         address sender,
-        uint256 amount,
+        address owner,
+        uint256 valueDepositAmount,
+        uint256 gasDepositAmount,
         uint256 nonce //isSyncRouter(MAIN_CHAINID)
     ) external payable {
-        _submitDepositOperationRemote(sender, amount, nonce);
+        _submitDepositOperationRemote(sender, gasDepositAmount, nonce);
+        emit ValueDepositAmount(sender, owner, valueDepositAmount);
     }
 
     error EstimateRevert(uint256 gas);
@@ -303,9 +350,11 @@ contract EntryPoint is
      * @param amount      - Amount to transfer.
      */
     function _compensate(address payable beneficiary, uint256 amount) internal {
-        require(beneficiary != address(0), "AA90 invalid beneficiary");
+        // require(beneficiary != address(0), "AA90 invalid beneficiary");
+        require(beneficiary != address(0));
         (bool success, ) = beneficiary.call{value: amount}("");
-        require(success, "AA91 failed send to beneficiary");
+        // require(success, "AA91 failed send to beneficiary");
+        require(success);
     }
 
     /**
@@ -500,7 +549,9 @@ contract EntryPoint is
         bytes calldata context
     ) external returns (uint256 actualGasCost) {
         uint256 preGas = gasleft();
-        require(msg.sender == address(this), "AA92 internal call only");
+        //Delete throw error messages --TODO
+        // require(msg.sender == address(this), "AA92 internal call only");
+        require(msg.sender == address(this));
         MemoryUserOp memory mUserOp = opInfo.mUserOp;
 
         uint256 callGasLimit = mUserOp.mainChainGasLimit * 100;
@@ -614,9 +665,10 @@ contract EntryPoint is
             mUserOp.mainChainGasPrice |
             mUserOp.destChainGasPrice;
 
-        if (maxGasValues > type(uint120).max) {
-            revert AAGasValueOverflow();
-        }
+        // if (maxGasValues > type(uint120).max) {
+        //     revert AAGasValueOverflow();
+        // }
+        require(maxGasValues <= type(uint120).max);
 
         uint256 requiredPreFund = _getRequiredPrefund(mUserOp);
 
@@ -743,6 +795,7 @@ contract EntryPoint is
         }
     }
 
+    //public getInputSnarkBytes transfer ZKVizingAADataHelp.sol --TODO
     /**
      * @notice Function to calculate the input snark bytes
      * @param initNumBatch Batch which the aggregator starts the verification
@@ -757,16 +810,20 @@ contract EntryPoint is
         bytes32 newAccInputHash,
         bytes32 oldStateRoot,
         bytes32 newStateRoot
-    ) public pure returns (bytes memory) {
+    ) private pure returns (bytes memory) {
         // sanity checks
+        bytes32 ZeroBytes32;
 
-        if (initNumBatch != 0 && oldAccInputHash == bytes32(0)) {
-            revert OldAccInputHashDoesNotExist();
-        }
+        // if (initNumBatch != 0 && oldAccInputHash == bytes32(0)) {
+        //     revert OldAccInputHashDoesNotExist();
+        // }
 
-        if (newAccInputHash == bytes32(0)) {
-            revert NewAccInputHashDoesNotExist();
-        }
+        // if (newAccInputHash == bytes32(0)) {
+        //     revert NewAccInputHashDoesNotExist();
+        // }
+        // --TODO
+        require(initNumBatch == 0 || oldAccInputHash != ZeroBytes32);
+        require(newAccInputHash != ZeroBytes32);
 
         // Check that new state root is inside goldilocks field
         // if (!checkStateRootInsidePrime(uint256(newStateRoot))) {

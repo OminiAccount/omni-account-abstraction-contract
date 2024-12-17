@@ -101,16 +101,18 @@ library UserOperationLib {
     function packUints(
         uint256 high128,
         uint256 low128
-    ) public pure returns (bytes32 packed) {
-        require(high128 <= type(uint128).max, "high128 exceeds uint128 range");
-        require(low128 <= type(uint128).max, "low128 exceeds uint128 range");
+    ) internal pure returns (bytes32 packed) {
+        // require(high128 <= type(uint128).max, "high128 exceeds uint128 range");
+        // require(low128 <= type(uint128).max, "low128 exceeds uint128 range");
+        require(high128 <= type(uint128).max);
+        require(low128 <= type(uint128).max);
         packed = bytes32((high128 << 128) | low128);
     }
 
     function packUint64s(
         uint64 high64,
         uint64 low64
-    ) public pure returns (bytes16 packed) {
+    ) internal pure returns (bytes16 packed) {
         packed = bytes16((uint128(high64) << 64) | uint128(low64));
     }
 
@@ -194,7 +196,7 @@ library UserOperationLib {
      */
     function packOperation(
         BaseStruct.PackedUserOperation calldata userOp
-    ) public pure returns (bytes32 encoded) {
+    ) internal pure returns (bytes32 encoded) {
         uint8 operationType = userOp.operationType;
         uint248 operationValue = uint248(userOp.operationValue);
 
@@ -213,7 +215,7 @@ library UserOperationLib {
      */
     function packOpInfo(
         BaseStruct.ExecData calldata exec
-    ) public pure returns (bytes32) {
+    ) internal pure returns (bytes32) {
         return packUints(exec.nonce, exec.chainId);
     }
 
@@ -223,7 +225,7 @@ library UserOperationLib {
      */
     function packChainGasLimit(
         BaseStruct.ExecData calldata exec
-    ) public pure returns (bytes32) {
+    ) internal pure returns (bytes32) {
         return packUints(exec.mainChainGasLimit, exec.destChainGasLimit);
     }
 
@@ -233,13 +235,13 @@ library UserOperationLib {
      */
     function packChainGasPrice(
         BaseStruct.ExecData calldata exec
-    ) public pure returns (bytes32) {
+    ) internal pure returns (bytes32) {
         return packUints(exec.mainChainGasPrice, exec.destChainGasPrice);
     }
 
     function hasInnerExec(
         BaseStruct.PackedUserOperation calldata userOp
-    ) public pure returns (bool) {
+    ) internal pure returns (bool) {
         return userOp.innerExec.chainId == 0 ? false : true;
     }
 

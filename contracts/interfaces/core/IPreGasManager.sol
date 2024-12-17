@@ -2,12 +2,13 @@
 pragma solidity >=0.7.5;
 
 import "./BaseStruct.sol";
+import {BaseEvent} from "./BaseEvent.sol";
 /**
  * Ticket to manage deposit and withdraw.
  * Deposit is just a balance used to pay for UserOperations (either by a paymaster or an account).
  */
 
-interface IPreGasManager is BaseStruct {
+interface IPreGasManager is BaseStruct, BaseEvent {
     error ValueNotEqual();
     error CallFailed();
 
@@ -17,13 +18,6 @@ interface IPreGasManager is BaseStruct {
         uint256 amount,
         uint256 timestamp
     );
-    event WithdrawTicketAdded(
-        address indexed account,
-        uint256 amount,
-        uint256 timestamp
-    );
-    event DepositTicketDeleted(address indexed account, uint256 amount);
-    event WithdrawTicketDeleted(address indexed account, uint256 amount);
 
     /**
      * Get preGasBalance info.
@@ -33,14 +27,6 @@ interface IPreGasManager is BaseStruct {
     function getPreGasBalanceInfo(
         address account
     ) external view returns (uint256);
-
-    // /**
-    //  * @param deposit         - The entity's deposit.
-    //  */
-    // struct DepositInfo {
-    //     uint256 deposit;
-    //     // uint256 notConfirmedDeposit;
-    // }
 
     function submitDepositOperation(
         uint256 amount,

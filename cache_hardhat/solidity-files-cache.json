@@ -152,8 +152,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/ZKVizingAccount.sol": {
-      "lastModificationDate": 1734082913521,
-      "contentHash": "f93c908f2048e05c402e958361f92c1a",
+      "lastModificationDate": 1734422384203,
+      "contentHash": "fc93aa8a9b242c64eeef3fb641760cdf",
       "sourceName": "contracts/ZKVizingAccount.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -184,8 +184,7 @@
         "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol",
         "./core/BaseAccount.sol",
         "./libraries/Helpers.sol",
-        "./TokenCallbackHandler.sol",
-        "forge-std/console.sol"
+        "./TokenCallbackHandler.sol"
       ],
       "versionPragmas": [
         "^0.8.23"
@@ -195,7 +194,7 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/BaseAccount.sol": {
-      "lastModificationDate": 1734059129446,
+      "lastModificationDate": 1734421728883,
       "contentHash": "54951bc59e36895d0af32d243e5ce194",
       "sourceName": "contracts/core/BaseAccount.sol",
       "solcConfig": {
@@ -236,8 +235,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/libraries/Helpers.sol": {
-      "lastModificationDate": 1733368033601,
-      "contentHash": "d9a3c7fc04ae5f3fc8011d8792e8cb18",
+      "lastModificationDate": 1734421661264,
+      "contentHash": "4e1b42a65f5cf7c3d9527a5e753616f7",
       "sourceName": "contracts/libraries/Helpers.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -345,7 +344,7 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IAccount.sol": {
-      "lastModificationDate": 1733369844726,
+      "lastModificationDate": 1734421888515,
       "contentHash": "d4ce7a9d9b56e595e77edaaf76cf653c",
       "sourceName": "contracts/interfaces/core/IAccount.sol",
       "solcConfig": {
@@ -383,8 +382,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IEntryPoint.sol": {
-      "lastModificationDate": 1734082834180,
-      "contentHash": "9ac1e0ff5f5a378cadd4a6db12291320",
+      "lastModificationDate": 1734421917528,
+      "contentHash": "e180573329409ba80fa8fee6a98fe189",
       "sourceName": "contracts/interfaces/core/IEntryPoint.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -422,8 +421,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/libraries/UserOperationLib.sol": {
-      "lastModificationDate": 1733992403317,
-      "contentHash": "39d5d9fbcb8ed663d725d13425a3c713",
+      "lastModificationDate": 1734422091636,
+      "contentHash": "fdc0dd9e90d946679e76adab8d27e2a6",
       "sourceName": "contracts/libraries/UserOperationLib.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -463,8 +462,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/BaseStruct.sol": {
-      "lastModificationDate": 1734057534775,
-      "contentHash": "89e3ed399be0d28d6c2acb482d40d9e8",
+      "lastModificationDate": 1734421877172,
+      "contentHash": "5d54f301e8adfb3e2c42585fa659c36a",
       "sourceName": "contracts/interfaces/core/BaseStruct.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -499,7 +498,7 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IPreGasManager.sol": {
-      "lastModificationDate": 1733801881685,
+      "lastModificationDate": 1734421932198,
       "contentHash": "ce9623cec2660b1ceac83468631a5b20",
       "sourceName": "contracts/interfaces/core/IPreGasManager.sol",
       "solcConfig": {
@@ -831,8 +830,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/ZKVizingAccountFactory.sol": {
-      "lastModificationDate": 1734058941220,
-      "contentHash": "aaa2604d64ed56020a6ae01c2ee63c73",
+      "lastModificationDate": 1734423362371,
+      "contentHash": "0bdc3fedbe0822ff5e0f22735a8dc64a",
       "sourceName": "contracts/ZKVizingAccountFactory.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1706,8 +1705,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/SyncRouter/SyncRouter.sol": {
-      "lastModificationDate": 1734085801751,
-      "contentHash": "a0da99021ca394aff5eeda5e53ae3285",
+      "lastModificationDate": 1734422726609,
+      "contentHash": "5f69d914dae0a9da74c8030a7e602468",
       "sourceName": "contracts/core/SyncRouter/SyncRouter.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1745,8 +1744,7 @@
         "../../interfaces/hook/IVizingSwap.sol",
         "../../libraries/Error.sol",
         "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "@openzeppelin/contracts/utils/ReentrancyGuard.sol",
-        "forge-std/console.sol"
+        "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
@@ -1910,8 +1908,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/ISyncRouter.sol": {
-      "lastModificationDate": 1733800340583,
-      "contentHash": "93505b984c08faf17e44a6943e55da70",
+      "lastModificationDate": 1734421947181,
+      "contentHash": "97e63108313b56c8caaaec99b1b7d33d",
       "sourceName": "contracts/interfaces/core/ISyncRouter.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1948,8 +1946,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/hook/IVizingSwap.sol": {
-      "lastModificationDate": 1733799485930,
-      "contentHash": "f16168afa5b3c7771a102de668022fa1",
+      "lastModificationDate": 1734421959107,
+      "contentHash": "2eda3f3ed54a39233b7c2b22796b06cb",
       "sourceName": "contracts/interfaces/hook/IVizingSwap.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1979,15 +1977,15 @@
         "../core/BaseStruct.sol"
       ],
       "versionPragmas": [
-        ">=0.7.5"
+        "^0.8.24"
       ],
       "artifacts": [
         "IVizingSwap"
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/libraries/Error.sol": {
-      "lastModificationDate": 1734059264169,
-      "contentHash": "4a611a6400b76ecf4216eac54f2a4dc6",
+      "lastModificationDate": 1734422075549,
+      "contentHash": "cb61aea62f2f7df4aa60faaf4f50a12d",
       "sourceName": "contracts/libraries/Error.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2420,8 +2418,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/hook/VizingSwap.sol": {
-      "lastModificationDate": 1734057208492,
-      "contentHash": "c4b97e7dbc8f0381a97a9c0d73652c95",
+      "lastModificationDate": 1734421856645,
+      "contentHash": "dea368660c401f828685ce241bb3a83d",
       "sourceName": "contracts/hook/VizingSwap.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2450,10 +2448,9 @@
       "imports": [
         "../interfaces/uniswapv3/IUniswapFactory.sol",
         "../interfaces/uniswapv3/ISwapRouter02.sol",
-        "../interfaces/hook/IVizingSwap.sol",
+        "../interfaces/core/BaseStruct.sol",
         "../interfaces/IWETH9.sol",
         "../interfaces/Event.sol",
-        "../interfaces/core/BaseStruct.sol",
         "../interfaces/uniswapv2/IUniswapV2Router02.sol",
         "../libraries/Error.sol",
         "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
@@ -2504,8 +2501,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/EntryPoint.sol": {
-      "lastModificationDate": 1734087640729,
-      "contentHash": "a0c3e2c4e62fe68654651ac6f686ec18",
+      "lastModificationDate": 1734421752493,
+      "contentHash": "3fbe405f0e111b2a08ff05f2424d6684",
       "sourceName": "contracts/core/EntryPoint.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2541,7 +2538,6 @@
         "../utils/Exec.sol",
         "./StateManager.sol",
         "./PreGasManager.sol",
-        "./ConfigManager.sol",
         "../libraries/Error.sol",
         "../libraries/Helpers.sol",
         "../libraries/UserOperationLib.sol",
@@ -2556,7 +2552,7 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IAccountExecute.sol": {
-      "lastModificationDate": 1733369847714,
+      "lastModificationDate": 1734421661259,
       "contentHash": "f629ee7f88d84f285e9c4717b9559f72",
       "sourceName": "contracts/interfaces/core/IAccountExecute.sol",
       "solcConfig": {
@@ -2594,7 +2590,7 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IPaymaster.sol": {
-      "lastModificationDate": 1733367582717,
+      "lastModificationDate": 1734421661260,
       "contentHash": "31dcb1b041fca027fb607b581135d919",
       "sourceName": "contracts/interfaces/core/IPaymaster.sol",
       "solcConfig": {
@@ -2705,8 +2701,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/StateManager.sol": {
-      "lastModificationDate": 1734316213794,
-      "contentHash": "b0813bbf92dc9e64c61a8b0a66671412",
+      "lastModificationDate": 1734421661254,
+      "contentHash": "2fb0f0a1c181ceb2e6a61133c16eb38f",
       "sourceName": "contracts/core/StateManager.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2741,8 +2737,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/PreGasManager.sol": {
-      "lastModificationDate": 1734059335454,
-      "contentHash": "3b3a4e0ae64b44acfe180874c1cbabd1",
+      "lastModificationDate": 1734421762398,
+      "contentHash": "e16b4590be8a4a35afcaa609da3288dc",
       "sourceName": "contracts/core/PreGasManager.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2857,8 +2853,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/hook/testCall.sol": {
-      "lastModificationDate": 1733799337941,
-      "contentHash": "105a1e2ee92f3557eca658badfe1d7e7",
+      "lastModificationDate": 1734421847652,
+      "contentHash": "8aff6a6767a9126ed0112ff0641e1402",
       "sourceName": "contracts/hook/testCall.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2886,8 +2882,8 @@
       },
       "imports": [
         "../interfaces/core/BaseStruct.sol",
-        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
-        "../interfaces/hook/IVizingSwap.sol"
+        "../interfaces/hook/IVizingSwap.sol",
+        "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
@@ -2897,8 +2893,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/ZKVizingAADataHelp.sol": {
-      "lastModificationDate": 1734057181047,
-      "contentHash": "78e1fbf2471fa9ef90f63a06d516e634",
+      "lastModificationDate": 1734422294911,
+      "contentHash": "fa09749e8fdc28f1a6594f66a50663f5",
       "sourceName": "contracts/core/ZKVizingAADataHelp.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2925,7 +2921,8 @@
         }
       },
       "imports": [
-        "../interfaces/core/BaseStruct.sol"
+        "../interfaces/core/ISyncRouter.sol",
+        "../libraries/UserOperationLib.sol"
       ],
       "versionPragmas": [
         "^0.8.24"

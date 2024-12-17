@@ -38,6 +38,11 @@ interface BaseStruct {
      * EntryPoint***********************************************************
      */
 
+    // struct Config {
+    //     address entryPoint;
+    //     address router;
+    // }
+
     struct BatchData {
         PackedUserOperation[] userOperations; // accInputHash
         bytes32 accInputHash; // Todo: Use the poseidonHash to calculate the value
@@ -176,7 +181,6 @@ interface BaseStruct {
         address destContract;
         address selectedRelayer;
         uint256 destChainExecuteUsedFee; // Amount that the target chain needs to spend to execute userop
-        bytes batchsMessage; //bytes PackedUserOperation
         bytes packCrossMessage; //The sending chain sends the instruction to the target chain after encode and executes the call
         bytes packCrossParams;
     }

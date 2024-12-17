@@ -6,7 +6,6 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IWETH9} from "../../interfaces/IWETH9.sol";
 import {ISwapRouter02, IV3SwapRouter} from "../../interfaces/uniswapv3/ISwapRouter02.sol";
 import {IEntryPoint} from "../../interfaces/core/IEntryPoint.sol";
-import {Event} from "../../interfaces/Event.sol";
 import {IUniswapV2Router02} from "../../interfaces/uniswapv2/IUniswapV2Router02.sol";
 import {ISyncRouter} from "../../interfaces/core/ISyncRouter.sol";
 import {IVizingSwap} from "../../interfaces/hook/IVizingSwap.sol";
@@ -15,16 +14,8 @@ import "../../libraries/Error.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-import "forge-std/console.sol";
-
 // Todo: The cross-chain module is separated from the business module.
-contract SyncRouter is
-    VizingOmni,
-    Ownable,
-    ReentrancyGuard,
-    Event,
-    ISyncRouter
-{
+contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, ISyncRouter {
     using SafeERC20 for IERC20;
 
     uint256 public OrderId;
@@ -89,7 +80,6 @@ contract SyncRouter is
         thisRelayer = newRelayer;
     }
 
-    // Put hook coding information into?  --TODO
     function sendOmniMessage(
         uint64 destChainId,
         address destContract,
@@ -133,8 +123,6 @@ contract SyncRouter is
             uint256 sendETHAmount,
             bytes memory encodeOmniMessage
         ) = getUserOmniEncodeMessage(cmp);
-
-        console.logBytes(encodeOmniMessage);
 
         bytes memory encodedMessage = _packetMessage(
             mode,
@@ -273,9 +261,7 @@ contract SyncRouter is
             sendETHAmount = crossETH.amount;
             newCrossParams = cmp._hookMessageParams.packCrossParams;
             payload = cmp._hookMessageParams.packCrossMessage;
-        } else {
-            revert InvalidWay();
-        }
+        } else {}
 
         //repack
         CrossHookMessageParams
@@ -291,7 +277,6 @@ contract SyncRouter is
                 destChainExecuteUsedFee: cmp
                     ._hookMessageParams
                     .destChainExecuteUsedFee,
-                batchsMessage: cmp._hookMessageParams.batchsMessage,
                 packCrossMessage: payload, //The sending chain sends the instruction to the target chain after encode and executes the call
                 packCrossParams: newCrossParams
             });
@@ -355,14 +340,13 @@ contract SyncRouter is
         // deposit remote
         if (_crossMessage._hookMessageParams.way == 255) {
             (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
-                value: crossETHParams.amount +
-                    _crossMessage._hookMessageParams.destChainExecuteUsedFee
+                value: crossETHParams.amount
             }(_crossMessage._hookMessageParams.packCrossMessage);
         } else if (
             _crossMessage._hookMessageParams.way == 0 ||
             _crossMessage._hookMessageParams.way == 254
         ) {
-            //receive eth  --TODO
+            //receive eth
             (suc, resultData) = crossETHParams.reciever.call{
                 value: crossETHParams.amount
             }("");
@@ -386,8 +370,11 @@ contract SyncRouter is
         uint256 srcContract,
         bytes calldata message
     ) internal virtual override {
+        address srcSyncRouter = IEntryPoint(MirrorEntryPoint[srcChainId])
+            .getChainConfigs(srcChainId)
+            .router;
         require(
-            MirrorEntryPoint[srcChainId] == address(uint160(srcContract)),
+            srcSyncRouter == address(uint160(srcContract)),
             "Invalid contract"
         );
 
@@ -412,14 +399,13 @@ contract SyncRouter is
         // deposit remote
         if (_crossMessage._hookMessageParams.way == 255) {
             (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
-                value: crossETHParams.amount +
-                    _crossMessage._hookMessageParams.destChainExecuteUsedFee
+                value: crossETHParams.amount
             }(_crossMessage._hookMessageParams.packCrossMessage);
         } else if (
             _crossMessage._hookMessageParams.way == 0 ||
             _crossMessage._hookMessageParams.way == 254
         ) {
-            //receive eth  --TODO
+            //receive eth
             (suc, resultData) = crossETHParams.reciever.call{
                 value: crossETHParams.amount
             }("");

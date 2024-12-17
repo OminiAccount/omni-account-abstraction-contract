@@ -3,17 +3,16 @@ pragma solidity ^0.8.24;
 
 import {IUniswapV3Factory} from "../interfaces/uniswapv3/IUniswapFactory.sol";
 import {ISwapRouter02, IV2SwapRouter, IV3SwapRouter} from "../interfaces/uniswapv3/ISwapRouter02.sol";
-import {IVizingSwap} from "../interfaces/hook/IVizingSwap.sol";
-import {IWETH9} from "../interfaces/IWETH9.sol";
-import {Event} from "../interfaces/Event.sol";
 import {BaseStruct} from "../interfaces/core/BaseStruct.sol";
+import {IWETH9} from "../interfaces/IWETH9.sol";
+import {BaseEvent} from "../interfaces/core/BaseEvent.sol";
 import {IUniswapV2Router02} from "../interfaces/uniswapv2/IUniswapV2Router02.sol";
 import "../libraries/Error.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, Event {
+contract VizingSwap is Ownable, ReentrancyGuard, BaseStruct, BaseEvent {
     using SafeERC20 for IERC20;
 
     address public WETH;

@@ -10,7 +10,6 @@ import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
 import "./core/BaseAccount.sol";
 import "./libraries/Helpers.sol";
 import "./TokenCallbackHandler.sol";
-import "forge-std/console.sol";
 /**
  * ZK vizing account.
  *  this is vizing account.
@@ -156,9 +155,10 @@ contract ZKVizingAccount is
     }
 
     function estimateDepositRemoteCrossFee(
+        address owner,
         uint256 nonce,
-        uint256 amount,
-        uint256 destChainExecuteUsedFee,
+        uint256 valueDepositAmount,
+        uint256 gasDepositAmount,
         uint24 gasLimit,
         uint64 gasPrice,
         uint64 minArrivalTime,
@@ -167,12 +167,12 @@ contract ZKVizingAccount is
     ) public view returns (uint256) {
         bytes memory data = abi.encodeCall(
             entryPoint().submitDepositOperationByRemote,
-            (address(this), amount, nonce)
+            (address(this), owner, valueDepositAmount, gasDepositAmount, nonce)
         );
 
         CrossMessageParams memory params;
         CrossETHParams memory crossETH;
-        crossETH.amount = amount;
+        crossETH.amount = gasDepositAmount;
         params._hookMessageParams.way = 255;
         params._hookMessageParams.gasLimit = gasLimit;
         params._hookMessageParams.gasPrice = gasPrice;
@@ -183,9 +183,6 @@ contract ZKVizingAccount is
             .getChainConfigs(params._hookMessageParams.destChainId)
             .router;
         params._hookMessageParams.selectedRelayer = selectedRelayer;
-        params
-            ._hookMessageParams
-            .destChainExecuteUsedFee = destChainExecuteUsedFee;
         params._hookMessageParams.packCrossMessage = data;
         params._hookMessageParams.packCrossParams = abi.encode(crossETH);
 
@@ -231,9 +228,8 @@ contract ZKVizingAccount is
 
     function depositRemote(
         uint256 nonce,
-        uint256 amount,
-        uint256 gasAmount,
-        uint256 destChainExecuteUsedFee,
+        uint256 valueDepositAmount,
+        uint256 gasDepositAmount,
         uint256 crossFee,
         uint24 gasLimit,
         uint64 gasPrice,
@@ -241,14 +237,13 @@ contract ZKVizingAccount is
         uint64 maxArrivalTime,
         address selectedRelayer
     ) public payable {
-        require(msg.value >= amount + destChainExecuteUsedFee + crossFee);
-        if (gasAmount != 0) {
-            this.depositGasRemote{
-                value: gasAmount + destChainExecuteUsedFee + crossFee
-            }(
+        require(msg.value >= valueDepositAmount + gasDepositAmount + crossFee);
+        if (gasDepositAmount != 0) {
+            depositGasRemote(
+                msg.sender,
                 nonce,
-                gasAmount,
-                destChainExecuteUsedFee,
+                valueDepositAmount,
+                gasDepositAmount,
                 crossFee,
                 gasLimit,
                 gasPrice,
@@ -263,24 +258,25 @@ contract ZKVizingAccount is
      * deposit Gas to vizing from other chains
      */
     function depositGasRemote(
+        address owner,
         uint256 nonce,
-        uint256 amount,
-        uint256 destChainExecuteUsedFee,
+        uint256 valueDepositAmount,
+        uint256 gasDepositAmount,
         uint256 crossFee,
         uint24 gasLimit,
         uint64 gasPrice,
         uint64 minArrivalTime,
         uint64 maxArrivalTime,
         address selectedRelayer
-    ) external payable {
+    ) internal {
         bytes memory data = abi.encodeCall(
             entryPoint().submitDepositOperationByRemote,
-            (address(this), amount, nonce)
+            (address(this), owner, valueDepositAmount, gasDepositAmount, nonce)
         );
 
         CrossMessageParams memory params;
         CrossETHParams memory crossETH;
-        crossETH.amount = amount;
+        crossETH.amount = gasDepositAmount;
         params._hookMessageParams.way = 255;
         params._hookMessageParams.gasLimit = gasLimit;
         params._hookMessageParams.gasPrice = gasPrice;
@@ -291,9 +287,6 @@ contract ZKVizingAccount is
             .getChainConfigs(params._hookMessageParams.destChainId)
             .router;
         params._hookMessageParams.selectedRelayer = selectedRelayer;
-        params
-            ._hookMessageParams
-            .destChainExecuteUsedFee = destChainExecuteUsedFee;
         params._hookMessageParams.packCrossMessage = data;
         params._hookMessageParams.packCrossParams = abi.encode(crossETH);
 
@@ -301,10 +294,10 @@ contract ZKVizingAccount is
             params
         );
         require(crossFee >= _crossFee);
-        require(msg.value >= crossFee + amount + destChainExecuteUsedFee);
-        entryPoint().sendUserOmniMessage{
-            value: crossFee + amount + destChainExecuteUsedFee
-        }(params);
+        require(msg.value >= crossFee + gasDepositAmount);
+        entryPoint().sendUserOmniMessage{value: gasDepositAmount + crossFee}(
+            params
+        );
     }
 
     /**

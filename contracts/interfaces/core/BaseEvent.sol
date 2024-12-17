@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.23;
 
-interface Event {
+interface BaseEvent {
     /************************************************VzingSwap*********************************************************** */
 
     /**
@@ -131,4 +131,10 @@ interface Event {
      * Any event emitted before this event, is part of the validation.
      */
     event BeforeExecution();
+
+    event ValueDepositAmount(
+        address indexed sender,
+        address indexed owner,
+        uint256 indexed valueDepositAmount
+    );
 }

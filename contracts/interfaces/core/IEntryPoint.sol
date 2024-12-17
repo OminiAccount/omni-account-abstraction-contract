@@ -39,60 +39,6 @@ interface IEntryPoint is IPreGasManager, IConfigManager {
     );
 
     /**
-     * Account "sender" was deployed.
-     * @param userOpHash - The userOp that deployed this account. UserOperationEvent will follow.
-     * @param sender     - The account that is deployed
-     * @param factory    - The factory used to deploy this account (in the initCode)
-     * @param paymaster  - The paymaster used by this UserOp
-     */
-    event AccountDeployed(
-        bytes32 indexed userOpHash,
-        address indexed sender,
-        address factory,
-        address paymaster
-    );
-
-    /**
-     * An event emitted if the UserOperation "callData" reverted with non-zero length.
-     * @param userOpHash   - The request unique identifier.
-     * @param sender       - The sender of this request.
-     * @param revertReason - The return bytes from the (reverted) call to "callData".
-     */
-    event UserOperationRevertReason(
-        bytes32 indexed userOpHash,
-        address indexed sender,
-        bytes revertReason
-    );
-
-    /**
-     * An event emitted if the UserOperation Paymaster's "postOp" call reverted with non-zero length.
-     * @param userOpHash   - The request unique identifier.
-     * @param sender       - The sender of this request.
-     * @param revertReason - The return bytes from the (reverted) call to "callData".
-     */
-    event PostOpRevertReason(
-        bytes32 indexed userOpHash,
-        address indexed sender,
-        bytes revertReason
-    );
-
-    /**
-     * UserOp consumed more than prefund. The UserOperation is reverted, and no refund is made.
-     * @param userOpHash   - The request unique identifier.
-     * @param sender       - The sender of this request.
-     */
-    event UserOperationPrefundTooLow(
-        bytes32 indexed userOpHash,
-        address indexed sender
-    );
-
-    /**
-     * An event emitted by handleOps(), before starting the execution loop.
-     * Any event emitted before this event, is part of the validation.
-     */
-    event BeforeExecution();
-
-    /**
      * A custom revert error of handleOps, to identify the offending op.
      * Should be caught in off-chain handleOps simulation and not happen on-chain.
      * Useful for mitigating DoS attempts against batchers or for troubleshooting of factory/account/paymaster reverts.
@@ -128,7 +74,9 @@ interface IEntryPoint is IPreGasManager, IConfigManager {
 
     function submitDepositOperationByRemote(
         address sender,
-        uint256 amount,
+        address owner,
+        uint256 valueDepositAmount,
+        uint256 gasDepositAmount,
         uint256 nonce
     ) external payable;
 
@@ -190,4 +138,8 @@ interface IEntryPoint is IPreGasManager, IConfigManager {
      * @param data data to pass to target in a delegatecall
      */
     function delegateAndRevert(address target, bytes calldata data) external;
+
+    function getChainConfigs(
+        uint64 chainId
+    ) external view returns (Config memory);
 }

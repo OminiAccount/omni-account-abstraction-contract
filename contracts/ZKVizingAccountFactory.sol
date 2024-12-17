@@ -13,9 +13,10 @@ import "./ZKVizingAccount.sol";
  * This way, the entryPoint.getSenderAddress() can be called either before or after the account is created.
  */
 contract ZKVizingAccountFactory is Ownable {
+    error AccountAlreadyCreated();
+
     struct UserZKVizingAccountInfo {
         uint256 userId;
-        bytes1 state;
         address zkVizingAccount;
     }
 
@@ -51,10 +52,10 @@ contract ZKVizingAccountFactory is Ownable {
         address owner,
         uint256 userId
     ) public onlyBundler returns (ZKVizingAccount ret) {
-        require(
-            _UserZKVizingAccountInfo[owner].state != 0x01,
-            "Already create"
-        );
+        if (_UserZKVizingAccountInfo[owner].zkVizingAccount != address(0)) {
+            revert AccountAlreadyCreated();
+        }
+
         ret = ZKVizingAccount(
             payable(
                 new ERC1967Proxy{salt: bytes32(userId)}(
@@ -67,10 +68,8 @@ contract ZKVizingAccountFactory is Ownable {
         require(zkVizingAccountAddress != address(0));
         _UserZKVizingAccountInfo[owner] = UserZKVizingAccountInfo({
             userId: userId,
-            state: 0x01,
             zkVizingAccount: zkVizingAccountAddress
         });
-
         emit AccountCreated(zkVizingAccountAddress, owner);
     }
 

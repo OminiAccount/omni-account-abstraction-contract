@@ -180,33 +180,33 @@ contract ExecuteTest is Utils, AddressHelper {
         vm.stopPrank();
     }
 
-    function test_depositGasRemote() public {
-        console.log("account1 balance pre", account1.getPreGasBalance());
+    // function test_depositGasRemote() public {
+    //     console.log("account1 balance pre", account1.getPreGasBalance());
 
-        ep.estimateSubmitDepositOperationByRemoteGas{value: 1 ether}(
-            address(account1),
-            1 ether,
-            1
-        );
+    //     ep.estimateSubmitDepositOperationByRemoteGas{value: 1 ether}(
+    //         address(account1),
+    //         1 ether,
+    //         1
+    //     );
 
-        bytes memory data = abi.encodeCall(
-            EntryPoint.submitDepositOperationByRemote,
-            (address(account1), 1 ether, 1)
-        );
+    //     bytes memory data = abi.encodeCall(
+    //         EntryPoint.submitDepositOperationByRemote,
+    //         (address(account1), 1 ether, 1)
+    //     );
 
-        CrossMessageParams memory params;
-        CrossETHParams memory crossETH;
-        crossETH.amount = 1 ether;
-        // crossETH.reciever = address(ep);
-        params._hookMessageParams.way = 255;
-        params._hookMessageParams.packCrossMessage = data;
-        params._hookMessageParams.packCrossParams = abi.encode(crossETH);
-        params._hookMessageParams.destChainExecuteUsedFee = 5000;
-        (, bytes memory paramsData) = router.getUserOmniEncodeMessage(params);
-        // router.testReceiveMessage{value: 3 ether}(paramsData);
+    //     CrossMessageParams memory params;
+    //     CrossETHParams memory crossETH;
+    //     crossETH.amount = 1 ether;
+    //     // crossETH.reciever = address(ep);
+    //     params._hookMessageParams.way = 255;
+    //     params._hookMessageParams.packCrossMessage = data;
+    //     params._hookMessageParams.packCrossParams = abi.encode(crossETH);
+    //     params._hookMessageParams.destChainExecuteUsedFee = 5000;
+    //     (, bytes memory paramsData) = router.getUserOmniEncodeMessage(params);
+    //     // router.testReceiveMessage{value: 3 ether}(paramsData);
 
-        console.log("account1 balance after", account1.getPreGasBalance());
-    }
+    //     console.log("account1 balance after", account1.getPreGasBalance());
+    // }
 
     // function test_syncBatch() public {
     //     vm.selectFork(arbitrumSepoliaFork);
