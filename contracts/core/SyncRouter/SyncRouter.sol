@@ -335,7 +335,7 @@ contract SyncRouter is
 
     function testReceiveMessage(bytes calldata message) external payable {
         CrossMessageParams memory _crossMessage = abi.decode(
-            message,
+            message[44:],
             (CrossMessageParams)
         );
 
@@ -392,7 +392,7 @@ contract SyncRouter is
         );
 
         CrossMessageParams memory _crossMessage = abi.decode(
-            message,
+            message[44:],
             (CrossMessageParams)
         );
 
