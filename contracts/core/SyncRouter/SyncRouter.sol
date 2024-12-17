@@ -335,7 +335,7 @@ contract SyncRouter is
 
     function testReceiveMessage(bytes calldata message) external payable {
         CrossMessageParams memory _crossMessage = abi.decode(
-            message[44:],
+            message,
             (CrossMessageParams)
         );
 
@@ -352,16 +352,16 @@ contract SyncRouter is
             (CrossETHParams)
         );
 
-        // withdraw remote
-        if (_crossMessage._hookMessageParams.way == 254) {
-            (suc, resultData) = crossETHParams.reciever.call{
-                value: crossETHParams.amount
-            }("");
-        } else if (_crossMessage._hookMessageParams.way == 255) {
+        // deposit remote
+        if (_crossMessage._hookMessageParams.way == 255) {
             (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
-                value: crossETHParams.amount
+                value: crossETHParams.amount +
+                    _crossMessage._hookMessageParams.destChainExecuteUsedFee
             }(_crossMessage._hookMessageParams.packCrossMessage);
-        } else if (_crossMessage._hookMessageParams.way == 0) {
+        } else if (
+            _crossMessage._hookMessageParams.way == 0 ||
+            _crossMessage._hookMessageParams.way == 254
+        ) {
             //receive eth  --TODO
             (suc, resultData) = crossETHParams.reciever.call{
                 value: crossETHParams.amount
@@ -392,7 +392,7 @@ contract SyncRouter is
         );
 
         CrossMessageParams memory _crossMessage = abi.decode(
-            message[44:],
+            message,
             (CrossMessageParams)
         );
 
@@ -412,7 +412,8 @@ contract SyncRouter is
         // deposit remote
         if (_crossMessage._hookMessageParams.way == 255) {
             (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
-                value: crossETHParams.amount
+                value: crossETHParams.amount +
+                    _crossMessage._hookMessageParams.destChainExecuteUsedFee
             }(_crossMessage._hookMessageParams.packCrossMessage);
         } else if (
             _crossMessage._hookMessageParams.way == 0 ||
