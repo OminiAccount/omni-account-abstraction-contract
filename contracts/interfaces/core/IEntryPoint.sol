@@ -190,4 +190,8 @@ interface IEntryPoint is IPreGasManager, IConfigManager {
      * @param data data to pass to target in a delegatecall
      */
     function delegateAndRevert(address target, bytes calldata data) external;
+
+    function getChainConfigs(
+        uint64 chainId
+    ) external view returns (Config memory);
 }

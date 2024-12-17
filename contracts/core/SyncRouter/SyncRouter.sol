@@ -88,7 +88,6 @@ contract SyncRouter is
         thisRelayer = newRelayer;
     }
 
-    // Put hook coding information into?  --TODO
     function sendOmniMessage(
         uint64 destChainId,
         address destContract,
@@ -271,7 +270,7 @@ contract SyncRouter is
             newCrossParams = cmp._hookMessageParams.packCrossParams;
             payload = cmp._hookMessageParams.packCrossMessage;
         } else {
-            revert InvalidWay();
+           
         }
 
         //repack
@@ -359,7 +358,7 @@ contract SyncRouter is
                 value: crossETHParams.amount
             }(_crossMessage._hookMessageParams.packCrossMessage);
         } else if (_crossMessage._hookMessageParams.way == 0) {
-            //receive eth  --TODO
+            //receive eth  
             (suc, resultData) = crossETHParams.reciever.call{
                 value: crossETHParams.amount
             }("");
@@ -383,10 +382,8 @@ contract SyncRouter is
         uint256 srcContract,
         bytes calldata message
     ) internal virtual override {
-        require(
-            MirrorEntryPoint[srcChainId] == address(uint160(srcContract)),
-            "Invalid contract"
-        );
+        address srcSyncRouter=IEntryPoint(MirrorEntryPoint[srcChainId]).getChainConfigs(srcChainId).router;
+        require(srcSyncRouter == address(uint160(srcContract)),"Invalid contract");
 
         CrossMessageParams memory _crossMessage = abi.decode(
             message,
@@ -409,13 +406,14 @@ contract SyncRouter is
         // deposit remote
         if (_crossMessage._hookMessageParams.way == 255) {
             (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
-                value: crossETHParams.amount
+                value: crossETHParams.amount +
+                    _crossMessage._hookMessageParams.destChainExecuteUsedFee
             }(_crossMessage._hookMessageParams.packCrossMessage);
         } else if (
             _crossMessage._hookMessageParams.way == 0 ||
             _crossMessage._hookMessageParams.way == 254
         ) {
-            //receive eth  --TODO
+            //receive eth 
             (suc, resultData) = crossETHParams.reciever.call{
                 value: crossETHParams.amount
             }("");

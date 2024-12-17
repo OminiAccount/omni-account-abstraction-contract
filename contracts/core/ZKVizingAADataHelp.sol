@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.24;
-import {BaseStruct} from "../interfaces/core/BaseStruct.sol";
+import {ISyncRouter, BaseStruct} from "../interfaces/core/ISyncRouter.sol";
 import "../libraries/UserOperationLib.sol";
 contract ZKVizingAADataHelp is BaseStruct {
 
-    
     uint64 public constant FORK_ID = 1;
 
     function decodeCrossETHData(bytes memory callData)external view returns(CrossETHParams memory){
@@ -166,21 +165,9 @@ contract ZKVizingAADataHelp is BaseStruct {
         // sanity checks
         bytes32 ZeroBytes32;
 
-        // if (initNumBatch != 0 && oldAccInputHash == bytes32(0)) {
-        //     revert OldAccInputHashDoesNotExist();
-        // }
-
-        // if (newAccInputHash == bytes32(0)) {
-        //     revert NewAccInputHashDoesNotExist();
-        // }
         // --TODO
         require(initNumBatch ==0 || oldAccInputHash != ZeroBytes32);
         require(newAccInputHash != ZeroBytes32);
-
-        // Check that new state root is inside goldilocks field
-        // if (!checkStateRootInsidePrime(uint256(newStateRoot))) {
-        //     revert NewStateRootNotInsidePrime();
-        // }
 
         return
             abi.encodePacked(
