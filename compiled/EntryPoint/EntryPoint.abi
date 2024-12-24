@@ -245,11 +245,6 @@
                 "internalType": "uint256"
               },
               {
-                "name": "batchsMessage",
-                "type": "bytes",
-                "internalType": "bytes"
-              },
-              {
                 "name": "packCrossMessage",
                 "type": "bytes",
                 "internalType": "bytes"
@@ -326,50 +321,6 @@
       }
     ],
     "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "getInputSnarkBytes",
-    "inputs": [
-      {
-        "name": "initNumBatch",
-        "type": "uint64",
-        "internalType": "uint64"
-      },
-      {
-        "name": "finalNewBatch",
-        "type": "uint64",
-        "internalType": "uint64"
-      },
-      {
-        "name": "oldAccInputHash",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      },
-      {
-        "name": "newAccInputHash",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      },
-      {
-        "name": "oldStateRoot",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      },
-      {
-        "name": "newStateRoot",
-        "type": "bytes32",
-        "internalType": "bytes32"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bytes",
-        "internalType": "bytes"
-      }
-    ],
-    "stateMutability": "pure"
   },
   {
     "type": "function",
@@ -1007,11 +958,6 @@
                 "internalType": "uint256"
               },
               {
-                "name": "batchsMessage",
-                "type": "bytes",
-                "internalType": "bytes"
-              },
-              {
                 "name": "packCrossMessage",
                 "type": "bytes",
                 "internalType": "bytes"
@@ -1057,7 +1003,17 @@
         "internalType": "address"
       },
       {
-        "name": "amount",
+        "name": "owner",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "valueDepositAmount",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "gasDepositAmount",
         "type": "uint256",
         "internalType": "uint256"
       },
@@ -1251,17 +1207,17 @@
   },
   {
     "type": "function",
-    "name": "updateChainConfigs",
+    "name": "updateChainConfig",
     "inputs": [
       {
-        "name": "_chainIds",
-        "type": "uint64[]",
-        "internalType": "uint64[]"
+        "name": "_chainId",
+        "type": "uint64",
+        "internalType": "uint64"
       },
       {
         "name": "_config",
-        "type": "tuple[]",
-        "internalType": "struct IConfigManager.Config[]",
+        "type": "tuple",
+        "internalType": "struct IConfigManager.Config",
         "components": [
           {
             "name": "entryPoint",
@@ -1537,6 +1493,31 @@
     "name": "DepositTicketAdded",
     "inputs": [
       {
+        "name": "account",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "timestamp",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "DepositTicketAdded",
+    "inputs": [
+      {
         "name": "did",
         "type": "bytes32",
         "indexed": true,
@@ -1603,6 +1584,93 @@
         "type": "bytes",
         "indexed": false,
         "internalType": "bytes"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "ReceiveTouchHook",
+    "inputs": [
+      {
+        "name": "success",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "data",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      },
+      {
+        "name": "packHookMessage",
+        "type": "bytes",
+        "indexed": false,
+        "internalType": "bytes"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RefundEvent",
+    "inputs": [
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "receiver",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "UserOperationEvent",
+    "inputs": [
+      {
+        "name": "userOpHash",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "success",
+        "type": "bool",
+        "indexed": false,
+        "internalType": "bool"
+      },
+      {
+        "name": "actualGasCost",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "actualGasUsed",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
       }
     ],
     "anonymous": false
@@ -1708,6 +1776,74 @@
   },
   {
     "type": "event",
+    "name": "ValueDepositAmount",
+    "inputs": [
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "owner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "valueDepositAmount",
+        "type": "uint256",
+        "indexed": true,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "VizingSwapEvent",
+    "inputs": [
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "tokenIn",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "tokenOut",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "receiver",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "amountIn",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "amountOut",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "WithdrawTicketAdded",
     "inputs": [
       {
@@ -1749,11 +1885,6 @@
       }
     ],
     "anonymous": false
-  },
-  {
-    "type": "error",
-    "name": "AAGasValueOverflow",
-    "inputs": []
   },
   {
     "type": "error",
@@ -1826,32 +1957,12 @@
   },
   {
     "type": "error",
-    "name": "InsufficientBalance",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "InvalidProof",
     "inputs": []
   },
   {
     "type": "error",
-    "name": "NewAccInputHashDoesNotExist",
-    "inputs": []
-  },
-  {
-    "type": "error",
     "name": "NotSupportChainId",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "NumberIsNotEqual",
-    "inputs": []
-  },
-  {
-    "type": "error",
-    "name": "OldAccInputHashDoesNotExist",
     "inputs": []
   },
   {

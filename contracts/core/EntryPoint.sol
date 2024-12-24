@@ -60,7 +60,7 @@ contract EntryPoint is
     uint256 private constant PENALTY_PERCENT = 10;
 
     // Modulus zkSNARK
-    uint256 internal constant _RFIELD =
+    uint256 private constant _RFIELD =
         21_888_242_871_839_275_222_246_405_745_257_275_088_548_364_400_416_034_343_698_204_186_575_808_495_617;
 
     constructor() {
@@ -687,7 +687,7 @@ contract EntryPoint is
         }(userOp.owner);
 
         if (!validationResult) {
-            revert FailedOp(opIndex, "AA owner verification falied");
+            revert FailedOp(opIndex, ""); //AA owner verification falied
         }
 
         // Todo How to check the gas limit of the authentication owner

@@ -42,59 +42,6 @@
   },
   {
     "type": "function",
-    "name": "depositGasRemote",
-    "inputs": [
-      {
-        "name": "nonce",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "amount",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "destChainExecuteUsedFee",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "crossFee",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "gasLimit",
-        "type": "uint24",
-        "internalType": "uint24"
-      },
-      {
-        "name": "gasPrice",
-        "type": "uint64",
-        "internalType": "uint64"
-      },
-      {
-        "name": "minArrivalTime",
-        "type": "uint64",
-        "internalType": "uint64"
-      },
-      {
-        "name": "maxArrivalTime",
-        "type": "uint64",
-        "internalType": "uint64"
-      },
-      {
-        "name": "selectedRelayer",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "payable"
-  },
-  {
-    "type": "function",
     "name": "depositRemote",
     "inputs": [
       {
@@ -103,17 +50,12 @@
         "internalType": "uint256"
       },
       {
-        "name": "amount",
+        "name": "valueDepositAmount",
         "type": "uint256",
         "internalType": "uint256"
       },
       {
-        "name": "gasAmount",
-        "type": "uint256",
-        "internalType": "uint256"
-      },
-      {
-        "name": "destChainExecuteUsedFee",
+        "name": "gasDepositAmount",
         "type": "uint256",
         "internalType": "uint256"
       },
@@ -169,17 +111,22 @@
     "name": "estimateDepositRemoteCrossFee",
     "inputs": [
       {
+        "name": "owner",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
         "name": "nonce",
         "type": "uint256",
         "internalType": "uint256"
       },
       {
-        "name": "amount",
+        "name": "valueDepositAmount",
         "type": "uint256",
         "internalType": "uint256"
       },
       {
-        "name": "destChainExecuteUsedFee",
+        "name": "gasDepositAmount",
         "type": "uint256",
         "internalType": "uint256"
       },

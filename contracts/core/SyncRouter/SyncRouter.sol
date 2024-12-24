@@ -370,9 +370,9 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, ISyncRouter {
         uint256 srcContract,
         bytes calldata message
     ) internal virtual override {
-        address srcSyncRouter = IEntryPoint(MirrorEntryPoint[srcChainId])
-            .getChainConfigs(srcChainId)
-            .router;
+        address srcSyncRouter = IEntryPoint(
+            MirrorEntryPoint[uint64(block.chainid)]
+        ).getChainConfigs(srcChainId).router;
         require(
             srcSyncRouter == address(uint160(srcContract)),
             "Invalid contract"

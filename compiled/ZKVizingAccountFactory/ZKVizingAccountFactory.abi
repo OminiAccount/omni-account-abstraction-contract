@@ -6,6 +6,11 @@
         "name": "_entryPoint",
         "type": "address",
         "internalType": "contract IEntryPoint"
+      },
+      {
+        "name": "_bundler",
+        "type": "address",
+        "internalType": "address"
       }
     ],
     "stateMutability": "nonpayable"
@@ -91,11 +96,6 @@
             "name": "userId",
             "type": "uint256",
             "internalType": "uint256"
-          },
-          {
-            "name": "state",
-            "type": "bytes1",
-            "internalType": "bytes1"
           },
           {
             "name": "zkVizingAccount",
@@ -190,6 +190,11 @@
       }
     ],
     "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "AccountAlreadyCreated",
+    "inputs": []
   },
   {
     "type": "error",

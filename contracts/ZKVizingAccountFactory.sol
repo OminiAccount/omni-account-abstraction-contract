@@ -34,8 +34,9 @@ contract ZKVizingAccountFactory is Ownable {
         _;
     }
 
-    constructor(IEntryPoint _entryPoint) Ownable(msg.sender) {
+    constructor(IEntryPoint _entryPoint, address _bundler) Ownable(msg.sender) {
         accountImplementation = new ZKVizingAccount(_entryPoint);
+        bundler = _bundler;
     }
 
     function updateBundler(address _bundler) external onlyOwner {
@@ -52,9 +53,9 @@ contract ZKVizingAccountFactory is Ownable {
         address owner,
         uint256 userId
     ) public onlyBundler returns (ZKVizingAccount ret) {
-        if (_UserZKVizingAccountInfo[owner].zkVizingAccount != address(0)) {
-            revert AccountAlreadyCreated();
-        }
+        // if (_UserZKVizingAccountInfo[owner].zkVizingAccount != address(0)) {
+        //     revert AccountAlreadyCreated();
+        // }
 
         ret = ZKVizingAccount(
             payable(
