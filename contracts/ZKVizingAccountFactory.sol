@@ -14,20 +14,13 @@ import "./ZKVizingAccount.sol";
  */
 contract ZKVizingAccountFactory is Ownable {
     error AccountAlreadyCreated();
-
-    struct UserZKVizingAccountInfo {
-        uint256 userId;
-        address zkVizingAccount;
-    }
-
     event AccountCreated(address indexed account, address owner);
 
     ZKVizingAccount public immutable accountImplementation;
 
     address internal bundler;
 
-    mapping(address => UserZKVizingAccountInfo)
-        private _UserZKVizingAccountInfo;
+    mapping(address owner => address account) public accounts;
 
     modifier onlyBundler() {
         require(msg.sender == bundler);
@@ -51,27 +44,26 @@ contract ZKVizingAccountFactory is Ownable {
      */
     function createAccount(
         address owner,
-        uint256 userId
+        uint256 salt
     ) public onlyBundler returns (ZKVizingAccount ret) {
-        // if (_UserZKVizingAccountInfo[owner].zkVizingAccount != address(0)) {
+        // if (_accountInfos[owner].zkVizingAccount != address(0)) {
         //     revert AccountAlreadyCreated();
         // }
 
         ret = ZKVizingAccount(
             payable(
-                new ERC1967Proxy{salt: bytes32(userId)}(
+                new ERC1967Proxy{salt: bytes32(salt)}(
                     address(accountImplementation),
                     abi.encodeCall(ZKVizingAccount.initialize, (owner))
                 )
             )
         );
-        address zkVizingAccountAddress = address(ret);
-        require(zkVizingAccountAddress != address(0));
-        _UserZKVizingAccountInfo[owner] = UserZKVizingAccountInfo({
-            userId: userId,
-            zkVizingAccount: zkVizingAccountAddress
-        });
-        emit AccountCreated(zkVizingAccountAddress, owner);
+
+        address account = address(ret);
+        require(account != address(0));
+        accounts[owner] = account;
+
+        emit AccountCreated(account, owner);
     }
 
     /**
@@ -79,11 +71,11 @@ contract ZKVizingAccountFactory is Ownable {
      */
     function getAccountAddress(
         address owner,
-        uint256 userId
+        uint256 salt
     ) public view returns (address) {
         return
             Create2.computeAddress(
-                bytes32(userId),
+                bytes32(salt),
                 keccak256(
                     abi.encodePacked(
                         type(ERC1967Proxy).creationCode,
@@ -94,11 +86,5 @@ contract ZKVizingAccountFactory is Ownable {
                     )
                 )
             );
-    }
-
-    function getUserAccountInfo(
-        address _owner
-    ) external view returns (UserZKVizingAccountInfo memory) {
-        return _UserZKVizingAccountInfo[_owner];
     }
 }

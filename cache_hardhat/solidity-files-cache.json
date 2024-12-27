@@ -152,8 +152,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/ZKVizingAccount.sol": {
-      "lastModificationDate": 1734422384203,
-      "contentHash": "fc93aa8a9b242c64eeef3fb641760cdf",
+      "lastModificationDate": 1735213020802,
+      "contentHash": "86ec44be6fb178aa4008d7a8bac0e0b0",
       "sourceName": "contracts/ZKVizingAccount.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -235,8 +235,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/libraries/Helpers.sol": {
-      "lastModificationDate": 1734421661264,
-      "contentHash": "4e1b42a65f5cf7c3d9527a5e753616f7",
+      "lastModificationDate": 1735267971045,
+      "contentHash": "7c3ea08a519ae6986016a181173a38e4",
       "sourceName": "contracts/libraries/Helpers.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -382,8 +382,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IEntryPoint.sol": {
-      "lastModificationDate": 1734421917528,
-      "contentHash": "e180573329409ba80fa8fee6a98fe189",
+      "lastModificationDate": 1735269169731,
+      "contentHash": "84df839a957da08d9f3a25332b7c0197",
       "sourceName": "contracts/interfaces/core/IEntryPoint.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -410,8 +410,7 @@
         }
       },
       "imports": [
-        "./IPreGasManager.sol",
-        "./IConfigManager.sol"
+        "./IPreGasManager.sol"
       ],
       "versionPragmas": [
         ">=0.7.5"
@@ -498,8 +497,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IPreGasManager.sol": {
-      "lastModificationDate": 1734421932198,
-      "contentHash": "ce9623cec2660b1ceac83468631a5b20",
+      "lastModificationDate": 1734429577156,
+      "contentHash": "61680d7d4ca026b26216e8d00b4cb69e",
       "sourceName": "contracts/interfaces/core/IPreGasManager.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -526,7 +525,8 @@
         }
       },
       "imports": [
-        "./BaseStruct.sol"
+        "./BaseStruct.sol",
+        "./BaseEvent.sol"
       ],
       "versionPragmas": [
         ">=0.7.5"
@@ -536,8 +536,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IConfigManager.sol": {
-      "lastModificationDate": 1733818816830,
-      "contentHash": "03d051a2f0854449649d4bcc50b280da",
+      "lastModificationDate": 1735212933594,
+      "contentHash": "4a1affe7c30a2e929f9452b08470c1f8",
       "sourceName": "contracts/interfaces/core/IConfigManager.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -830,8 +830,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/ZKVizingAccountFactory.sol": {
-      "lastModificationDate": 1734423362371,
-      "contentHash": "0bdc3fedbe0822ff5e0f22735a8dc64a",
+      "lastModificationDate": 1735027629451,
+      "contentHash": "f49128f5acf5914bd93733bf669a62d5",
       "sourceName": "contracts/ZKVizingAccountFactory.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1705,8 +1705,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/SyncRouter/SyncRouter.sol": {
-      "lastModificationDate": 1734422726609,
-      "contentHash": "5f69d914dae0a9da74c8030a7e602468",
+      "lastModificationDate": 1735023203480,
+      "contentHash": "e694304d6eeb78ea96cc6d9c77c40e85",
       "sourceName": "contracts/core/SyncRouter/SyncRouter.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1738,7 +1738,6 @@
         "../../interfaces/IWETH9.sol",
         "../../interfaces/uniswapv3/ISwapRouter02.sol",
         "../../interfaces/core/IEntryPoint.sol",
-        "../../interfaces/Event.sol",
         "../../interfaces/uniswapv2/IUniswapV2Router02.sol",
         "../../interfaces/core/ISyncRouter.sol",
         "../../interfaces/hook/IVizingSwap.sol",
@@ -1833,42 +1832,6 @@
         "ISwapRouter02"
       ]
     },
-    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/Event.sol": {
-      "lastModificationDate": 1734057471959,
-      "contentHash": "c9a7e4c46b12892195f17d908a2eff90",
-      "sourceName": "contracts/interfaces/Event.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "evmVersion": "paris",
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.23"
-      ],
-      "artifacts": [
-        "Event"
-      ]
-    },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/uniswapv2/IUniswapV2Router02.sol": {
       "lastModificationDate": 1734057260110,
       "contentHash": "b62dc6d8b1acbd6f75a8bb7789f492c4",
@@ -1908,8 +1871,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/ISyncRouter.sol": {
-      "lastModificationDate": 1734421947181,
-      "contentHash": "97e63108313b56c8caaaec99b1b7d33d",
+      "lastModificationDate": 1734429661982,
+      "contentHash": "f530c3ecc030e851988fc1295a2c4527",
       "sourceName": "contracts/interfaces/core/ISyncRouter.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1936,7 +1899,8 @@
         }
       },
       "imports": [
-        "./BaseStruct.sol"
+        "./BaseStruct.sol",
+        "./BaseEvent.sol"
       ],
       "versionPragmas": [
         ">=0.7.5"
@@ -1984,8 +1948,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/libraries/Error.sol": {
-      "lastModificationDate": 1734422075549,
-      "contentHash": "cb61aea62f2f7df4aa60faaf4f50a12d",
+      "lastModificationDate": 1735269158115,
+      "contentHash": "94e1e0b94cdde2c21f6e9961a2870e9a",
       "sourceName": "contracts/libraries/Error.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2418,8 +2382,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/hook/VizingSwap.sol": {
-      "lastModificationDate": 1734421856645,
-      "contentHash": "dea368660c401f828685ce241bb3a83d",
+      "lastModificationDate": 1734429623861,
+      "contentHash": "def372fe220ceb191d4aaf054deb4785",
       "sourceName": "contracts/hook/VizingSwap.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2450,7 +2414,7 @@
         "../interfaces/uniswapv3/ISwapRouter02.sol",
         "../interfaces/core/BaseStruct.sol",
         "../interfaces/IWETH9.sol",
-        "../interfaces/Event.sol",
+        "../interfaces/core/BaseEvent.sol",
         "../interfaces/uniswapv2/IUniswapV2Router02.sol",
         "../libraries/Error.sol",
         "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol",
@@ -2501,8 +2465,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/EntryPoint.sol": {
-      "lastModificationDate": 1734421752493,
-      "contentHash": "3fbe405f0e111b2a08ff05f2424d6684",
+      "lastModificationDate": 1735269542651,
+      "contentHash": "60e3aab593b86f02c7957117a9e9bdc8",
       "sourceName": "contracts/core/EntryPoint.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2534,9 +2498,8 @@
         "../interfaces/core/IPaymaster.sol",
         "../interfaces/core/IEntryPoint.sol",
         "../interfaces/core/ISyncRouter.sol",
-        "../interfaces/core/IVerifier.sol",
+        "../interfaces/core/IStateManager.sol",
         "../utils/Exec.sol",
-        "./StateManager.sol",
         "./PreGasManager.sol",
         "../libraries/Error.sol",
         "../libraries/Helpers.sol",
@@ -2701,8 +2664,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/StateManager.sol": {
-      "lastModificationDate": 1734421661254,
-      "contentHash": "2fb0f0a1c181ceb2e6a61133c16eb38f",
+      "lastModificationDate": 1735270697459,
+      "contentHash": "6346260c0e78ebc42df7446d5d73cd27",
       "sourceName": "contracts/core/StateManager.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2728,7 +2691,12 @@
           }
         }
       },
-      "imports": [],
+      "imports": [
+        "../libraries/Error.sol",
+        "../interfaces/core/IVerifier.sol",
+        "../interfaces/core/IStateManager.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
       "versionPragmas": [
         "^0.8.24"
       ],
@@ -2737,8 +2705,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/PreGasManager.sol": {
-      "lastModificationDate": 1734421762398,
-      "contentHash": "e16b4590be8a4a35afcaa609da3288dc",
+      "lastModificationDate": 1735270743242,
+      "contentHash": "0273f2e703443114a761069fa62cf244",
       "sourceName": "contracts/core/PreGasManager.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2774,44 +2742,6 @@
       ],
       "artifacts": [
         "PreGasManager"
-      ]
-    },
-    "/Users/changsheng/Develop/omni-account-abstraction/contracts/core/ConfigManager.sol": {
-      "lastModificationDate": 1734087900856,
-      "contentHash": "9e326da5f121cee06cd6181dfec07564",
-      "sourceName": "contracts/core/ConfigManager.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "evmVersion": "paris",
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../interfaces/core/IConfigManager.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "ConfigManager"
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/lib/openzeppelin-contracts/contracts/utils/introspection/ERC165.sol": {
@@ -3444,8 +3374,8 @@
       ]
     },
     "/Users/changsheng/Develop/omni-account-abstraction/contracts/verifiers/Groth16Verifier.sol": {
-      "lastModificationDate": 1733309971553,
-      "contentHash": "1d7814be17a08babb1e99d54ea56b98c",
+      "lastModificationDate": 1735270499052,
+      "contentHash": "419f482e9aadd62be212c6698de0a3a8",
       "sourceName": "contracts/verifiers/Groth16Verifier.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -3477,6 +3407,78 @@
       ],
       "artifacts": [
         "Groth16Verifier"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/BaseEvent.sol": {
+      "lastModificationDate": 1734429950160,
+      "contentHash": "7cefbbae4a8f935f983bc4050ace9593",
+      "sourceName": "contracts/interfaces/core/BaseEvent.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.23"
+      ],
+      "artifacts": [
+        "BaseEvent"
+      ]
+    },
+    "/Users/changsheng/Develop/omni-account-abstraction/contracts/interfaces/core/IStateManager.sol": {
+      "lastModificationDate": 1735269360905,
+      "contentHash": "0bf0c9a362693f3039855075705b2b77",
+      "sourceName": "contracts/interfaces/core/IStateManager.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.7.5"
+      ],
+      "artifacts": [
+        "IStateManager"
       ]
     }
   }

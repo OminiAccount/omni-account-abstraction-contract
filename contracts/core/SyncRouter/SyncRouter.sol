@@ -46,13 +46,13 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, ISyncRouter {
         Hook = _Hook;
     }
 
-    mapping(uint64 => address) public MirrorEntryPoint;
+    address public entryPoint;
     mapping(uint256 => bytes1) public LockWay;
 
     mapping(bytes => uint8) public DataExcecuteNumber;
 
-    modifier onlyEntryPoint(uint64 chainId) {
-        require(msg.sender == MirrorEntryPoint[chainId], "MEP");
+    modifier onlyEntryPoint() {
+        require(msg.sender == entryPoint, "MEP");
         _;
     }
 
@@ -60,14 +60,10 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, ISyncRouter {
 
     /**
      * @notice owner set chain entryPoint
-     * @param chainId chainid
-     * @param entryPoint chain entryPoint
+     * @param _entryPoint chain entryPoint
      */
-    function setMirrorEntryPoint(
-        uint64 chainId,
-        address entryPoint
-    ) external onlyOwner {
-        MirrorEntryPoint[chainId] = entryPoint;
+    function updateEntryPoint(address _entryPoint) external onlyOwner {
+        entryPoint = _entryPoint;
     }
 
     function changeDefaultSet(
@@ -85,7 +81,7 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, ISyncRouter {
         address destContract,
         uint256 destChainExecuteUsedFee, // Amount that the target chain needs to spend to execute userop
         PackedUserOperation[] calldata userOperations
-    ) external payable onlyEntryPoint(uint64(block.chainid)) {
+    ) external payable onlyEntryPoint {
         bytes memory encodedMessage = _packetMessage(
             mode,
             destContract,
@@ -325,7 +321,7 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, ISyncRouter {
         );
 
         if (_crossMessage._packedUserOperation.length != 0) {
-            IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]).syncBatches(
+            IEntryPoint(entryPoint).syncBatches(
                 _crossMessage._packedUserOperation
             );
         }
@@ -339,9 +335,9 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, ISyncRouter {
 
         // deposit remote
         if (_crossMessage._hookMessageParams.way == 255) {
-            (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
-                value: crossETHParams.amount
-            }(_crossMessage._hookMessageParams.packCrossMessage);
+            (suc, resultData) = entryPoint.call{value: crossETHParams.amount}(
+                _crossMessage._hookMessageParams.packCrossMessage
+            );
         } else if (
             _crossMessage._hookMessageParams.way == 0 ||
             _crossMessage._hookMessageParams.way == 254
@@ -370,9 +366,9 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, ISyncRouter {
         uint256 srcContract,
         bytes calldata message
     ) internal virtual override {
-        address srcSyncRouter = IEntryPoint(
-            MirrorEntryPoint[uint64(block.chainid)]
-        ).getChainConfigs(srcChainId).router;
+        address srcSyncRouter = IEntryPoint(entryPoint)
+            .getChainConfigs(srcChainId)
+            .router;
         require(
             srcSyncRouter == address(uint160(srcContract)),
             "Invalid contract"
@@ -384,7 +380,7 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, ISyncRouter {
         );
 
         if (_crossMessage._packedUserOperation.length != 0) {
-            IEntryPoint(MirrorEntryPoint[uint64(block.chainid)]).syncBatches(
+            IEntryPoint(entryPoint).syncBatches(
                 _crossMessage._packedUserOperation
             );
         }
@@ -398,9 +394,9 @@ contract SyncRouter is VizingOmni, Ownable, ReentrancyGuard, ISyncRouter {
 
         // deposit remote
         if (_crossMessage._hookMessageParams.way == 255) {
-            (suc, resultData) = MirrorEntryPoint[uint64(block.chainid)].call{
-                value: crossETHParams.amount
-            }(_crossMessage._hookMessageParams.packCrossMessage);
+            (suc, resultData) = entryPoint.call{value: crossETHParams.amount}(
+                _crossMessage._hookMessageParams.packCrossMessage
+            );
         } else if (
             _crossMessage._hookMessageParams.way == 0 ||
             _crossMessage._hookMessageParams.way == 254

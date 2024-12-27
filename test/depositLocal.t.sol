@@ -1,4 +1,5 @@
-pragma solidity ^0.8.23;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity ^0.8.24;
 
 import "forge-std/console.sol";
 import "contracts/core/EntryPoint.sol";
@@ -10,7 +11,6 @@ import "contracts/core/SyncRouter/SyncRouter.sol";
 import "./Utils.sol";
 import "script/Address.sol";
 import "contracts/interfaces/core/IEntryPoint.sol";
-import "contracts/interfaces/core/IConfigManager.sol";
 
 contract DepositTest is Utils, AddressHelper {
     EntryPoint ep;
@@ -31,12 +31,12 @@ contract DepositTest is Utils, AddressHelper {
             address(0),
             address(0)
         );
-        router.setMirrorEntryPoint(uint64(block.chainid), address(ep));
-        IConfigManager.Config memory config;
+        router.updateEntryPoint(address(ep));
+        IEntryPoint.Config memory config;
         config.router = address(router);
         ep.updateChainConfig(uint64(block.chainid), config);
-        factory = new ZKVizingAccountFactory(ep);
-        factory.updateBundler(deployer);
+        factory = new ZKVizingAccountFactory(ep, deployer);
+
         account1 = factory.createAccount(account1Owner, 1);
         console.log("account %s", address(account1));
         vm.stopPrank();

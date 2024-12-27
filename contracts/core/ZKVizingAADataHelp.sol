@@ -182,34 +182,4 @@ contract ZKVizingAADataHelp is BaseStruct {
     ) external pure returns (bool) {
         return UserOperationLib.hasInnerExec(userOp);
     }
-
-    function getInputSnarkBytes(
-        uint64 initNumBatch,
-        uint64 finalNewBatch,
-        bytes32 oldAccInputHash,
-        bytes32 newAccInputHash,
-        bytes32 oldStateRoot,
-        bytes32 newStateRoot
-    ) public pure returns (bytes memory) {
-        // sanity checks
-        bytes32 ZeroBytes32;
-
-        // --TODO
-        require(initNumBatch == 0 || oldAccInputHash != ZeroBytes32);
-        require(newAccInputHash != ZeroBytes32);
-
-        return
-            abi.encodePacked(
-                0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266,
-                oldStateRoot,
-                oldAccInputHash,
-                initNumBatch,
-                uint64(1),
-                FORK_ID,
-                newStateRoot,
-                newAccInputHash,
-                bytes32(0),
-                finalNewBatch
-            );
-    }
 }

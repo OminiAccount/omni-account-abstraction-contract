@@ -26,6 +26,9 @@ contract ZKVizingAccount is
 
     IEntryPoint private immutable _entryPoint;
 
+    // bytes4(keccak256(bytes("permit(address,address,uint256,uint256,uint8,bytes32,bytes32)")));
+    bytes4 private constant _PERMIT_SIGNATURE = 0xd505accf;
+
     event ZKVizingAccountInitialized(
         IEntryPoint indexed entryPoint,
         address indexed owner
@@ -176,7 +179,7 @@ contract ZKVizingAccount is
         params._hookMessageParams.way = 255;
         params._hookMessageParams.gasLimit = gasLimit;
         params._hookMessageParams.gasPrice = gasPrice;
-        params._hookMessageParams.destChainId = entryPoint().getMainChainId();
+        params._hookMessageParams.destChainId = entryPoint().MAIN_CHAINID();
         params._hookMessageParams.minArrivalTime = minArrivalTime;
         params._hookMessageParams.maxArrivalTime = maxArrivalTime;
         params._hookMessageParams.destContract = entryPoint()
@@ -280,7 +283,7 @@ contract ZKVizingAccount is
         params._hookMessageParams.way = 255;
         params._hookMessageParams.gasLimit = gasLimit;
         params._hookMessageParams.gasPrice = gasPrice;
-        params._hookMessageParams.destChainId = entryPoint().getMainChainId();
+        params._hookMessageParams.destChainId = entryPoint().MAIN_CHAINID();
         params._hookMessageParams.minArrivalTime = minArrivalTime;
         params._hookMessageParams.maxArrivalTime = maxArrivalTime;
         params._hookMessageParams.destContract = entryPoint()
@@ -360,6 +363,124 @@ contract ZKVizingAccount is
         require(crossFee >= _crossFee);
         entryPoint().sendUserOmniMessage{value: crossFee + amount}(params);
     }
+
+    // /**
+    //  * @notice Function to call token permit method of extended ERC20
+    //  *  + @param token ERC20 token address
+    //  * @param amount Quantity that is expected to be allowed
+    //  * @param permitData Raw data of the call `permit` of the token
+    //  */
+    // function _permit(
+    //     address token,
+    //     uint256 amount,
+    //     bytes calldata permitData
+    // ) internal {
+    //     bytes4 sig = bytes4(permitData[:4]);
+    //     if (sig == _PERMIT_SIGNATURE) {
+    //         (
+    //             address owner,
+    //             address spender,
+    //             uint256 value,
+    //             uint256 deadline,
+    //             uint8 v,
+    //             bytes32 r,
+    //             bytes32 s
+    //         ) = abi.decode(
+    //                 permitData[4:],
+    //                 (
+    //                     address,
+    //                     address,
+    //                     uint256,
+    //                     uint256,
+    //                     uint8,
+    //                     bytes32,
+    //                     bytes32
+    //                 )
+    //             );
+    //         if (owner != msg.sender) {
+    //             revert NotValidOwner();
+    //         }
+    //         if (spender != address(this)) {
+    //             revert NotValidSpender();
+    //         }
+
+    //         if (value != amount) {
+    //             revert NotValidAmount();
+    //         }
+
+    //         // we call without checking the result, in case it fails and he doesn't have enough balance
+    //         // the following transferFrom should be fail. This prevents DoS attacks from using a signature
+    //         // before the smartcontract call
+    //         /* solhint-disable avoid-low-level-calls */
+    //         (bool success, ) = address(token).call(
+    //             abi.encodeWithSelector(
+    //                 _PERMIT_SIGNATURE,
+    //                 owner,
+    //                 spender,
+    //                 value,
+    //                 deadline,
+    //                 v,
+    //                 r,
+    //                 s
+    //             )
+    //         );
+    //         (success);
+    //     } else {
+    //         if (sig != _PERMIT_SIGNATURE_DAI) {
+    //             revert NotValidSignature();
+    //         }
+
+    //         (
+    //             address holder,
+    //             address spender,
+    //             uint256 nonce,
+    //             uint256 expiry,
+    //             bool allowed,
+    //             uint8 v,
+    //             bytes32 r,
+    //             bytes32 s
+    //         ) = abi.decode(
+    //                 permitData[4:],
+    //                 (
+    //                     address,
+    //                     address,
+    //                     uint256,
+    //                     uint256,
+    //                     bool,
+    //                     uint8,
+    //                     bytes32,
+    //                     bytes32
+    //                 )
+    //             );
+
+    //         if (holder != msg.sender) {
+    //             revert NotValidOwner();
+    //         }
+
+    //         if (spender != address(this)) {
+    //             revert NotValidSpender();
+    //         }
+
+    //         // we call without checking the result, in case it fails and he doesn't have enough balance
+    //         // the following transferFrom should be fail. This prevents DoS attacks from using a signature
+    //         // before the smartcontract call
+    //         /* solhint-disable avoid-low-level-calls */
+    //         (bool success, ) = address(token).call(
+    //             abi.encodeWithSelector(
+    //                 _PERMIT_SIGNATURE_DAI,
+    //                 holder,
+    //                 spender,
+    //                 nonce,
+    //                 expiry,
+    //                 allowed,
+    //                 v,
+    //                 r,
+    //                 s
+    //             )
+    //         );
+    //         (success);
+    //     }
+    // }
 
     function _authorizeUpgrade(
         address newImplementation

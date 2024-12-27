@@ -11,9 +11,8 @@ pragma solidity >=0.7.5;
 /* solhint-disable reason-string */
 
 import "./IPreGasManager.sol";
-import "./IConfigManager.sol";
 
-interface IEntryPoint is IPreGasManager, IConfigManager {
+interface IEntryPoint is IPreGasManager {
     /**
      *
      * An event emitted after each successful request.
@@ -65,8 +64,6 @@ interface IEntryPoint is IPreGasManager, IConfigManager {
     error SenderAddressResult(address sender);
 
     error NotSupportChainId();
-
-    error InvalidProof();
 
     function estimateCrossMessageParamsCrossGas(
         CrossMessageParams calldata params
@@ -139,7 +136,14 @@ interface IEntryPoint is IPreGasManager, IConfigManager {
      */
     function delegateAndRevert(address target, bytes calldata data) external;
 
+    struct Config {
+        address entryPoint;
+        address router;
+    }
+
     function getChainConfigs(
         uint64 chainId
     ) external view returns (Config memory);
+
+    function MAIN_CHAINID() external view returns (uint64);
 }

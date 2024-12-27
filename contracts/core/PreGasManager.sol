@@ -24,10 +24,9 @@ contract PreGasManager is IPreGasManager {
         uint256 amount,
         uint256 nonce
     ) external payable {
-        // if (msg.value != amount) {
-        //     revert ValueNotEqual();
-        // }
-        require(msg.value == amount);
+        if (msg.value != amount) {
+            revert ValueNotEqual();
+        }
 
         preGasBalance[msg.sender] += amount;
 
@@ -39,10 +38,9 @@ contract PreGasManager is IPreGasManager {
         uint256 amount,
         uint256 nonce
     ) internal {
-        // if (msg.value != amount) {
-        //     revert ValueNotEqual();
-        // }
-        require(msg.value == amount);
+        if (msg.value != amount) {
+            revert ValueNotEqual();
+        }
 
         preGasBalance[sender] += amount;
 
@@ -64,10 +62,10 @@ contract PreGasManager is IPreGasManager {
     ) internal {
         address account = userOp.sender;
         uint256 amount = userOp.operationValue;
-        // if (preGasBalance[account] < amount) {
-        //     revert InsufficientBalance();
-        // }
-        require(preGasBalance[account] >= amount);
+        if (preGasBalance[account] < amount) {
+            revert InsufficientBalance();
+        }
+
         preGasBalance[account] -= amount;
 
         emit DepositTicketDeleted(account, amount);
@@ -81,16 +79,14 @@ contract PreGasManager is IPreGasManager {
     ) internal {
         address account = userOp.sender;
         uint256 amount = userOp.operationValue;
-        // if (address(this).balance < amount) {
-        //     revert InsufficientBalance();
-        // }
-        require(address(this).balance >= amount);
+        if (address(this).balance < amount) {
+            revert InsufficientBalance();
+        }
 
         (bool success, ) = payable(account).call{value: amount}("");
-        // if (!success) {
-        //     revert CallFailed();
-        // }
-        require(success);
+        if (!success) {
+            revert CallFailed();
+        }
         emit WithdrawTicketDeleted(account, amount);
     }
 
@@ -102,10 +98,9 @@ contract PreGasManager is IPreGasManager {
         uint256 amount,
         uint256 nonce
     ) internal {
-        // if (preGasBalance[sender] < amount) {
-        //     revert InsufficientBalance();
-        // }
-        require(preGasBalance[sender] >= amount);
+        if (preGasBalance[sender] < amount) {
+            revert InsufficientBalance();
+        }
         emit DepositTicketAdded(
             keccak256(abi.encodePacked(sender, block.chainid, nonce, amount)),
             sender,

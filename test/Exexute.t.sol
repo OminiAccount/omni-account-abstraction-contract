@@ -8,6 +8,7 @@ import "contracts/ZKVizingAccount.sol";
 import "contracts/libraries/UserOperationLib.sol";
 import "contracts/ZKVizingAccountFactory.sol";
 import "contracts/core/SyncRouter/SyncRouter.sol";
+import "contracts/core/StateManager.sol";
 import "./Utils.sol";
 import "script/Address.sol";
 import "contracts/interfaces/core/IEntryPoint.sol";
@@ -19,6 +20,7 @@ contract ExecuteTest is Utils, AddressHelper {
     ZKVizingAccount account1;
     Groth16Verifier gverifier;
     SyncRouter router;
+    StateManager state;
     address deployer = owner;
     address account1Owner = address(0x96f3088fC6E3e4C4535441f5Bc4d69C4eF3FE9c5);
     address account2Owner = address(0xe25A045cBC0407DB4743c9c5B8dcbdDE2021e3Aa);
@@ -28,14 +30,20 @@ contract ExecuteTest is Utils, AddressHelper {
         vm.deal(account1Owner, 20 ether);
         // vm.deal(router, 2 ether);
         vm.startPrank(deployer);
+
         ep = new EntryPoint();
-        router = new SyncRouter(address(0), address(0), address(0));
         gverifier = new Groth16Verifier();
-        ep.updateVerifier(address(gverifier));
-        // ep.updateSyncRouter(address(router));
-        router.setMirrorEntryPoint(uint64(block.chainid), address(ep));
-        factory = new ZKVizingAccountFactory(ep);
-        factory.updateBundler(deployer);
+        state = new StateManager(address(ep));
+
+        state.updateVerifier(address(gverifier));
+
+        ep.updateStateManager(address(state));
+
+        router = new SyncRouter(address(0), address(0), address(0));
+
+        router.updateEntryPoint(address(ep));
+        factory = new ZKVizingAccountFactory(ep, deployer);
+
         account1 = factory.createAccount(account1Owner, 1);
         console.log("account %s", address(account1));
         vm.stopPrank();
@@ -43,9 +51,6 @@ contract ExecuteTest is Utils, AddressHelper {
         console.log("ep address", address(ep));
         console.log("factory address", address(factory));
         console.log("account1 balance", address(account1).balance);
-        vm.startPrank(account1Owner);
-        ep.updateVerifier(address(gverifier));
-        vm.stopPrank();
     }
 
     function getUserOp(
@@ -137,7 +142,7 @@ contract ExecuteTest is Utils, AddressHelper {
 
             batches[0].userOperations = ops;
             batches[0]
-                .accInputHash = 0xf4e61c0db7d5e2ca4f0553a23d7a132296c61736177c0a442e01bff692749904;
+                .accInputHash = 0xa5845b8fb4b7b68fe9686342e9b54d5850f20e1d256db4d6553c5e309cb7ab12;
         }
 
         {
@@ -156,7 +161,7 @@ contract ExecuteTest is Utils, AddressHelper {
 
             batches[1].userOperations = ops;
             batches[1]
-                .accInputHash = 0xed6ab6af986b5c3e3861ce5f4c61384c8342fd8ca2c045b4a445b6e512eea037;
+                .accInputHash = 0x2b716e4c655ea1976aaddc63b51735f24243cf04ab5bdb888489458839737e6a;
         }
 
         vm.startPrank(deployer);
@@ -172,9 +177,9 @@ contract ExecuteTest is Utils, AddressHelper {
         extras[0].chainUserOperationsNumber = 128;
         chainsExecuteInfo.chainExtra = extras;
         chainsExecuteInfo
-            .newStateRoot = 0x5e3a8e62915ca07a0b614ce7a3fe756d2b9a47d7089d3841e79d94ac34de952e;
+            .newStateRoot = 0x9e664fd150d91a900ff82407dc45afd52863d0a211d0daec25e870e96e4e227b;
         bytes
-            memory proof = hex"20698b582df596c05da713a6414c932f001687d8b7aa42471be11cce4f511ad32179f46ea232bb83bd58e7d3ecd044e7b7b945da26d7d7d988e42ccb20869b91168a0e2eccf80b60edca7db9263f8fcc0df30efc7392ef5405564e19aaddc9221028ad0aa582293ab91b81caa655ee55546ce0296a110256b585c2439ce246c80d499c1b5051233d1dae2b74183d3b07da86210af33277b688c7ec04766eaf290532aa055b529478190272f652d84c530440d638abc69e325e39e156ae9c74502c0db455e5028b0a630ebd4eba04c9b89c96811162bd5331ab7ae32891ebc2e11efe5b20b231cbd71a1e38d4cb3a5351d8b48d89add729083a0b664463c7e377";
+            memory proof = hex"03bb71a88f4c3a2e38e59f56a922839c7a42ad5561d3b8127df47c6362366a95244b6a715355a651635c04bda44a5b908ce427e0723372a9d49d2484fc893d1c2e24204d5a6fe51d88f228e944bea2e554e4d14dad103f508773666c8ebbaaac1521a28cbdc16455f7d8bfed7c73f37a829f676569c1f8d9bbf2cdf8a027b4bf0c66cbc9d7afb62da9ca541d191c30c6b68c40e87ae0409db7c7f181b14a27c21776bf99e65e66e906cf6a7061ebaeb9d41442ff7e93da0f8002f8d57cb7b2f32dbe9278ce3755984bcbbe7374d06fed1c07982ce3a485b843b63802cff3dcee0d769f7cdb4fcfe4f225e4faaa33093a90dfed4d0321e92081ea9d820da3a12e";
         ep.verifyBatches{value: 0.01 ether}(proof, batches, chainsExecuteInfo);
         console.log("balance", account2Owner.balance);
         vm.stopPrank();

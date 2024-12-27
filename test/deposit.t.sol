@@ -18,7 +18,7 @@ contract DepositTest is Utils, AddressHelper {
         payable(address(0x569Db0654a0C9844257A7f496e02F9E7Bc805c0B));
 
     function setUp() public {
-        uint64 chainId = IEntryPoint(ep).getMainChainId();
+        uint64 chainId = IEntryPoint(ep).MAIN_CHAINID();
         console.log("chainId %s", chainId);
         // vm.deal(deployer, 100 ether);
         // vm.deal(account1Owner, 20 ether);
@@ -49,7 +49,7 @@ contract DepositTest is Utils, AddressHelper {
             "account1 balance pre",
             ZKVizingAccount(account1).getPreGasBalance()
         );
-        address _ep = SyncRouter(sr).MirrorEntryPoint(uint64(block.chainid));
+        address _ep = SyncRouter(sr).entryPoint();
         console.log("_ep %s", _ep);
         uint256 amount = 0.002000000000025 ether;
         bytes

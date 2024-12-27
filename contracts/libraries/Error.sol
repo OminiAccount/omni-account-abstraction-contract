@@ -19,6 +19,12 @@ error NotFromEP();
 
 error AAGasValueOverflow();
 
+/**
+ * StateManager***********************************************************
+ */
+
+error InvalidProof();
+
 error OldAccInputHashDoesNotExist();
 
 error NewAccInputHashDoesNotExist();

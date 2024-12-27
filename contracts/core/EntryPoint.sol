@@ -8,13 +8,11 @@ import "../interfaces/core/IAccountExecute.sol";
 import "../interfaces/core/IPaymaster.sol";
 import "../interfaces/core/IEntryPoint.sol";
 import "../interfaces/core/ISyncRouter.sol";
-import "../interfaces/core/IVerifier.sol";
+import "../interfaces/core/IStateManager.sol";
 
 import "../utils/Exec.sol";
-import "./StateManager.sol";
 
 import "./PreGasManager.sol";
-// import "./ConfigManager.sol";
 import "../libraries/Error.sol";
 import "../libraries/Helpers.sol";
 import "../libraries/UserOperationLib.sol";
@@ -30,18 +28,13 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
  */
 
 /// @custom:security-contact https://bounty.ethereum.org
-contract EntryPoint is
-    IEntryPoint,
-    StateManager,
-    PreGasManager,
-    ReentrancyGuard,
-    ERC165
-{
+contract EntryPoint is IEntryPoint, PreGasManager, ReentrancyGuard, ERC165 {
     using UserOperationLib for PackedUserOperation;
     using UserOperationsLib for PackedUserOperation[];
 
     address private _owner;
-    address public verifier;
+
+    address private _stateManager;
 
     // compensate for innerHandleOps' emit message and deposit refund.
     // allow some slack for future gas price changes.
@@ -51,17 +44,11 @@ contract EntryPoint is
     bytes32 private constant INNER_OUT_OF_GAS = hex"deaddead";
     bytes32 private constant INNER_REVERT_LOW_PREFUND = hex"deadaa51";
 
-    // L2 chain identifier
-    uint64 public constant FORK_ID = 1;
     //vizng sepolia --TODO
-    uint64 internal constant MAIN_CHAINID = 28516;
+    uint64 public constant MAIN_CHAINID = 28516;
 
     uint256 private constant REVERT_REASON_MAX_LEN = 2048;
     uint256 private constant PENALTY_PERCENT = 10;
-
-    // Modulus zkSNARK
-    uint256 private constant _RFIELD =
-        21_888_242_871_839_275_222_246_405_745_257_275_088_548_364_400_416_034_343_698_204_186_575_808_495_617;
 
     constructor() {
         _owner = msg.sender;
@@ -78,32 +65,15 @@ contract EntryPoint is
 
     mapping(uint64 => Config) private chainConfigs;
 
-    function getMainChainId() public pure returns (uint64) {
-        return MAIN_CHAINID;
-    }
-
     function getChainConfigs(
         uint64 chainId
     ) public view returns (Config memory) {
         return chainConfigs[chainId];
     }
 
-    function updateVerifier(address _verifier) external onlyOwner {
-        verifier = _verifier;
+    function updateStateManager(address stateManager) external onlyOwner {
+        _stateManager = stateManager;
     }
-    /// change to single update --TODO
-    // function updateChainConfigs(
-    //     uint64[] calldata _chainIds,
-    //     Config[] calldata _config
-    // ) external onlyOwner {
-    //     require(_chainIds.length == _config.length);
-    //     unchecked {
-    //         for (uint256 i = 0; i < _chainIds.length; ) {
-    //             chainConfigs[_chainIds[i]] = _config[i];
-    //             ++i;
-    //         }
-    //     }
-    // }
 
     function updateChainConfig(
         uint64 _chainId,
@@ -148,37 +118,19 @@ contract EntryPoint is
         BatchData[] calldata batches,
         ChainsExecuteInfo calldata chainsExecuteInfos
     ) external payable {
+        IStateManager stateManager = IStateManager(_stateManager);
+
+        uint64 lastVerifiedBatch = stateManager.lastVerifiedBatch();
+        uint64 batchLength = uint64(batches.length);
+
         // First verify proof
-        (
-            uint256[2] memory pA,
-            uint256[2][2] memory pB,
-            uint256[2] memory pC
-        ) = abi.decode(proof, (uint256[2], uint256[2][2], uint256[2]));
-
-        //stack deep(Optimization parameter)  --TODO
-        // uint64 batchLength = uint64(batches.length);
-        // uint64 finalNewBatch = lastVerifiedBatch + uint64(batches.length);
-
-        // Get snark bytes
-        bytes memory snarkHashBytes = getInputSnarkBytes(
-            lastVerifiedBatch,
-            lastVerifiedBatch + uint64(batches.length),
-            batchNumToState[lastVerifiedBatch].accInputRoot,
-            batches[uint64(batches.length) - 1].accInputHash,
-            batchNumToState[lastVerifiedBatch].stateRoot,
-            chainsExecuteInfos.newStateRoot
-        );
-
-        // Calulate the snark input
-        //stack deep(Optimization parameter)  --TODO
-        // uint256 inputSnark = uint256(sha256(snarkHashBytes)) % _RFIELD;
-
         if (
-            !IVerifier(verifier).verifyProof(
-                pA,
-                pB,
-                pC,
-                [uint256(sha256(snarkHashBytes)) % _RFIELD]
+            !stateManager.verifyProof(
+                proof,
+                lastVerifiedBatch,
+                lastVerifiedBatch + batchLength,
+                chainsExecuteInfos.newStateRoot,
+                batches[batchLength - 1].accInputHash
             )
         ) {
             revert InvalidProof();
@@ -210,7 +162,7 @@ contract EntryPoint is
 
                 uint256 userOpsIndex;
 
-                for (uint256 j = 0; j < uint64(batches.length); ) {
+                for (uint256 j = 0; j < batchLength; ) {
                     // batchHashs[j] = batches[j].userOperations.calculateHash();
                     PackedUserOperation[] memory userOps = batches[j]
                         .userOperations
@@ -232,23 +184,23 @@ contract EntryPoint is
 
         // Update State
         {
-            updateState(
-                lastVerifiedBatch + uint64(batches.length),
+            stateManager.updateState(
+                lastVerifiedBatch + batchLength,
                 chainsExecuteInfos.newStateRoot,
-                batches[uint64(batches.length) - 1].accInputHash
+                batches[batchLength - 1].accInputHash
             );
-            updateLastVerifiedBatch(uint64(batches.length));
+            stateManager.updateLastVerifiedBatch(batchLength);
         }
 
         // Execute vizing userOperations
         {
-            uint256 startGas = gasleft();
+            // uint256 startGas = gasleft();
             processBatchs(
                 chainExecuteInfos[0].userOperations,
                 payable(chainsExecuteInfos.beneficiary),
                 false
             );
-            uint256 gasUsed = startGas - gasleft();
+            // uint256 gasUsed = startGas - gasleft();
         }
 
         // Sync stateRoot and destUserOperations to other chain
@@ -258,9 +210,9 @@ contract EntryPoint is
             for (uint256 i = 1; i < chainExecuteInfos.length; i++) {
                 ChainExecuteInfo memory chainExecuteInfo = chainExecuteInfos[i];
 
-                address destEntryPoint = chainConfigs[
-                    chainExecuteInfo.extra.chainId
-                ].entryPoint;
+                // address destEntryPoint = chainConfigs[
+                //     chainExecuteInfo.extra.chainId
+                // ].entryPoint;
 
                 // uint256 crossFee = ISyncRouter(syncRouter).fetchOmniMessageFee(
                 //     chainExecuteInfo.extra.chainId,
@@ -793,56 +745,6 @@ contract EntryPoint is
                     ? mUserOp.mainChainGasPrice
                     : mUserOp.destChainGasPrice;
         }
-    }
-
-    //public getInputSnarkBytes transfer ZKVizingAADataHelp.sol --TODO
-    /**
-     * @notice Function to calculate the input snark bytes
-     * @param initNumBatch Batch which the aggregator starts the verification
-     * @param finalNewBatch Last batch aggregator intends to verify
-     * @param oldStateRoot State root before batch is processed
-     * @param newStateRoot New State root once the batch is processed
-     */
-    function getInputSnarkBytes(
-        uint64 initNumBatch,
-        uint64 finalNewBatch,
-        bytes32 oldAccInputHash,
-        bytes32 newAccInputHash,
-        bytes32 oldStateRoot,
-        bytes32 newStateRoot
-    ) private pure returns (bytes memory) {
-        // sanity checks
-        bytes32 ZeroBytes32;
-
-        // if (initNumBatch != 0 && oldAccInputHash == bytes32(0)) {
-        //     revert OldAccInputHashDoesNotExist();
-        // }
-
-        // if (newAccInputHash == bytes32(0)) {
-        //     revert NewAccInputHashDoesNotExist();
-        // }
-        // --TODO
-        require(initNumBatch == 0 || oldAccInputHash != ZeroBytes32);
-        require(newAccInputHash != ZeroBytes32);
-
-        // Check that new state root is inside goldilocks field
-        // if (!checkStateRootInsidePrime(uint256(newStateRoot))) {
-        //     revert NewStateRootNotInsidePrime();
-        // }
-
-        return
-            abi.encodePacked(
-                0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266,
-                oldStateRoot,
-                oldAccInputHash,
-                initNumBatch,
-                uint64(1),
-                FORK_ID,
-                newStateRoot,
-                newAccInputHash,
-                bytes32(0),
-                finalNewBatch
-            );
     }
 
     /**
